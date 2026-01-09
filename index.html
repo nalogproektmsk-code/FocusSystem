@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTD FocusSystem</title>
+    <title>FocusSystem Cloud</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script type="text/javascript" >
        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -24,205 +30,297 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106183159" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <style>
-        /* --- STYLES --- */
+        /* --- DESIGN SYSTEM VARS --- */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #f4f5f7);
-            --text-color: var(--tg-theme-text-color, #333333);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #ffffff);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-            --button-color: var(--tg-theme-button-color, #0066cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --danger-color: #ef4444;
-            --success-color: #22c55e;
-            --warning-color: #f59e0b;
+            --bg-color: #F8FAFC; /* Очень светлый серо-голубой */
+            --sidebar-bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            
+            --primary-color: #F97316; /* Тот самый Оранжевый */
+            --primary-hover: #EA580C;
+            --primary-text: #FFFFFF;
+            
+            --text-main: #1E293B; /* Глубокий темный */
+            --text-secondary: #64748B; /* Серый текст */
+            
+            --border-color: #E2E8F0;
+            --shadow-soft: 0 4px 20px rgba(148, 163, 184, 0.1);
+            --shadow-hover: 0 10px 25px rgba(148, 163, 184, 0.15);
+            
+            --radius-xl: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Inter', -apple-system, sans-serif; 
             background-color: var(--bg-color); 
-            color: var(--text-color); 
+            color: var(--text-main); 
             margin: 0; 
             display: flex; 
             height: 100vh; 
             overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
-            font-size: 16px; 
+            font-size: 15px; 
+            line-height: 1.5;
         }
         
-        /* Sidebar (Desktop) */
-        .sidebar { width: 280px; background: var(--secondary-bg); border-right: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
+        /* --- SIDEBAR (DESKTOP) --- */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            border-right: 1px solid var(--border-color); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 32px 20px; 
+            flex-shrink: 0; 
+        }
         
-        /* --- MOBILE BOTTOM NAV --- */
+        .logo { 
+            font-size: 20px; 
+            font-weight: 800; 
+            margin-bottom: 40px; 
+            color: var(--text-main); 
+            padding-left: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            letter-spacing: -0.5px;
+        }
+        .logo i { color: var(--primary-color); font-size: 24px; }
+
+        .menu-item { 
+            height: 44px; 
+            padding: 0 16px; 
+            cursor: pointer; 
+            border-radius: var(--radius-md); 
+            margin-bottom: 4px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 15px; 
+            color: var(--text-secondary); 
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .menu-item:hover { background: #F1F5F9; color: var(--text-main); }
+        .menu-item.active { 
+            background-color: #FFF7ED; /* Очень светлый оранжевый */
+            color: var(--primary-color); 
+        }
+        .menu-item span { display: flex; align-items: center; gap: 12px; }
+        .menu-item i { font-size: 20px; }
+
+        .badge { 
+            background: #F1F5F9; 
+            color: var(--text-secondary);
+            padding: 2px 8px; 
+            border-radius: 99px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            min-width: 20px;
+            text-align: center;
+        }
+        .menu-item.active .badge { background: #FED7AA; color: #9A3412; }
+
+        .spacer { height: 1px; background: var(--border-color); margin: 20px 0; }
+        
+        /* --- MOBILE NAV --- */
         .bottom-nav { 
             display: none; 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: var(--secondary-bg); 
-            padding-bottom: max(15px, env(safe-area-inset-bottom));
-            padding-top: 12px;
-            border-top: 1px solid rgba(0,0,0,0.05); 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(10px);
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color); 
             z-index: 100; 
             overflow-x: auto; 
             white-space: nowrap; 
-            scrollbar-width: none;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            scrollbar-width: none; 
+            gap: 5px;
         }
         
         .nav-item { 
-            display: inline-flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-width: 85px; 
-            padding: 0 5px;
-            color: var(--hint-color); 
-            font-size: 11px; 
-            font-weight: 500;
-            text-align: center; 
-            cursor: pointer; 
-            flex-shrink: 0; 
+            display: inline-flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-width: 70px; padding: 5px; 
+            color: var(--text-secondary); 
+            font-size: 10px; font-weight: 600; 
+            border-radius: 12px;
+            transition: 0.2s;
         }
-        .nav-item.active { color: var(--button-color); font-weight: 700; transform: scale(1.05); transition: 0.2s; }
-        .nav-icon { font-size: 26px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-icon { font-size: 24px; margin-bottom: 2px; }
+        .nav-item.active .nav-icon { font-weight: bold; }
 
         @media (max-width: 768px) { 
             .sidebar { display: none; } 
             .bottom-nav { display: flex; } 
-            .main { padding: 20px; padding-bottom: 110px; } 
-            .modal { width: 92% !important; padding: 24px !important; } 
+            .main { padding: 20px 16px; padding-bottom: 100px; } 
+            .modal { width: 100% !important; border-radius: 24px 24px 0 0 !important; bottom: 0 !important; top: auto !important; max-height: 90vh; }
+            .modal-overlay { align-items: flex-end; }
         }
 
-        /* General UI Scaling */
-        .logo { font-size: 22px; font-weight: 800; margin-bottom: 30px; color: var(--text-color); padding-left: 10px; }
+        /* --- MAIN AREA --- */
+        .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
-        .menu-item { 
-            height: 48px; 
-            padding: 0 16px; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            margin-bottom: 6px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-size: 16px; 
-            color: var(--text-color); 
-            opacity: 0.8; 
-            font-weight: 500;
+        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+        .title { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+        
+        /* New Input Style */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-soft);
+            border-radius: var(--radius-xl);
+            background: #fff;
+            transition: 0.2s;
         }
-        .menu-item.active { background-color: var(--button-color); color: var(--button-text); opacity: 1; }
-        .badge { background: rgba(0,0,0,0.1); padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
-        .spacer { height: 24px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 24px; }
-        
-        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-        .header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-        .title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
-        
-        .input-group { display: flex; gap: 12px; margin-bottom: 24px; background: var(--secondary-bg); padding: 12px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .input-wrapper:focus-within { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+        .input-group { 
+            display: flex; gap: 0; background: transparent; padding: 6px; 
+        }
         
         input, textarea { 
             flex: 1; 
-            padding: 14px; 
-            border: 1px solid rgba(0,0,0,0.1); 
-            border-radius: 10px; 
-            font-size: 17px; 
-            outline: none; 
-            background: var(--bg-color); 
-            color: var(--text-color); 
-        }
-        input:focus { border-color: var(--button-color); border-width: 2px; }
-        
-        .btn { 
-            padding: 0 24px; 
-            height: 50px; 
-            border-radius: 12px; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: 700; 
+            padding: 16px 20px; 
+            border: none;
             font-size: 16px; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 6px; 
+            font-family: 'Inter', sans-serif;
+            outline: none; 
+            background: transparent; 
+            color: var(--text-main); 
         }
-        .btn-primary { background: var(--button-color); color: var(--button-text); box-shadow: 0 4px 10px rgba(0,102,204,0.2); }
-        .btn-wizard { width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; margin-bottom: 24px; font-size: 17px; height: 56px; }
+        input::placeholder { color: #94A3B8; }
         
-        .btn-icon { 
-            background: rgba(0,0,0,0.05); 
-            color: var(--hint-color); 
-            padding: 0; 
-            height: 40px; width: 40px; 
-            font-size: 20px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; border: none; 
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .btn-icon.delete { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
-        .btn-icon.complete { color: var(--success-color); background: rgba(34, 197, 94, 0.1); }
-        .btn-icon:active { transform: scale(0.95); }
+        .btn-add:active { transform: scale(0.9); }
+        
+        .btn-wizard { 
+            width: 100%; 
+            background: linear-gradient(135deg, #10B981, #059669); 
+            color: white; 
+            margin-bottom: 24px; 
+            font-size: 15px; font-weight: 700;
+            height: 48px; 
+            border-radius: var(--radius-md);
+            border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
 
-        /* Tasks */
-        .task-list { display: flex; flex-direction: column; gap: 12px; }
+        /* --- TASKS --- */
+        .task-list { display: flex; flex-direction: column; gap: 16px; }
+        
         .task-card { 
-            background: var(--secondary-bg); 
-            padding: 18px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(0,0,0,0.05); 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: var(--radius-xl); 
+            border: 1px solid transparent; 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            align-items: flex-start; 
+            box-shadow: var(--shadow-soft);
+            transition: all 0.2s ease;
         }
-        .task-info { flex: 1; margin-right: 12px; }
-        .task-title { font-weight: 600; font-size: 17px; line-height: 1.4; }
-        .task-meta { font-size: 13px; color: var(--hint-color); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .task-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: rgba(249, 115, 22, 0.3); }
+
+        .task-left { display: flex; gap: 16px; align-items: flex-start; flex: 1; }
+        .task-check {
+            width: 24px; height: 24px;
+            border: 2px solid #CBD5E1;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            color: transparent;
+            margin-top: 2px;
+            transition: 0.2s;
+        }
+        .task-check:hover { border-color: var(--primary-color); }
+        .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
+
+        .task-content { flex: 1; padding-right: 10px; }
+        .task-title { font-weight: 600; font-size: 16px; line-height: 1.4; color: var(--text-main); margin-bottom: 8px; }
+        .task-meta { display: flex; flex-wrap: wrap; gap: 8px; }
         
-        .tag { padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; }
-        .tag.quick { background: #fffbeb; color: #d97706; border: 1px solid #fcd34d; }
+        .tag { 
+            padding: 4px 10px; 
+            background: #F1F5F9; 
+            color: var(--text-secondary);
+            border-radius: 6px; 
+            font-size: 11px; font-weight: 600; 
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .tag.quick { background: #FFF7ED; color: #EA580C; }
+        .tag.date { background: #F0F9FF; color: #0284C7; }
+        .tag.project { background: #F5F3FF; color: #7C3AED; }
 
-        .section-title { font-size: 14px; font-weight: 800; color: var(--hint-color); margin-top: 24px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* Actions */
+        .actions { display: flex; gap: 4px; }
+        .btn-action { 
+            width: 32px; height: 32px; 
+            border-radius: 8px; 
+            border: none; background: transparent; 
+            color: #94A3B8; 
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            transition: 0.2s;
+        }
+        .btn-action:hover { background: #F1F5F9; color: var(--text-main); }
+        .btn-action.delete:hover { background: #FEF2F2; color: var(--danger); }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: var(--secondary-bg); width: 500px; padding: 32px; border-radius: 20px; max-height: 85vh; overflow-y: auto; color: var(--text-color); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .modal-header { font-size: 22px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-size: 12px; font-weight: 800; color: var(--text-secondary); margin-top: 30px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: #fff; width: 450px; padding: 32px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.5); }
+        .modal-header { font-size: 20px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn-primary { 
+            width: 100%; background: var(--primary-color); color: white; 
+            height: 48px; border-radius: 12px; border: none; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+        }
         
         .wizard-buttons { display: flex; gap: 12px; margin-top: 32px; }
-        .wizard-btn { 
-            flex: 1; 
-            padding: 18px; 
-            border-radius: 14px; 
-            border: 2px solid rgba(0,0,0,0.05); 
-            background: var(--bg-color); 
-            color: var(--text-color); 
-            cursor: pointer; 
-            font-weight: 700; 
-            font-size: 18px; 
-        }
-        
-        .step-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: center; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 8px; }
-        
-        /* Close button in modals */
-        .close-btn { font-size: 24px; padding: 10px; color: var(--hint-color); cursor: pointer; }
+        .wizard-btn { flex: 1; padding: 16px; border-radius: 16px; border: 2px solid #F1F5F9; background: #fff; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .wizard-btn:hover { border-color: var(--primary-color); background: #FFF7ED; }
+
+        /* Custom Checkbox for Projects */
+        .step-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; padding: 8px 12px; background: #F8FAFC; border-radius: 12px; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="logo">🚀 GTD Planner</div>
-        <div class="menu-item active" onclick="switchView('inbox')"><span>📥 Inbox</span><span class="badge" id="badge-inbox">0</span></div>
+        <div class="logo"><i class="ph-fill ph-rocket-launch"></i> GTD Focus</div>
+        
+        <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="spacer"></div>
-        <div class="menu-item" onclick="switchView('today')"><span>🔥 Сегодня</span><span class="badge" id="badge-today">0</span></div>
-        <div class="menu-item" onclick="switchView('calendar')"><span>📅 Календарь</span><span class="badge" id="badge-calendar">0</span></div>
-        <div class="menu-item" onclick="switchView('projects')"><span>🏗 Проекты</span><span class="badge" id="badge-projects">0</span></div>
-        <div class="menu-item" onclick="switchView('waiting')"><span>👀 Поручения</span><span class="badge" id="badge-waiting">0</span></div>
-        <div class="menu-item" onclick="switchView('someday')"><span>💡 Потом</span><span class="badge" id="badge-someday">0</span></div>
-        <div class="menu-item" onclick="switchView('reference')"><span>📚 Архив</span><span class="badge" id="badge-reference">0</span></div>
+        <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
+        <div class="menu-item" onclick="switchView('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span><span class="badge" id="badge-calendar">0</span></div>
+        <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
+        <div class="menu-item" onclick="switchView('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span><span class="badge" id="badge-waiting">0</span></div>
+        <div class="menu-item" onclick="switchView('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span><span class="badge" id="badge-someday">0</span></div>
+        <div class="menu-item" onclick="switchView('reference')"><span><i class="ph ph-archive-box"></i> Архив</span><span class="badge" id="badge-reference">0</span></div>
         <div class="spacer"></div>
-        <div class="menu-item" onclick="switchView('done')"><span>✅ Выполнено</span><span class="badge" id="badge-done">0</span></div>
-        <div class="menu-item" onclick="switchView('trash')"><span>🗑 Корзина</span><span class="badge" id="badge-trash">0</span></div>
+        <div class="menu-item" onclick="switchView('done')"><span><i class="ph ph-check-circle"></i> Готово</span><span class="badge" id="badge-done">0</span></div>
+        <div class="menu-item" onclick="switchView('trash')"><span><i class="ph ph-trash"></i> Корзина</span><span class="badge" id="badge-trash">0</span></div>
     </div>
 
     <div class="main">
@@ -231,78 +329,78 @@
 
     <nav class="bottom-nav">
         <div style="width: 10px; flex-shrink: 0;"></div>
-        <div class="nav-item active" onclick="switchView('inbox')"><div class="nav-icon">📥</div>Inbox <span id="mob-badge-inbox"></span></div>
-        <div class="nav-item" onclick="switchView('today')"><div class="nav-icon">🔥</div>Сегодня <span id="mob-badge-today"></span></div>
-        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon">📅</div>Календ.</div>
-        <div class="nav-item" onclick="switchView('projects')"><div class="nav-icon">🏗</div>Проекты</div>
-        <div class="nav-item" onclick="switchView('waiting')"><div class="nav-icon">👀</div>Поруч.</div>
-        <div class="nav-item" onclick="switchView('someday')"><div class="nav-icon">💡</div>Потом</div>
-        <div class="nav-item" onclick="switchView('reference')"><div class="nav-icon">📚</div>Архив</div>
-        <div class="nav-item" onclick="switchView('done')"><div class="nav-icon">✅</div>Готово</div>
-        <div class="nav-item" onclick="switchView('trash')"><div class="nav-icon">🗑</div>Корзина</div>
+        <div class="nav-item active" onclick="switchView('inbox')"><div class="nav-icon"><i class="ph ph-tray"></i></div>Inbox <span id="mob-badge-inbox"></span></div>
+        <div class="nav-item" onclick="switchView('today')"><div class="nav-icon"><i class="ph ph-fire"></i></div>Сегодня <span id="mob-badge-today"></span></div>
+        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon"><i class="ph ph-calendar-blank"></i></div>Календ.</div>
+        <div class="nav-item" onclick="switchView('projects')"><div class="nav-icon"><i class="ph ph-kanban"></i></div>Проекты</div>
+        <div class="nav-item" onclick="switchView('waiting')"><div class="nav-icon"><i class="ph ph-clock-user"></i></div>Поруч.</div>
+        <div class="nav-item" onclick="switchView('someday')"><div class="nav-icon"><i class="ph ph-lightbulb"></i></div>Потом</div>
+        <div class="nav-item" onclick="switchView('reference')"><div class="nav-icon"><i class="ph ph-archive-box"></i></div>Архив</div>
+        <div class="nav-item" onclick="switchView('done')"><div class="nav-icon"><i class="ph ph-check-circle"></i></div>Готово</div>
+        <div class="nav-item" onclick="switchView('trash')"><div class="nav-icon"><i class="ph ph-trash"></i></div>Корзина</div>
         <div style="width: 10px; flex-shrink: 0;"></div>
     </nav>
 
     <div id="wizard-modal" class="modal-overlay">
         <div class="modal">
-            <div style="text-align:center; font-size:13px; text-transform:uppercase; color:var(--hint-color); margin-bottom:12px; font-weight: 700;">Сортировка Inbox</div>
+            <div style="text-align:center; font-size:11px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
             <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 20px; line-height: 1.4;">...</strong></div>
-            <div id="wizard-question-text" style="text-align:center; font-size:22px; font-weight:600; margin:32px 0;">...</div>
+            <div id="wizard-question-text" style="text-align:center; font-size:20px; font-weight:600; margin:32px 0;">...</div>
             <div class="wizard-buttons">
-                <button class="wizard-btn" style="color:var(--danger-color); border-color:rgba(239, 68, 68, 0.2);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
-                <button class="wizard-btn" style="color:var(--success-color); border-color:rgba(34, 197, 94, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
+                <button class="wizard-btn" style="color:var(--danger);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
+                <button class="wizard-btn" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
             </div>
-            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--hint-color); font-size:16px; padding: 10px;">Отмена</button>
+            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:14px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
 
     <div id="project-modal" class="modal-overlay">
         <div class="modal">
-            <div class="modal-header"><span id="proj-modal-title">Проект</span><span class="close-btn" onclick="closeModal('project-modal')">✕</span></div>
+            <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
             <input type="hidden" id="proj-edit-id"> 
-            <label style="display:block; font-size:13px; font-weight:800; color:var(--hint-color); margin-bottom:8px;">НАЗВАНИЕ</label>
-            <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px;">
-            <label style="display:block; font-size:13px; font-weight:800; color:var(--hint-color); margin-bottom:8px;">ЦЕЛЬ</label>
-            <input type="text" id="proj-goal" placeholder="Результат..." style="width:100%; box-sizing:border-box; margin-bottom:24px;">
-            <label style="display:block; font-size:13px; font-weight:800; color:var(--hint-color); margin-bottom:8px;">ШАГИ</label>
+            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
+            <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px; background:#F8FAFC; border-radius:12px;" placeholder="Например: Сделать ремонт">
+            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
+            <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px; background:#F8FAFC; border-radius:12px;">
+            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПЕРВЫЕ ШАГИ</label>
             <div id="proj-steps-container" style="margin-bottom: 12px;"></div>
             <div style="display:flex; gap:12px; margin-bottom:24px;">
-                <input type="text" id="proj-new-step" placeholder="Добавить шаг..." style="flex:1;">
-                <button class="btn btn-primary" onclick="addStepToUI()">+</button>
+                <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1; background:#F8FAFC; border-radius:12px;">
+                <button class="btn-primary" style="width:50px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
             </div>
-            <button class="btn btn-primary" onclick="saveProject()" style="width:100%;">Сохранить</button>
+            <button class="btn-primary" onclick="saveProject()">Сохранить проект</button>
         </div>
     </div>
 
     <div id="input-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header" id="input-modal-title">Ввод</div>
-            <input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px;">
-            <button class="btn btn-primary" onclick="submitInputModal()" style="width: 100%;">ОК</button>
+            <input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px; background:#F8FAFC; border-radius:12px;">
+            <button class="btn-primary" onclick="submitInputModal()">ОК</button>
         </div>
     </div>
 
     <div id="date-modal" class="modal-overlay">
         <div class="modal">
-            <div class="modal-header">📅 Дата</div>
-            <input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px;">
-            <input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
-            <button class="btn btn-primary" onclick="submitDateModal()" style="width:100%;">Сохранить</button>
+            <div class="modal-header">📅 Выберите время</div>
+            <input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px; background:#F8FAFC; border-radius:12px;">
+            <input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px; background:#F8FAFC; border-radius:12px;">
+            <button class="btn-primary" onclick="submitDateModal()">Сохранить</button>
         </div>
     </div>
 
     <div id="move-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">Куда переместить?</div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('inbox')">📥 Inbox</button>
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('today')">🔥 Сегодня</button>
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('calendar')">📅 Календарь</button>
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('waiting')">👀 Поручения</button>
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('someday')">💡 Потом</button>
-                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('reference')">📚 Архив</button>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button>
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button>
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button>
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span></button>
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('reference')"><span><i class="ph ph-archive-box"></i> Архив</span></button>
             </div>
-            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--hint-color); font-size:16px; padding: 10px;">Отмена</button>
+            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:14px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
 
@@ -337,16 +435,17 @@
             haptic('light');
             currentView = view;
             
+            // Sidebar active state
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
             for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
 
+            // Mobile nav active state
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navItems = document.querySelectorAll('.nav-item');
             for(let item of navItems) {
                 if(item.getAttribute('onclick').includes(view)) { 
                     item.classList.add('active'); 
-                    // Плавный скролл к активной кнопке
                     item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
                     break; 
                 }
@@ -356,22 +455,29 @@
 
         function renderCurrentView() {
             const container = document.getElementById('app-view');
-            const headers = { 'inbox': '📥 Inbox', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Поручения', 'someday': '💡 Потом', 'reference': '📚 Архив', 'done': '✅ Готово', 'trash': '🗑 Корзина' };
+            const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
 
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            if(currentView === 'trash' && db.trash.length > 0) html += `<button class="btn" style="background:var(--danger-color); color:white; height:34px; font-size:13px;" onclick="emptyTrash()">Очистить</button>`;
+            if(currentView === 'trash' && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
             html += `</div>`;
 
+            // Input Block
             if (currentView === 'inbox') {
-                html += `<div class="input-group"><input type="text" id="main-input" placeholder="Новая задача..." onkeypress="if(event.key==='Enter') addTask()"><button class="btn btn-primary" onclick="addTask()">+</button></div>`;
-                if(db.inbox.length > 0) html += `<button class="btn btn-wizard" onclick="startWizard()">⚡️ Разобрать (${db.inbox.length})</button>`;
+                html += `
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()">
+                        <button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button>
+                    </div>
+                </div>`;
+                if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph ph-lightning"></i> Разобрать Инбокс (${db.inbox.length})</button>`;
             }
 
             html += `<div class="task-list">`;
             const list = db[currentView];
             
             if(!list || list.length === 0) {
-                html += `<div style="text-align:center; color:var(--hint-color); margin-top:60px; font-size:18px;">Пусто</div>`;
+                html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:15px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:40px; margin-bottom:10px; display:block;"></i>Задач нет</div>`;
             } else {
                 if (currentView === 'done') {
                     const doneProjects = list.filter(i => i.isProject);
@@ -391,16 +497,16 @@
                         html += `
                         <div class="task-card" style="display:block;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                                <div style="font-weight:bold; font-size:18px;">${item.title}</div>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn-icon" onclick="editProject(${item.id})">✏️</button>
-                                    <button class="btn-icon delete" onclick="moveToTrash('${currentView}', ${item.id})">🗑</button>
+                                <div style="font-weight:700; font-size:17px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div>
+                                <div class="actions">
+                                    <button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button>
+                                    <button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>
                                 </div>
                             </div>
-                            <div style="font-size:15px; color:var(--hint-color); margin-bottom:10px;">🎯 ${item.goal}</div>
-                            <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; font-size:15px; display:flex; justify-content:space-between;">
-                                <span><b>След:</b> ${activeStep ? activeStep.text : '✅'}</span>
-                                <span style="color:var(--hint-color); font-size:13px;">${progress}</span>
+                            <div style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div>
+                            <div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span>
+                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">${progress}</span>
                             </div>
                         </div>`;
                       });
@@ -415,29 +521,47 @@
 
         function createCard(item, isDoneView, isProjectCard) {
             let metaHtml = '';
-            // ТЕГ "БЫСТРО"
-            if(item.isQuick) metaHtml += `<span class="tag quick">⚡️ 2 МИН</span>`;
-            if(item.dateStr) metaHtml += `<span class="tag">📅 ${formatDateRUS(item.dateStr)}</span>`;
-            if(item.timeStr) metaHtml += `<span class="tag">⏰ ${item.timeStr}</span>`;
-            if(item.assignee) metaHtml += `<span class="tag" style="color:blue">👤 ${item.assignee}</span>`;
-            if(item.projectTitle) metaHtml += `<span class="tag">🏗 ${item.projectTitle}</span>`;
-            if(isProjectCard) metaHtml += `<span class="tag">🏁 Проект</span>`;
+            // Tags
+            if(item.isQuick) metaHtml += `<span class="tag quick"><i class="ph-fill ph-lightning"></i> 2 мин</span>`;
+            if(item.dateStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-calendar"></i> ${formatDateRUS(item.dateStr)}</span>`;
+            if(item.timeStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-clock"></i> ${item.timeStr}</span>`;
+            if(item.assignee) metaHtml += `<span class="tag project"><i class="ph-fill ph-user"></i> ${item.assignee}</span>`;
+            if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
 
             let buttons = '';
-            if(['today','calendar','inbox'].includes(currentView)) buttons += `<button class="btn-icon complete" onclick="completeTask('${currentView}', ${Number(item.id)})">✅</button>`;
-            if(isDoneView) buttons += `<button class="btn-icon" onclick="undoComplete(${item.id})">↩️</button>`;
-            if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-icon" onclick="openMoveModal(${item.id})">📂</button>`;
+            // Action Buttons based on View
+            if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`;
             
             if(currentView === 'trash') {
-                buttons += `<button class="btn-icon complete" onclick="restoreFromTrash(${item.id})">♻️</button><button class="btn-icon delete" onclick="permanentDelete(${item.id})">✖</button>`;
+                buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`;
+            } else if (isDoneView) {
+                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`;
             } else {
-                 buttons += `<button class="btn-icon delete" onclick="moveToTrash('${currentView}', ${item.id})">🗑</button>`;
+                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`;
             }
 
-            // Добавляем эмодзи молнии в текст, если задача быстрая
-            const displayTitle = (item.isQuick ? "⚡️ " : "") + (item.title || item.text);
+            const displayTitle = item.title || item.text;
+            const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
+            
+            // Checkbox logic
+            let checkboxHtml = '';
+            if(['today','calendar','inbox'].includes(currentView)) {
+                checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`;
+            } else if (isDoneView) {
+                checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`;
+            }
 
-            return `<div class="task-card"><div class="task-info"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.6':''}">${displayTitle}</div><div class="task-meta">${metaHtml}</div></div><div style="display:flex; gap:8px;">${buttons}</div></div>`;
+            return `
+            <div class="task-card">
+                <div class="task-left">
+                    ${checkboxHtml}
+                    <div class="task-content">
+                        <div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${displayTitle}</div>
+                        <div class="task-meta">${metaHtml}</div>
+                    </div>
+                </div>
+                <div class="actions">${buttons}</div>
+            </div>`;
         }
 
         // --- ACTIONS ---
@@ -452,8 +576,8 @@
 
         function moveToTrash(from, id) { haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; db.trash.unshift(item); saveDB(); } }
         function restoreFromTrash(id) { haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
-        function permanentDelete(id) { haptic('heavy'); if(confirm("Удалить?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
-        function emptyTrash() { haptic('heavy'); if(confirm("Очистить?")) { db.trash = []; saveDB(); } }
+        function permanentDelete(id) { haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
+        function emptyTrash() { haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; saveDB(); } }
         function undoComplete(id) { haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); saveDB(); } }
 
         function completeTask(from, id) {
@@ -472,7 +596,7 @@
                     
                     const nextStep = project.steps.find(s => !s.completed);
                     if(nextStep) {
-                        alert(`Шаг выполнен! Следующий: "${nextStep.text}"`);
+                        alert(`Отлично! Следующий шаг: "${nextStep.text}"`);
                         db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false });
                     } else {
                         alert("🎉 Проект завершен!");
@@ -522,10 +646,9 @@
                 if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; }
                 if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; }
             } else {
-                // ИЗМЕНЕНИЕ: Задачи < 2 минут идут в "Сегодня" с пометкой
                 if(q.yes==='DO_NOW') { 
                     moveTo('today', { isQuick: true }); 
-                    alert("⚡️ Добавлено в 'Сегодня' с пометкой 2 МИН. Сделайте это первым!");
+                    alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!");
                     return; 
                 }
                 if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; }
@@ -552,8 +675,7 @@
         }
         function addStepToUI() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         function removeStep(i) { tempSteps.splice(i,1); renderSteps(); }
-        // FIX: oninput used
-        function renderSteps() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:16px; width:100%;"><span style="color:red; font-size:20px; padding:5px;" onclick="removeStep(${i})">×</span></div>`; }); }
+        function renderSteps() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:15px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
         window.updateStep=(i,v)=>{tempSteps[i].text=v};
         
         function saveProject() {
@@ -573,33 +695,20 @@
             } 
         }
 
-        // --- NEW: USER IDENTIFICATION ---
+        // --- USER INFO ---
         function initUserInfo() {
-            // Берем данные из Телеграма
             const user = tg.initDataUnsafe?.user;
-            
             if (user) {
-                // 1. Показываем имя в логотипе
                 const name = user.first_name;
                 const logoEl = document.querySelector('.logo');
-                if (logoEl) logoEl.innerText = `🚀 ${name}'s GTD`;
+                if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
                 
-                // 2. Отправляем ID в Яндекс.Метрику (чтобы вы видели, кто зашел)
-                // Проверяем, загрузилась ли Метрика
                 if (typeof ym !== 'undefined') {
-                    ym(106183159, 'userParams', {
-                        UserID: user.id,
-                        UserName: user.username || 'No Username',
-                        Name: user.first_name + ' ' + (user.last_name || '')
-                    });
-                    console.log('User info sent to Metrica:', user.id);
+                    ym(106183159, 'userParams', { UserID: user.id, UserName: user.username, Name: user.first_name });
                 }
-            } else {
-                console.log('No user data (opened outside Telegram?)');
             }
         }
 
-        // Запускаем всё
         initUserInfo();
         switchView('inbox');
     </script>
