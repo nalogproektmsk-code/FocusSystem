@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTD Planner v4 Big UI</title>
+    <title>GTD FocusSystem</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <script type="text/javascript" >
@@ -38,7 +38,6 @@
         }
 
         body { 
-            /* УВЕЛИЧЕН БАЗОВЫЙ ШРИФТ */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-color); 
@@ -47,13 +46,13 @@
             height: 100vh; 
             overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
-            font-size: 16px; /* Было меньше */
+            font-size: 16px; 
         }
         
         /* Sidebar (Desktop) */
         .sidebar { width: 280px; background: var(--secondary-bg); border-right: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
         
-        /* --- MOBILE BOTTOM NAV (УЛУЧШЕННЫЙ) --- */
+        /* --- MOBILE BOTTOM NAV --- */
         .bottom-nav { 
             display: none; 
             position: fixed; 
@@ -61,7 +60,6 @@
             left: 0; 
             right: 0; 
             background: var(--secondary-bg); 
-            /* Добавлен отступ для iPhone (Safe Area) */
             padding-bottom: max(15px, env(safe-area-inset-bottom));
             padding-top: 12px;
             border-top: 1px solid rgba(0,0,0,0.05); 
@@ -77,11 +75,9 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            /* УВЕЛИЧЕНА ШИРИНА КНОПОК */
             min-width: 85px; 
             padding: 0 5px;
             color: var(--hint-color); 
-            /* УВЕЛИЧЕН ШРИФТ МЕНЮ */
             font-size: 11px; 
             font-weight: 500;
             text-align: center; 
@@ -89,12 +85,11 @@
             flex-shrink: 0; 
         }
         .nav-item.active { color: var(--button-color); font-weight: 700; transform: scale(1.05); transition: 0.2s; }
-        .nav-icon { font-size: 26px; margin-bottom: 4px; } /* Иконки крупнее */
+        .nav-icon { font-size: 26px; margin-bottom: 4px; }
 
         @media (max-width: 768px) { 
             .sidebar { display: none; } 
             .bottom-nav { display: flex; } 
-            /* Больше отступа снизу для контента, чтобы не перекрывался меню */
             .main { padding: 20px; padding-bottom: 110px; } 
             .modal { width: 92% !important; padding: 24px !important; } 
         }
@@ -103,7 +98,7 @@
         .logo { font-size: 22px; font-weight: 800; margin-bottom: 30px; color: var(--text-color); padding-left: 10px; }
         
         .menu-item { 
-            height: 48px; /* Выше */
+            height: 48px; 
             padding: 0 16px; 
             cursor: pointer; 
             border-radius: 10px; 
@@ -111,7 +106,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            font-size: 16px; /* Крупнее */
+            font-size: 16px; 
             color: var(--text-color); 
             opacity: 0.8; 
             font-weight: 500;
@@ -122,16 +117,16 @@
         
         .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
         .header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-        .title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; } /* Заголовки мощнее */
+        .title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
         
         .input-group { display: flex; gap: 12px; margin-bottom: 24px; background: var(--secondary-bg); padding: 12px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         
         input, textarea { 
             flex: 1; 
-            padding: 14px; /* Поля ввода просторнее */
+            padding: 14px; 
             border: 1px solid rgba(0,0,0,0.1); 
             border-radius: 10px; 
-            font-size: 17px; /* Текст ввода крупнее */
+            font-size: 17px; 
             outline: none; 
             background: var(--bg-color); 
             color: var(--text-color); 
@@ -140,7 +135,7 @@
         
         .btn { 
             padding: 0 24px; 
-            height: 50px; /* Кнопки выше */
+            height: 50px; 
             border-radius: 12px; 
             border: none; 
             cursor: pointer; 
@@ -158,7 +153,7 @@
             background: rgba(0,0,0,0.05); 
             color: var(--hint-color); 
             padding: 0; 
-            height: 40px; width: 40px; /* Иконки действий крупнее */
+            height: 40px; width: 40px; 
             font-size: 20px; 
             border-radius: 10px; 
             cursor: pointer; 
@@ -185,7 +180,6 @@
         .task-meta { font-size: 13px; color: var(--hint-color); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; }
         
         .tag { padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; }
-        /* Новый тег для быстрых задач */
         .tag.quick { background: #fffbeb; color: #d97706; border: 1px solid #fcd34d; }
 
         .section-title { font-size: 14px; font-weight: 800; color: var(--hint-color); margin-top: 24px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -198,14 +192,14 @@
         .wizard-buttons { display: flex; gap: 12px; margin-top: 32px; }
         .wizard-btn { 
             flex: 1; 
-            padding: 18px; /* Огромные кнопки выбора */
+            padding: 18px; 
             border-radius: 14px; 
             border: 2px solid rgba(0,0,0,0.05); 
             background: var(--bg-color); 
             color: var(--text-color); 
             cursor: pointer; 
             font-weight: 700; 
-            font-size: 18px; /* Крупный текст Да/Нет */
+            font-size: 18px; 
         }
         
         .step-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: center; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 8px; }
@@ -579,6 +573,34 @@
             } 
         }
 
+        // --- NEW: USER IDENTIFICATION ---
+        function initUserInfo() {
+            // Берем данные из Телеграма
+            const user = tg.initDataUnsafe?.user;
+            
+            if (user) {
+                // 1. Показываем имя в логотипе
+                const name = user.first_name;
+                const logoEl = document.querySelector('.logo');
+                if (logoEl) logoEl.innerText = `🚀 ${name}'s GTD`;
+                
+                // 2. Отправляем ID в Яндекс.Метрику (чтобы вы видели, кто зашел)
+                // Проверяем, загрузилась ли Метрика
+                if (typeof ym !== 'undefined') {
+                    ym(106183159, 'userParams', {
+                        UserID: user.id,
+                        UserName: user.username || 'No Username',
+                        Name: user.first_name + ' ' + (user.last_name || '')
+                    });
+                    console.log('User info sent to Metrica:', user.id);
+                }
+            } else {
+                console.log('No user data (opened outside Telegram?)');
+            }
+        }
+
+        // Запускаем всё
+        initUserInfo();
         switchView('inbox');
     </script>
 </body>
