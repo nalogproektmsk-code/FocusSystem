@@ -257,6 +257,7 @@
             <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:14px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
+    
     <div id="project-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
@@ -274,6 +275,7 @@
             <button class="btn-primary" onclick="saveProject()">Сохранить проект</button>
         </div>
     </div>
+    
     <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px; background:#F8FAFC; border-radius:12px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
     <div id="date-modal" class="modal-overlay"><div class="modal"><div class="modal-header">📅 Выберите время</div><input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px; background:#F8FAFC; border-radius:12px;"><input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px; background:#F8FAFC; border-radius:12px;"><button class="btn-primary" onclick="submitDateModal()">Сохранить</button></div></div>
     <div id="move-modal" class="modal-overlay">
@@ -313,7 +315,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [] };
+        let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], isPremium: false };
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
 
@@ -330,21 +332,18 @@
                     ym(106183159, 'userParams', { UserID: user.id, UserName: user.username, Name: user.first_name });
                 }
             } else {
-                // If opened in browser without Telegram, use localStorage ID for testing
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
             
-            // CONNECT TO FIREBASE LISTENER
             const userRef = ref(dbRef, 'users/' + currentUserID);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    db = data; // Sync received!
+                    db = data; 
                 } else {
-                    // New user in cloud
-                    saveDB(); // Create initial structure
+                    saveDB(); 
                 }
                 updateBadges();
                 renderCurrentView();
@@ -353,13 +352,23 @@
 
         // --- DB FUNCTIONS (CLOUD) ---
         function saveDB() {
-            // Save to Firebase instead of localStorage
             set(ref(dbRef, 'users/' + currentUserID), db);
             updateBadges();
             renderCurrentView();
         }
 
-        // --- GLOBAL FUNCTIONS EXPORT (Needed for onclick in HTML) ---
+        // --- PREMIUM CHECKER ---
+        function checkPremiumLimits() {
+            if (db.isPremium) return true;
+            const activeProjects = (db.projects || []).filter(p => !p.completedAt).length;
+            if (activeProjects >= 3) {
+                alert("💎 Лимит бесплатной версии!\n\nВы можете вести одновременно только 3 проекта.\n\nЧтобы создавать бесконечное количество проектов и получить доступ к ИИ-помощнику, оформите Premium.");
+                return false; 
+            }
+            return true;
+        }
+
+        // --- GLOBAL FUNCTIONS EXPORT ---
         window.haptic = function(style = 'light') {
             try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){}
         }
@@ -397,7 +406,6 @@
             if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
             html += `</div>`;
 
-            // Normalize DB arrays if undefined
             if(!db[currentView]) db[currentView] = [];
 
             if (currentView === 'inbox') {
@@ -614,7 +622,7 @@
         window.openMoveModal = function(id) { moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
         window.submitMove = function(f) { if(!moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); saveDB(); } closeModal('move-modal'); }
 
-        // --- PROJECTS ---
+        // --- PROJECTS AND LIMITS ---
         let tempSteps=[];
         window.openProjectModal = function(eid=null, src=null) {
             closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[];
@@ -629,8 +637,18 @@
         
         window.saveProject = function() {
             window.haptic('success');
-            const eid=document.getElementById('proj-edit-id').value; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value;
+            const eid=document.getElementById('proj-edit-id').value; 
+            
+            // CHECK LIMITS FOR NEW PROJECTS
+            if (!eid) {
+                if (!checkPremiumLimits()) return;
+            }
+
+            const t=document.getElementById('proj-name').value; 
+            const g=document.getElementById('proj-goal').value;
+            
             if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!");
+            
             if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
             else { 
                 const nid=Date.now(); 
