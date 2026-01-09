@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTD Planner Mini App</title>
+    <title>GTD Planner Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* --- CSS VARIABLES (TELEGRAM THEME) --- */
+        /* --- STYLES --- */
         :root {
             --bg-color: var(--tg-theme-bg-color, #f4f5f7);
             --text-color: var(--tg-theme-text-color, #333333);
@@ -17,126 +17,52 @@
             --danger-color: #ef4444;
             --success-color: #22c55e;
         }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color);
-            margin: 0; 
-            display: flex; 
-            height: 100vh; 
-            overflow: hidden; 
-            -webkit-tap-highlight-color: transparent;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* --- LAYOUT & SIDEBAR (DESKTOP) --- */
-        .sidebar { 
-            width: 260px; 
-            background: var(--secondary-bg); 
-            border-right: 1px solid rgba(0,0,0,0.05); 
-            display: flex; 
-            flex-direction: column; 
-            padding: 20px; 
-            flex-shrink: 0; 
-        }
-
-        /* --- BOTTOM NAV (MOBILE) --- */
-        .bottom-nav {
-            display: none; /* Hidden on desktop */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--secondary-bg);
-            padding: 10px 0;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            z-index: 100;
-            overflow-x: auto;
-            white-space: nowrap;
-            /* Hide scrollbar */
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
-        }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-
-        .nav-item {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 70px;
-            color: var(--hint-color);
-            font-size: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
+        /* Sidebar (Desktop) */
+        .sidebar { width: 260px; background: var(--secondary-bg); border-right: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
+        
+        /* Bottom Nav (Mobile) */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--secondary-bg); padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.05); z-index: 100; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        .nav-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; color: var(--hint-color); font-size: 10px; text-align: center; cursor: pointer; flex-shrink: 0; }
         .nav-item.active { color: var(--button-color); font-weight: bold; }
         .nav-icon { font-size: 20px; margin-bottom: 4px; }
 
-        /* --- MEDIA QUERIES --- */
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .bottom-nav { display: flex; }
-            .main { padding: 20px; padding-bottom: 90px; } /* Space for bottom nav */
-            .task-card { padding: 12px; }
-            .modal { width: 90% !important; padding: 20px !important; }
-            .title { font-size: 22px; }
-        }
+        @media (max-width: 768px) { .sidebar { display: none; } .bottom-nav { display: flex; } .main { padding: 20px; padding-bottom: 90px; } .modal { width: 90% !important; padding: 20px !important; } }
 
-        /* --- GENERAL STYLES --- */
+        /* General */
         .logo { font-size: 18px; font-weight: 800; margin-bottom: 25px; color: var(--text-color); padding-left: 10px; }
-        
-        .menu-item { 
-            height: 40px; padding: 0 15px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--text-color); transition: all 0.2s; opacity: 0.8;
-        }
-        .menu-item:hover { background-color: rgba(0,0,0,0.05); opacity: 1; }
+        .menu-item { height: 40px; padding: 0 15px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--text-color); opacity: 0.8; }
         .menu-item.active { background-color: var(--button-color); color: var(--button-text); opacity: 1; }
-        
-        .badge { background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: inherit; font-weight: normal; }
-        
+        .badge { background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px; font-size: 11px; }
         .spacer { height: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 20px; }
-
         .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
         .header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .title { font-size: 26px; font-weight: bold; }
         
-        /* INPUTS & BUTTONS */
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; background: var(--secondary-bg); padding: 10px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-        
-        input, textarea { 
-            flex: 1; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; outline: none; 
-            background: var(--bg-color); color: var(--text-color); 
-        }
-        input:focus { border-color: var(--button-color); }
-        
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; background: var(--secondary-bg); padding: 10px; border-radius: 12px; }
+        input, textarea { flex: 1; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; outline: none; background: var(--bg-color); color: var(--text-color); }
         .btn { padding: 0 20px; height: 44px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-primary { background: var(--button-color); color: var(--button-text); }
-        .btn-wizard { width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+        .btn-wizard { width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; margin-bottom: 20px; }
         
         .btn-icon { background: rgba(0,0,0,0.05); color: var(--hint-color); padding: 5px; height: 32px; width: 32px; font-size: 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; }
         .btn-icon.delete { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
         .btn-icon.complete { color: var(--success-color); background: rgba(34, 197, 94, 0.1); }
 
-        /* TASKS */
         .task-list { display: flex; flex-direction: column; gap: 10px; }
-        .task-card { background: var(--secondary-bg); padding: 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .task-card { background: var(--secondary-bg); padding: 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .task-info { flex: 1; margin-right: 10px; }
         .task-title { font-weight: 500; font-size: 15px; }
-        .task-meta { font-size: 12px; color: var(--hint-color); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .task-meta { font-size: 12px; color: var(--hint-color); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
         .tag { padding: 2px 8px; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 11px; font-weight: 600; }
-        
         .section-title { font-size: 13px; font-weight: 800; color: var(--hint-color); margin-top: 20px; margin-bottom: 10px; text-transform: uppercase; }
 
-        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: var(--secondary-bg); width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; color: var(--text-color); }
+        .modal { background: var(--secondary-bg); width: 500px; padding: 30px; border-radius: 16px; max-height: 90vh; overflow-y: auto; color: var(--text-color); }
         .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; }
-        
         .wizard-buttons { display: flex; gap: 10px; margin-top: 30px; }
         .wizard-btn { flex: 1; padding: 15px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); background: var(--bg-color); color: var(--text-color); cursor: pointer; font-weight: 700; }
-        
         .step-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 6px; }
     </style>
 </head>
@@ -237,13 +163,11 @@
     </div>
 
     <script>
-        // --- TELEGRAM INIT ---
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand(); 
         
-        // Haptic Feedback Helper
         function haptic(style = 'light') {
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+            try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){}
         }
 
         function formatDateRUS(isoDate) {
@@ -254,13 +178,11 @@
         }
 
         let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [] };
-
-        // Имитация CloudStorage (пока LocalStorage для MVP)
-        const saved = localStorage.getItem('gtd_tg_db');
+        const saved = localStorage.getItem('gtd_tg_db_v3');
         if(saved) db = JSON.parse(saved);
 
         function saveDB() {
-            localStorage.setItem('gtd_tg_db', JSON.stringify(db));
+            localStorage.setItem('gtd_tg_db_v3', JSON.stringify(db));
             updateBadges();
             renderCurrentView();
         }
@@ -268,23 +190,18 @@
         let currentView = 'inbox';
         
         function switchView(view) {
-            haptic('light'); // Вибрация при переключении
+            haptic('light');
             currentView = view;
             
-            // Update Desktop Sidebar
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
-            for(let item of items) {
-                if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; }
-            }
+            for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
 
-            // Update Mobile Bottom Nav
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navItems = document.querySelectorAll('.nav-item');
             for(let item of navItems) {
                 if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; }
             }
-
             renderCurrentView();
         }
 
@@ -312,9 +229,7 @@
                     const doneTasks = list.filter(i => !i.isProject);
                     if (doneProjects.length > 0) {
                         html += `<div class="section-title">Проекты</div>`;
-                        doneProjects.forEach(item => {
-                            html += createCard(item, true, true);
-                        });
+                        doneProjects.forEach(item => { html += createCard(item, true, true); });
                     }
                     if (doneTasks.length > 0) {
                          html += `<div class="section-title">Задачи</div>`;
@@ -358,7 +273,8 @@
             if(isProjectCard) metaHtml += `<span class="tag">🏁 Проект</span>`;
 
             let buttons = '';
-            if(['today','calendar','inbox'].includes(currentView)) buttons += `<button class="btn-icon complete" onclick="completeTask('${currentView}', ${item.id})">✅</button>`;
+            // FIX: Added Number() conversion to ensure IDs match correctly
+            if(['today','calendar','inbox'].includes(currentView)) buttons += `<button class="btn-icon complete" onclick="completeTask('${currentView}', ${Number(item.id)})">✅</button>`;
             if(isDoneView) buttons += `<button class="btn-icon" onclick="undoComplete(${item.id})">↩️</button>`;
             if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-icon" onclick="openMoveModal(${item.id})">📂</button>`;
             
@@ -389,7 +305,11 @@
 
         function completeTask(from, id) {
             haptic('success');
-            const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return;
+            // Ensure ID is a number
+            id = Number(id);
+            const idx = db[from].findIndex(t => t.id === id); 
+            if(idx === -1) return; // Task not found
+            
             const task = db[from][idx];
 
             if (task.projectId) {
@@ -397,12 +317,14 @@
                 if (project) {
                     const step = project.steps.find(s => s.id === task.stepId);
                     if(step) step.completed = true;
+                    
                     const nextStep = project.steps.find(s => !s.completed);
                     if(nextStep) {
-                        tg.showAlert(`Шаг выполнен! Следующий: "${nextStep.text}"`);
+                        // FIX: Use alert instead of tg.showAlert for reliability
+                        alert(`Шаг выполнен! Следующий: "${nextStep.text}"`);
                         db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false });
                     } else {
-                        tg.showAlert("🎉 Проект завершен!");
+                        alert("🎉 Проект завершен!");
                         db.projects = db.projects.filter(p => p.id !== project.id);
                         project.isProject = true; project.completedAt = new Date().toLocaleString();
                         db.done.unshift(project);
@@ -417,7 +339,7 @@
             saveDB();
         }
 
-        // --- WIZARD & MODALS ---
+        // --- WIZARD ---
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
         const questions = [
             { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" },
@@ -474,12 +396,19 @@
         }
         function addStepToUI() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         function removeStep(i) { tempSteps.splice(i,1); renderSteps(); }
-        function renderSteps() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" onchange="updateStep(${i},this.value)" style="border:none; bg:transparent"><span style="color:red" onclick="removeStep(${i})">×</span></div>`; }); }
-        window.updateStep=(i,v)=>{tempSteps[i].text=v};
+        
+        // FIX: Changed onchange to oninput so steps are updated immediately while typing
+        function renderSteps() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; bg:transparent"><span style="color:red" onclick="removeStep(${i})">×</span></div>`; }); }
+        
+        // Expose updateStep globally
+        window.updateStep = function(i,v) { tempSteps[i].text=v };
+        
         function saveProject() {
             haptic('success');
             const eid=document.getElementById('proj-edit-id').value; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value;
-            if(!t||!g||tempSteps.length===0) return tg.showAlert("Заполните всё!");
+            // FIX: Use standard alert
+            if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!");
+            
             if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
             else { const nid=Date.now(); db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); }
             saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
