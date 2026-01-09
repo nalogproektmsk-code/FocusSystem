@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GTD Planner Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* --- CSS VARIABLES (TELEGRAM THEME) --- */
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f4f5f7);
+            --text-color: var(--tg-theme-text-color, #333333);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #999999);
+            --button-color: var(--tg-theme-button-color, #0066cc);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* --- LAYOUT & SIDEBAR (DESKTOP) --- */
+        .sidebar { 
+            width: 260px; 
+            background: var(--secondary-bg); 
+            border-right: 1px solid rgba(0,0,0,0.05); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            flex-shrink: 0; 
+        }
+
+        /* --- BOTTOM NAV (MOBILE) --- */
+        .bottom-nav {
+            display: none; /* Hidden on desktop */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--secondary-bg);
+            padding: 10px 0;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            z-index: 100;
+            overflow-x: auto;
+            white-space: nowrap;
+            /* Hide scrollbar */
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+
+        .nav-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            color: var(--hint-color);
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-item.active { color: var(--button-color); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .bottom-nav { display: flex; }
+            .main { padding: 20px; padding-bottom: 90px; } /* Space for bottom nav */
+            .task-card { padding: 12px; }
+            .modal { width: 90% !important; padding: 20px !important; }
+            .title { font-size: 22px; }
+        }
+
+        /* --- GENERAL STYLES --- */
+        .logo { font-size: 18px; font-weight: 800; margin-bottom: 25px; color: var(--text-color); padding-left: 10px; }
+        
+        .menu-item { 
+            height: 40px; padding: 0 15px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--text-color); transition: all 0.2s; opacity: 0.8;
+        }
+        .menu-item:hover { background-color: rgba(0,0,0,0.05); opacity: 1; }
+        .menu-item.active { background-color: var(--button-color); color: var(--button-text); opacity: 1; }
+        
+        .badge { background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: inherit; font-weight: normal; }
+        
+        .spacer { height: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 20px; }
+
+        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .title { font-size: 26px; font-weight: bold; }
+        
+        /* INPUTS & BUTTONS */
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; background: var(--secondary-bg); padding: 10px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        
+        input, textarea { 
+            flex: 1; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; outline: none; 
+            background: var(--bg-color); color: var(--text-color); 
+        }
+        input:focus { border-color: var(--button-color); }
+        
+        .btn { padding: 0 20px; height: 44px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-primary { background: var(--button-color); color: var(--button-text); }
+        .btn-wizard { width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+        
+        .btn-icon { background: rgba(0,0,0,0.05); color: var(--hint-color); padding: 5px; height: 32px; width: 32px; font-size: 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; }
+        .btn-icon.delete { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
+        .btn-icon.complete { color: var(--success-color); background: rgba(34, 197, 94, 0.1); }
+
+        /* TASKS */
+        .task-list { display: flex; flex-direction: column; gap: 10px; }
+        .task-card { background: var(--secondary-bg); padding: 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .task-info { flex: 1; margin-right: 10px; }
+        .task-title { font-weight: 500; font-size: 15px; }
+        .task-meta { font-size: 12px; color: var(--hint-color); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .tag { padding: 2px 8px; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 11px; font-weight: 600; }
+        
+        .section-title { font-size: 13px; font-weight: 800; color: var(--hint-color); margin-top: 20px; margin-bottom: 10px; text-transform: uppercase; }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: var(--secondary-bg); width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; color: var(--text-color); }
+        .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        
+        .wizard-buttons { display: flex; gap: 10px; margin-top: 30px; }
+        .wizard-btn { flex: 1; padding: 15px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); background: var(--bg-color); color: var(--text-color); cursor: pointer; font-weight: 700; }
+        
+        .step-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">🚀 GTD Planner</div>
+        <div class="menu-item active" onclick="switchView('inbox')"><span>📥 Inbox</span><span class="badge" id="badge-inbox">0</span></div>
+        <div class="spacer"></div>
+        <div class="menu-item" onclick="switchView('today')"><span>🔥 Сегодня</span><span class="badge" id="badge-today">0</span></div>
+        <div class="menu-item" onclick="switchView('calendar')"><span>📅 Календарь</span><span class="badge" id="badge-calendar">0</span></div>
+        <div class="menu-item" onclick="switchView('projects')"><span>🏗 Проекты</span><span class="badge" id="badge-projects">0</span></div>
+        <div class="menu-item" onclick="switchView('waiting')"><span>👀 Поручения</span><span class="badge" id="badge-waiting">0</span></div>
+        <div class="menu-item" onclick="switchView('someday')"><span>💡 Потом</span><span class="badge" id="badge-someday">0</span></div>
+        <div class="menu-item" onclick="switchView('reference')"><span>📚 Хранилище</span><span class="badge" id="badge-reference">0</span></div>
+        <div class="spacer"></div>
+        <div class="menu-item" onclick="switchView('done')"><span>✅ Выполнено</span><span class="badge" id="badge-done">0</span></div>
+        <div class="menu-item" onclick="switchView('trash')"><span>🗑 Корзина</span><span class="badge" id="badge-trash">0</span></div>
+    </div>
+
+    <div class="main">
+        <div id="app-view"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('inbox')"><div class="nav-icon">📥</div>Inbox <span id="mob-badge-inbox"></span></div>
+        <div class="nav-item" onclick="switchView('today')"><div class="nav-icon">🔥</div>Сегодня <span id="mob-badge-today"></span></div>
+        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon">📅</div>Календ.</div>
+        <div class="nav-item" onclick="switchView('projects')"><div class="nav-icon">🏗</div>Проекты</div>
+        <div class="nav-item" onclick="switchView('waiting')"><div class="nav-icon">👀</div>Поруч.</div>
+        <div class="nav-item" onclick="switchView('someday')"><div class="nav-icon">💡</div>Потом</div>
+        <div class="nav-item" onclick="switchView('reference')"><div class="nav-icon">📚</div>Архив</div>
+        <div class="nav-item" onclick="switchView('done')"><div class="nav-icon">✅</div>Готово</div>
+        <div class="nav-item" onclick="switchView('trash')"><div class="nav-icon">🗑</div>Корзина</div>
+    </nav>
+
+    <div id="wizard-modal" class="modal-overlay">
+        <div class="modal">
+            <div style="text-align:center; font-size:12px; text-transform:uppercase; color:var(--hint-color); margin-bottom:10px;">Сортировка Inbox</div>
+            <div style="text-align: center; margin-bottom: 20px;"><strong id="wizard-task-text" style="font-size: 18px;">...</strong></div>
+            <div id="wizard-question-text" style="text-align:center; font-size:18px; margin:30px 0;">...</div>
+            <div class="wizard-buttons">
+                <button class="wizard-btn" style="color:var(--danger-color); border-color:var(--danger-color);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
+                <button class="wizard-btn" style="color:var(--success-color); border-color:var(--success-color);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
+            </div>
+            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:15px; border:none; background:none; color:var(--hint-color); cursor:pointer;">Отмена</button>
+        </div>
+    </div>
+
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header"><span id="proj-modal-title">Проект</span><span onclick="closeModal('project-modal')">✕</span></div>
+            <input type="hidden" id="proj-edit-id"> 
+            <label style="display:block; font-size:12px; font-weight:bold; color:var(--hint-color); margin-bottom:5px;">НАЗВАНИЕ</label>
+            <input type="text" id="proj-name" style="width:90%; margin-bottom:15px;">
+            <label style="display:block; font-size:12px; font-weight:bold; color:var(--hint-color); margin-bottom:5px;">ЦЕЛЬ</label>
+            <input type="text" id="proj-goal" placeholder="Результат..." style="width:90%; margin-bottom:20px;">
+            <label style="display:block; font-size:12px; font-weight:bold; color:var(--hint-color); margin-bottom:5px;">ШАГИ</label>
+            <div id="proj-steps-container" style="margin-bottom: 10px;"></div>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input type="text" id="proj-new-step" placeholder="Шаг..." style="flex:1;">
+                <button class="btn btn-primary" onclick="addStepToUI()">+</button>
+            </div>
+            <button class="btn btn-primary" onclick="saveProject()" style="width:100%;">Сохранить</button>
+        </div>
+    </div>
+
+    <div id="input-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header" id="input-modal-title">Ввод</div>
+            <input type="text" id="input-modal-field" style="width: 90%; margin-bottom: 20px;">
+            <button class="btn btn-primary" onclick="submitInputModal()" style="width: 100%;">ОК</button>
+        </div>
+    </div>
+
+    <div id="date-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">📅 Дата</div>
+            <input type="date" id="calendar-date" style="width:90%; margin-bottom:15px;">
+            <input type="time" id="calendar-time" style="width:90%; margin-bottom:20px;">
+            <button class="btn btn-primary" onclick="submitDateModal()" style="width:100%;">Сохранить</button>
+        </div>
+    </div>
+
+    <div id="move-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">Куда переместить?</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('inbox')">📥 Inbox</button>
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('today')">🔥 Сегодня</button>
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('calendar')">📅 Календарь</button>
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('waiting')">👀 Поручения</button>
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('someday')">💡 Потом</button>
+                <button class="btn" style="background:var(--bg-color); color:var(--text-color); justify-content:flex-start;" onclick="submitMove('reference')">📚 Хранилище</button>
+            </div>
+            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:15px; border:none; background:none; color:var(--hint-color);">Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        // --- TELEGRAM INIT ---
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+        
+        // Haptic Feedback Helper
+        function haptic(style = 'light') {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+        }
+
+        function formatDateRUS(isoDate) {
+            if(!isoDate) return '';
+            const parts = isoDate.split('-');
+            if(parts.length !== 3) return isoDate;
+            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+
+        let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [] };
+
+        // Имитация CloudStorage (пока LocalStorage для MVP)
+        const saved = localStorage.getItem('gtd_tg_db');
+        if(saved) db = JSON.parse(saved);
+
+        function saveDB() {
+            localStorage.setItem('gtd_tg_db', JSON.stringify(db));
+            updateBadges();
+            renderCurrentView();
+        }
+
+        let currentView = 'inbox';
+        
+        function switchView(view) {
+            haptic('light'); // Вибрация при переключении
+            currentView = view;
+            
+            // Update Desktop Sidebar
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            const items = document.querySelectorAll('.menu-item');
+            for(let item of items) {
+                if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; }
+            }
+
+            // Update Mobile Bottom Nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navItems = document.querySelectorAll('.nav-item');
+            for(let item of navItems) {
+                if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; }
+            }
+
+            renderCurrentView();
+        }
+
+        function renderCurrentView() {
+            const container = document.getElementById('app-view');
+            const headers = { 'inbox': '📥 Inbox', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Поручения', 'someday': '💡 Потом', 'reference': '📚 Архив', 'done': '✅ Готово', 'trash': '🗑 Корзина' };
+
+            let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
+            if(currentView === 'trash' && db.trash.length > 0) html += `<button class="btn" style="background:var(--danger-color); color:white; height:30px; font-size:12px;" onclick="emptyTrash()">Очистить</button>`;
+            html += `</div>`;
+
+            if (currentView === 'inbox') {
+                html += `<div class="input-group"><input type="text" id="main-input" placeholder="Новая задача..." onkeypress="if(event.key==='Enter') addTask()"><button class="btn btn-primary" onclick="addTask()">+</button></div>`;
+                if(db.inbox.length > 0) html += `<button class="btn btn-wizard" onclick="startWizard()">⚡️ Разобрать (${db.inbox.length})</button>`;
+            }
+
+            html += `<div class="task-list">`;
+            const list = db[currentView];
+            
+            if(!list || list.length === 0) {
+                html += `<div style="text-align:center; color:var(--hint-color); margin-top:40px;">Пусто</div>`;
+            } else {
+                if (currentView === 'done') {
+                    const doneProjects = list.filter(i => i.isProject);
+                    const doneTasks = list.filter(i => !i.isProject);
+                    if (doneProjects.length > 0) {
+                        html += `<div class="section-title">Проекты</div>`;
+                        doneProjects.forEach(item => {
+                            html += createCard(item, true, true);
+                        });
+                    }
+                    if (doneTasks.length > 0) {
+                         html += `<div class="section-title">Задачи</div>`;
+                         doneTasks.forEach(item => { html += createCard(item, true, false); });
+                    }
+                } else if (currentView === 'projects') {
+                     list.forEach(item => {
+                        const activeStep = item.steps.find(s => !s.completed);
+                        const progress = item.steps.filter(s=>s.completed).length + '/' + item.steps.length;
+                        html += `
+                        <div class="task-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <div style="font-weight:bold; font-size:16px;">${item.title}</div>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn-icon" onclick="editProject(${item.id})">✏️</button>
+                                    <button class="btn-icon delete" onclick="moveToTrash('${currentView}', ${item.id})">🗑</button>
+                                </div>
+                            </div>
+                            <div style="font-size:13px; color:var(--hint-color); margin-bottom:8px;">🎯 ${item.goal}</div>
+                            <div style="background:rgba(0,0,0,0.03); padding:8px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between;">
+                                <span><b>След:</b> ${activeStep ? activeStep.text : '✅'}</span>
+                                <span style="color:var(--hint-color); font-size:11px;">${progress}</span>
+                            </div>
+                        </div>`;
+                     });
+                } else {
+                    list.forEach(item => { html += createCard(item, false, false); });
+                }
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+            updateBadges();
+        }
+
+        function createCard(item, isDoneView, isProjectCard) {
+            let metaHtml = '';
+            if(item.dateStr) metaHtml += `<span class="tag">📅 ${formatDateRUS(item.dateStr)}</span>`;
+            if(item.timeStr) metaHtml += `<span class="tag">⏰ ${item.timeStr}</span>`;
+            if(item.assignee) metaHtml += `<span class="tag" style="color:blue">👤 ${item.assignee}</span>`;
+            if(item.projectTitle) metaHtml += `<span class="tag">🏗 ${item.projectTitle}</span>`;
+            if(isProjectCard) metaHtml += `<span class="tag">🏁 Проект</span>`;
+
+            let buttons = '';
+            if(['today','calendar','inbox'].includes(currentView)) buttons += `<button class="btn-icon complete" onclick="completeTask('${currentView}', ${item.id})">✅</button>`;
+            if(isDoneView) buttons += `<button class="btn-icon" onclick="undoComplete(${item.id})">↩️</button>`;
+            if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-icon" onclick="openMoveModal(${item.id})">📂</button>`;
+            
+            if(currentView === 'trash') {
+                buttons += `<button class="btn-icon complete" onclick="restoreFromTrash(${item.id})">♻️</button><button class="btn-icon delete" onclick="permanentDelete(${item.id})">✖</button>`;
+            } else {
+                 buttons += `<button class="btn-icon delete" onclick="moveToTrash('${currentView}', ${item.id})">🗑</button>`;
+            }
+
+            return `<div class="task-card"><div class="task-info"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.6':''}">${item.title || item.text}</div><div class="task-meta">${metaHtml}</div></div><div style="display:flex; gap:5px;">${buttons}</div></div>`;
+        }
+
+        // --- ACTIONS ---
+        function addTask() {
+            haptic('light');
+            const val = document.getElementById('main-input').value.trim();
+            if(!val) return;
+            db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false });
+            document.getElementById('main-input').value = '';
+            saveDB();
+        }
+
+        function moveToTrash(from, id) { haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; db.trash.unshift(item); saveDB(); } }
+        function restoreFromTrash(id) { haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
+        function permanentDelete(id) { haptic('heavy'); if(confirm("Удалить?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
+        function emptyTrash() { haptic('heavy'); if(confirm("Очистить?")) { db.trash = []; saveDB(); } }
+        function undoComplete(id) { haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); saveDB(); } }
+
+        function completeTask(from, id) {
+            haptic('success');
+            const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return;
+            const task = db[from][idx];
+
+            if (task.projectId) {
+                const project = db.projects.find(p => p.id === task.projectId);
+                if (project) {
+                    const step = project.steps.find(s => s.id === task.stepId);
+                    if(step) step.completed = true;
+                    const nextStep = project.steps.find(s => !s.completed);
+                    if(nextStep) {
+                        tg.showAlert(`Шаг выполнен! Следующий: "${nextStep.text}"`);
+                        db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false });
+                    } else {
+                        tg.showAlert("🎉 Проект завершен!");
+                        db.projects = db.projects.filter(p => p.id !== project.id);
+                        project.isProject = true; project.completedAt = new Date().toLocaleString();
+                        db.done.unshift(project);
+                    }
+                }
+                db[from].splice(idx, 1);
+            } else {
+                const item = db[from].splice(idx, 1)[0];
+                item.completedAt = new Date().toLocaleString();
+                db.done.unshift(item);
+            }
+            saveDB();
+        }
+
+        // --- WIZARD & MODALS ---
+        let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
+        const questions = [
+            { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" },
+            { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" },
+            { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" },
+            { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" },
+            { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" },
+            { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" }
+        ];
+
+        function startWizard() { 
+            if(db.inbox.length===0) return; 
+            haptic('light'); wizardTask=db.inbox[0]; wizardStep=0; 
+            document.getElementById('wizard-modal').style.display='flex'; renderWizard(); 
+        }
+        function renderWizard() {
+            const q = questions[wizardStep];
+            document.getElementById('wizard-task-text').innerText = wizardTask.text;
+            document.getElementById('wizard-question-text').innerText = q.text;
+            document.getElementById('btn-no').innerText = q.noTxt;
+            document.getElementById('btn-yes').innerText = q.yesTxt;
+        }
+        function handleWizardAnswer(yes) {
+            haptic('light');
+            const q = questions[wizardStep];
+            if(!yes) {
+                if(q.no==='reference') return moveTo('reference');
+                if(q.no==='someday') return moveTo('someday');
+                if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; }
+                if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; }
+            } else {
+                if(q.yes==='DO_NOW') { moveTo('done',{completedAt:new Date().toLocaleString()}); return; }
+                if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; }
+            }
+            wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard();
+        }
+        function moveTo(f, e={}) { db.inbox.shift(); db[f].unshift({...wizardTask, ...e, id:Date.now()}); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
+
+        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function openInput(t, cb) { document.getElementById('input-modal').style.display='flex'; document.getElementById('input-modal-title').innerText=t; inputCallback=cb; }
+        function submitInputModal() { const v=document.getElementById('input-modal-field').value; if(v&&inputCallback) inputCallback(v); closeModal('input-modal'); }
+        function openDateModal(cb) { document.getElementById('date-modal').style.display='flex'; dateCallback=cb; }
+        function submitDateModal() { const d=document.getElementById('calendar-date').value; const t=document.getElementById('calendar-time').value; if(d&&dateCallback) dateCallback(d,t); closeModal('date-modal'); }
+        function openMoveModal(id) { moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
+        function submitMove(f) { if(!moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; db[f].unshift(i); saveDB(); } closeModal('move-modal'); }
+
+        // --- PROJECTS ---
+        let tempSteps=[];
+        function openProjectModal(eid=null, src=null) {
+            closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[];
+            if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); }
+            else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src.text; document.getElementById('proj-goal').value=""; }
+            renderSteps();
+        }
+        function addStepToUI() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
+        function removeStep(i) { tempSteps.splice(i,1); renderSteps(); }
+        function renderSteps() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" onchange="updateStep(${i},this.value)" style="border:none; bg:transparent"><span style="color:red" onclick="removeStep(${i})">×</span></div>`; }); }
+        window.updateStep=(i,v)=>{tempSteps[i].text=v};
+        function saveProject() {
+            haptic('success');
+            const eid=document.getElementById('proj-edit-id').value; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value;
+            if(!t||!g||tempSteps.length===0) return tg.showAlert("Заполните всё!");
+            if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
+            else { const nid=Date.now(); db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); }
+            saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
+        }
+        window.editProject=(id)=>openProjectModal(id);
+
+        function updateBadges() { 
+            for(let k in db) { 
+                const el=document.getElementById('badge-'+k); if(el) el.innerText=db[k].length; 
+                const mel=document.getElementById('mob-badge-'+k); if(mel) mel.innerText=db[k].length>0?`(${db[k].length})`:'';
+            } 
+        }
+
+        switchView('inbox');
+    </script>
+</body>
+</html>
