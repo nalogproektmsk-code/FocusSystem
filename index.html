@@ -19,14 +19,7 @@
        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-       ym(106183159, "init", {
-            clickmap:true,
-            trackLinks:true,
-            accurateTrackBounce:true,
-            webvisor:true,
-            ssr:true,
-            ecommerce:"dataLayer"
-       });
+       ym(106183159, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true, ssr:true, ecommerce:"dataLayer" });
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106183159" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 
@@ -99,85 +92,84 @@
             flex-direction: column; 
             padding: 32px 20px; 
             flex-shrink: 0; 
+            overflow-y: auto; /* 🔥 ВКЛЮЧИЛИ СКРОЛЛ, ЧТОБЫ "АРХИВ" НЕ ОБРЕЗАЛСЯ */
         }
         
-        .logo { 
-            font-size: 20px; 
-            font-weight: 800; 
-            margin-bottom: 40px; 
-            color: var(--text-main); 
-            padding-left: 12px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            letter-spacing: -0.5px;
-        }
+        .logo { font-size: 20px; font-weight: 800; margin-bottom: 40px; color: var(--text-main); padding-left: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; flex-shrink: 0; }
         .logo i { color: var(--primary-color); font-size: 24px; }
-
-        .menu-item { 
-            height: 44px; 
-            padding: 0 16px; 
-            cursor: pointer; 
-            border-radius: var(--radius-md); 
-            margin-bottom: 4px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-size: 15px; 
-            color: var(--text-secondary); 
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
+        .menu-item { height: 44px; padding: 0 16px; cursor: pointer; border-radius: var(--radius-md); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--text-secondary); font-weight: 600; transition: all 0.2s ease; flex-shrink: 0; }
         .menu-item:hover { background: #F1F5F9; color: var(--text-main); }
         .menu-item.active { background-color: #FFF7ED; color: var(--primary-color); }
         .menu-item span { display: flex; align-items: center; gap: 12px; }
         .menu-item i { font-size: 20px; }
-
-        .badge { 
-            background: #F1F5F9; 
-            color: var(--text-secondary);
-            padding: 2px 8px; 
-            border-radius: 99px; 
-            font-size: 12px; 
-            font-weight: 700; 
-            min-width: 20px;
-            text-align: center;
-        }
+        .badge { background: #F1F5F9; color: var(--text-secondary); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
         .menu-item.active .badge { background: #FED7AA; color: #9A3412; }
-        .spacer { height: 1px; background: var(--border-color); margin: 20px 0; }
+        .spacer { height: 1px; background: var(--border-color); margin: 20px 0; flex-shrink: 0; }
         
-        /* --- MOBILE NAV --- */
+        /* --- MOBILE NAV (УЛУЧШЕННАЯ) --- */
         .bottom-nav { 
             display: none; 
             position: fixed; bottom: 0; left: 0; right: 0; 
-            background: rgba(255,255,255,0.95); 
+            background: rgba(255,255,255,0.98); 
             backdrop-filter: blur(10px);
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            padding-top: 10px;
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
+            padding-top: 12px;
             border-top: 1px solid var(--border-color); 
             z-index: 100; 
             overflow-x: auto; 
             white-space: nowrap; 
             scrollbar-width: none; 
-            gap: 5px;
+            gap: 8px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
         }
         .nav-item { 
             display: inline-flex; flex-direction: column; align-items: center; justify-content: center; 
-            min-width: 70px; padding: 5px; 
+            min-width: 72px; padding: 4px; 
             color: var(--text-secondary); 
-            font-size: 10px; font-weight: 600; 
+            font-size: 11px; 
+            font-weight: 600; 
             border-radius: 12px;
             transition: 0.2s;
+            position: relative;
         }
         .nav-item.active { color: var(--primary-color); }
-        .nav-icon { font-size: 24px; margin-bottom: 2px; }
+        .nav-icon { font-size: 26px; margin-bottom: 3px; position: relative; }
         .nav-item.active .nav-icon { font-weight: bold; }
+
+        .nav-badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+            border: 2px solid #fff;
+            display: none; 
+        }
 
         @media (max-width: 768px) { 
             .sidebar { display: none; } 
             .bottom-nav { display: flex; } 
-            .main { padding: 20px 16px; padding-bottom: 100px; } 
-            .modal { width: 100% !important; border-radius: 24px 24px 0 0 !important; bottom: 0 !important; top: auto !important; max-height: 90vh; }
+            .main { padding: 20px 16px; padding-bottom: 110px; } 
+            
+            .modal { 
+                width: 100% !important; 
+                border-radius: 24px 24px 0 0 !important; 
+                bottom: 0 !important; 
+                top: auto !important; 
+                max-height: 85vh; 
+                overflow-y: auto; /* ВКЛЮЧАЕМ СКРОЛЛ ДЛЯ МОДАЛОК */
+                display: flex;
+                flex-direction: column;
+            }
             .modal-overlay { align-items: flex-end; }
         }
 
@@ -186,51 +178,36 @@
         .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
         .title { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
         
-        .input-wrapper { position: relative; margin-bottom: 32px; box-shadow: var(--shadow-soft); border-radius: var(--radius-xl); background: #fff; transition: 0.2s; }
-        .input-wrapper:focus-within { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
-        .input-group { display: flex; gap: 0; background: transparent; padding: 6px; }
-        
         .btn-add { background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .btn-add:active { transform: scale(0.9); }
-        
         .btn-wizard { width: 100%; background: linear-gradient(135deg, #10B981, #059669); color: white; margin-bottom: 24px; font-size: 15px; font-weight: 700; height: 48px; border-radius: var(--radius-md); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
         /* --- TASKS --- */
         .task-list { display: flex; flex-direction: column; gap: 16px; }
         .task-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius-xl); border: 1px solid transparent; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: var(--shadow-soft); transition: all 0.2s ease; }
-        .task-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: rgba(249, 115, 22, 0.3); }
-
         .task-left { display: flex; gap: 16px; align-items: flex-start; flex: 1; }
         .task-check { width: 24px; height: 24px; border: 2px solid #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: transparent; margin-top: 2px; transition: 0.2s; }
         .task-check:hover { border-color: var(--primary-color); }
         .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
-
         .task-content { flex: 1; padding-right: 10px; }
         .task-title { font-weight: 600; font-size: 16px; line-height: 1.4; color: var(--text-main); margin-bottom: 8px; }
         .task-meta { display: flex; flex-wrap: wrap; gap: 8px; }
-        
         .tag { padding: 4px 10px; background: #F1F5F9; color: var(--text-secondary); border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .tag.quick { background: #FFF7ED; color: #EA580C; }
         .tag.date { background: #F0F9FF; color: #0284C7; }
         .tag.project { background: #F5F3FF; color: #7C3AED; }
-
-        /* Actions */
         .actions { display: flex; gap: 4px; }
         .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #94A3B8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
         .btn-action:hover { background: #F1F5F9; color: var(--text-main); }
         .btn-action.delete:hover { background: #FEF2F2; color: var(--danger); }
-
         .section-title { font-size: 12px; font-weight: 800; color: var(--text-secondary); margin-top: 30px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
 
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal { background: #fff; width: 450px; padding: 32px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.5); }
-        .modal-header { font-size: 20px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-        
+        .modal-header { font-size: 20px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .btn-primary { width: 100%; background: var(--primary-color); color: white; height: 48px; border-radius: 12px; border: none; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25); }
         .wizard-buttons { display: flex; gap: 12px; margin-top: 32px; }
         .wizard-btn { flex: 1; padding: 16px; border-radius: 16px; border: 2px solid #F1F5F9; background: #fff; font-weight: 700; font-size: 16px; cursor: pointer; }
-        .wizard-btn:hover { border-color: var(--primary-color); background: #FFF7ED; }
         .step-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; padding: 8px 12px; background: #F8FAFC; border-radius: 12px; }
 
         /* Стили для профиля */
@@ -243,15 +220,20 @@
 
     <div class="sidebar">
         <div class="logo"><i class="ph-fill ph-rocket-launch"></i> GTD Focus</div>
+        
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
+        
         <div class="spacer"></div>
+        
         <div class="menu-item" onclick="switchView('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span><span class="badge" id="badge-calendar">0</span></div>
         <div class="menu-item" onclick="switchView('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span><span class="badge" id="badge-waiting">0</span></div>
         <div class="menu-item" onclick="switchView('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span><span class="badge" id="badge-someday">0</span></div>
         <div class="menu-item" onclick="switchView('reference')"><span><i class="ph ph-archive-box"></i> Архив</span><span class="badge" id="badge-reference">0</span></div>
+        
         <div class="spacer"></div>
+        
         <div class="menu-item" onclick="switchView('done')"><span><i class="ph ph-check-circle"></i> Готово</span><span class="badge" id="badge-done">0</span></div>
         <div class="menu-item" onclick="switchView('trash')"><span><i class="ph ph-trash"></i> Корзина</span><span class="badge" id="badge-trash">0</span></div>
         
@@ -265,11 +247,57 @@
 
     <nav class="bottom-nav">
         <div style="width: 10px; flex-shrink: 0;"></div>
-        <div class="nav-item active" onclick="switchView('inbox')"><div class="nav-icon"><i class="ph ph-tray"></i></div>Inbox <span id="mob-badge-inbox"></span></div>
-        <div class="nav-item" onclick="switchView('today')"><div class="nav-icon"><i class="ph ph-fire"></i></div>Сегодня <span id="mob-badge-today"></span></div>
-        <div class="nav-item" onclick="switchView('projects')"><div class="nav-icon"><i class="ph ph-kanban"></i></div>Проекты</div>
-        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon"><i class="ph ph-calendar-blank"></i></div>Календ.</div>
-        <div class="nav-item" onclick="openSettings()"><div class="nav-icon"><i class="ph ph-gear"></i></div>Меню</div>
+        
+        <div class="nav-item active" onclick="switchView('inbox')">
+            <div class="nav-icon"><i class="ph ph-tray"></i><div class="nav-badge" id="mob-badge-inbox">0</div></div>
+            Inbox
+        </div>
+        
+        <div class="nav-item" onclick="switchView('today')">
+            <div class="nav-icon"><i class="ph ph-fire"></i><div class="nav-badge" id="mob-badge-today">0</div></div>
+            Сегодня
+        </div>
+        
+        <div class="nav-item" onclick="switchView('projects')">
+            <div class="nav-icon"><i class="ph ph-kanban"></i><div class="nav-badge" id="mob-badge-projects">0</div></div>
+            Проекты
+        </div>
+        
+        <div class="nav-item" onclick="switchView('calendar')">
+            <div class="nav-icon"><i class="ph ph-calendar-blank"></i><div class="nav-badge" id="mob-badge-calendar">0</div></div>
+            Календ.
+        </div>
+        
+        <div class="nav-item" onclick="switchView('waiting')">
+            <div class="nav-icon"><i class="ph ph-clock-user"></i><div class="nav-badge" id="mob-badge-waiting">0</div></div>
+            Поруч.
+        </div>
+
+        <div class="nav-item" onclick="switchView('someday')">
+            <div class="nav-icon"><i class="ph ph-lightbulb"></i><div class="nav-badge" id="mob-badge-someday">0</div></div>
+            Потом
+        </div>
+        
+        <div class="nav-item" onclick="switchView('reference')">
+            <div class="nav-icon"><i class="ph ph-archive-box"></i><div class="nav-badge" id="mob-badge-reference">0</div></div>
+            Архив
+        </div>
+
+        <div class="nav-item" onclick="switchView('done')">
+            <div class="nav-icon"><i class="ph ph-check-circle"></i><div class="nav-badge" id="mob-badge-done">0</div></div>
+            Готово
+        </div>
+
+        <div class="nav-item" onclick="switchView('trash')">
+            <div class="nav-icon"><i class="ph ph-trash"></i><div class="nav-badge" id="mob-badge-trash">0</div></div>
+            Корзина
+        </div>
+
+        <div class="nav-item" onclick="openSettings()">
+            <div class="nav-icon"><i class="ph ph-gear"></i></div>
+            Меню
+        </div>
+        
         <div style="width: 10px; flex-shrink: 0;"></div>
     </nav>
 
@@ -288,11 +316,11 @@
             <div class="spacer"></div>
 
             <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Нашли ошибку или есть идея? Напишите нам, мы читаем!" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
-            <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить разработчику</button>
+            <textarea id="feedback-text" placeholder="Нашли ошибку или есть идея? Напишите нам!" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
 
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v1.2 • Анонимно & Безопасно
+                FocusSystem v1.3 • Анонимно & Безопасно
             </div>
         </div>
     </div>
@@ -313,27 +341,30 @@
     <div id="project-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
-            <input type="hidden" id="proj-edit-id"> 
             
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
-            <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px;" placeholder="Например: Сделать ремонт">
-            
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
-            <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
-            
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <label style="font-size:11px; font-weight:800; color:var(--text-secondary);">ПЕРВЫЕ ШАГИ</label>
-                <button id="btn-ai-magic" onclick="askAIForSteps()" style="border:none; background: linear-gradient(135deg, #a855f7, #ec4899); color:white; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; display:none; box-shadow:0 2px 10px rgba(168, 85, 247, 0.3);">
-                    <i class="ph-bold ph-magic-wand"></i> Авто-план
-                </button>
-            </div>
+            <div style="overflow-y:auto; flex:1;"> <input type="hidden" id="proj-edit-id"> 
+                
+                <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
+                <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px;" placeholder="Например: Сделать ремонт">
+                
+                <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
+                <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary);">ПЕРВЫЕ ШАГИ</label>
+                    <button id="btn-ai-magic" onclick="askAIForSteps()" style="border:none; background: linear-gradient(135deg, #a855f7, #ec4899); color:white; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; display:none; box-shadow:0 2px 10px rgba(168, 85, 247, 0.3);">
+                        <i class="ph-bold ph-magic-wand"></i> Авто-план
+                    </button>
+                </div>
 
-            <div id="proj-steps-container" style="margin-bottom: 12px;"></div>
-            <div style="display:flex; gap:12px; margin-bottom:24px;">
-                <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1;">
-                <button class="btn-primary" style="width:50px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
+                <div id="proj-steps-container" style="margin-bottom: 12px;"></div>
+                <div style="display:flex; gap:12px; margin-bottom:24px;">
+                    <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1;">
+                    <button class="btn-primary" style="width:50px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
+                </div>
             </div>
-            <button class="btn-primary" onclick="saveProject()">Сохранить проект</button>
+            
+            <button class="btn-primary" onclick="saveProject()" style="margin-top:20px; flex-shrink:0;">Сохранить проект</button>
         </div>
     </div>
     
@@ -353,8 +384,7 @@
     <div id="move-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">Куда переместить?</div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
+            <div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"> <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button>
@@ -369,7 +399,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // 👇 ТВОЙ СЕРВЕР REPLIT (Мозг ИИ)
+        // 👇 ТВОЯ ССЫЛКА НА REPLIT
         const API_URL = 'https://636a13eb-9e28-4f04-a3b6-37318d504198-00-1eel6lm7asdp7.janeway.replit.dev'; 
 
         const firebaseConfig = {
@@ -388,12 +418,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Добавили premiumUntil в базу
         let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], premiumUntil: null };
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
 
-        // --- AUTH & INIT ---
         function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
             if (user) {
@@ -401,10 +429,7 @@
                 const name = user.first_name;
                 const logoEl = document.querySelector('.logo');
                 if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
-                
-                if (typeof ym !== 'undefined') {
-                    ym(106183159, 'userParams', { UserID: user.id, UserName: user.username, Name: user.first_name });
-                }
+                if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
             } else {
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
@@ -414,45 +439,33 @@
             const userRef = ref(dbRef, 'users/' + currentUserID);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    db = data; 
-                } else {
-                    saveDB(); 
-                }
+                if (data) db = data; else saveDB();
                 updateBadges();
                 renderCurrentView();
             });
         }
 
-        // --- DB FUNCTIONS (CLOUD) ---
         function saveDB() {
             set(ref(dbRef, 'users/' + currentUserID), db);
             updateBadges();
             renderCurrentView();
         }
 
-        // --- PREMIUM CHECKER (UPDATED: Check by Date) ---
         function checkPremiumLimits() {
-            // Если есть дата и она больше текущей
-            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
-                return true;
-            }
-            // Совместимость со старым Premium (на всякий случай)
+            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) return true;
             if (db.isPremium === true && !db.premiumUntil) return true;
-
             const activeProjects = (db.projects || []).filter(p => !p.completedAt).length;
             if (activeProjects >= 3) {
-                alert("💎 Лимит бесплатной версии!\n\nВы можете вести одновременно только 3 проекта.\n\nЧтобы создавать бесконечное количество проектов и получить доступ к ИИ-помощнику, оформите подписку в Настройках.");
+                alert("💎 Лимит бесплатной версии!\n\nТолько 3 проекта. Оформите подписку в Настройках.");
                 return false; 
             }
             return true;
         }
 
-        // --- NEW: SETTINGS & PROMO ---
+        // --- NEW SETTINGS LOGIC ---
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
-            
             if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
                 const date = new Date(db.premiumUntil).toLocaleDateString();
                 statusBox.className = 'premium-status active';
@@ -466,11 +479,8 @@
         window.activatePromo = async function() {
             const code = document.getElementById('promo-input').value.trim();
             if (!code) return;
-            
             const btn = document.querySelector('#settings-modal .btn-primary');
-            const oldText = btn.innerHTML;
             btn.innerHTML = 'Проверка...';
-            
             try {
                 const res = await fetch(`${API_URL}/api/promo`, {
                     method: 'POST',
@@ -478,130 +488,68 @@
                     body: JSON.stringify({ userId: currentUserID, code: code })
                 });
                 const data = await res.json();
-                
-                if (data.success) {
-                    alert('🎉 ' + data.message);
-                    closeModal('settings-modal');
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (e) { alert('Ошибка сети: ' + e.message); } 
-            
-            btn.innerHTML = oldText;
+                if (data.success) { alert('🎉 ' + data.message); closeModal('settings-modal'); } 
+                else { alert('❌ ' + data.message); }
+            } catch (e) { alert('Ошибка сети'); } 
+            btn.innerHTML = 'OK';
         }
 
         window.sendFeedback = async function() {
             const text = document.getElementById('feedback-text').value.trim();
             if(!text) return;
-            
             try {
                 await fetch(`${API_URL}/api/feedback`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' })
                 });
-                alert("Сообщение отправлено! Спасибо за ваш вклад.");
-                document.getElementById('feedback-text').value = '';
-                closeModal('settings-modal');
+                alert("Сообщение отправлено!"); document.getElementById('feedback-text').value = ''; closeModal('settings-modal');
             } catch(e) { alert("Ошибка отправки"); }
         }
 
-        // --- GLOBAL FUNCTIONS EXPORT ---
-        window.haptic = function(style = 'light') {
-            try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){}
-        }
-
-        window.formatDateRUS = function(isoDate) {
-            if(!isoDate) return '';
-            const parts = isoDate.split('-');
-            if(parts.length !== 3) return isoDate;
-            return `${parts[2]}.${parts[1]}.${parts[0]}`;
-        }
-
+        window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
+        window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
+        
         window.switchView = function(view) {
-            window.haptic('light');
-            currentView = view;
+            window.haptic('light'); currentView = view;
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
             for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navItems = document.querySelectorAll('.nav-item');
-            for(let item of navItems) {
-                if(item.getAttribute('onclick').includes(view)) { 
-                    item.classList.add('active'); 
-                    item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
-                    break; 
-                }
-            }
+            for(let item of navItems) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; } }
             renderCurrentView();
         }
 
         window.renderCurrentView = function() {
             const container = document.getElementById('app-view');
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
-
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
             if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
             html += `</div>`;
-
             if(!db[currentView]) db[currentView] = [];
-
             if (currentView === 'inbox') {
-                html += `
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()">
-                        <button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button>
-                    </div>
-                </div>`;
+                html += `<div class="input-wrapper"><div class="input-group"><input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()"><button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button></div></div>`;
                 if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph ph-lightning"></i> Разобрать Инбокс (${db.inbox.length})</button>`;
             }
-
             html += `<div class="task-list">`;
             const list = db[currentView] || [];
-            
-            if(list.length === 0) {
-                html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:15px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:40px; margin-bottom:10px; display:block;"></i>Задач нет</div>`;
-            } else {
+            if(list.length === 0) { html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:15px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:40px; margin-bottom:10px; display:block;"></i>Задач нет</div>`; } else {
                 if (currentView === 'done') {
                     const doneProjects = list.filter(i => i.isProject);
                     const doneTasks = list.filter(i => !i.isProject);
-                    if (doneProjects.length > 0) {
-                        html += `<div class="section-title">Проекты</div>`;
-                        doneProjects.forEach(item => { html += createCard(item, true, true); });
-                    }
-                    if (doneTasks.length > 0) {
-                         html += `<div class="section-title">Задачи</div>`;
-                         doneTasks.forEach(item => { html += createCard(item, true, false); });
-                    }
+                    if (doneProjects.length > 0) { html += `<div class="section-title">Проекты</div>`; doneProjects.forEach(item => { html += createCard(item, true, true); }); }
+                    if (doneTasks.length > 0) { html += `<div class="section-title">Задачи</div>`; doneTasks.forEach(item => { html += createCard(item, true, false); }); }
                 } else if (currentView === 'projects') {
                      list.forEach(item => {
                         if(!item.steps) item.steps = [];
                         const activeStep = item.steps.find(s => !s.completed);
                         const progress = item.steps.filter(s=>s.completed).length + '/' + item.steps.length;
-                        html += `
-                        <div class="task-card" style="display:block;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                                <div style="font-weight:700; font-size:17px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div>
-                                <div class="actions">
-                                    <button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button>
-                                    <button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>
-                                </div>
-                            </div>
-                            <div style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div>
-                            <div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span>
-                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">${progress}</span>
-                            </div>
-                        </div>`;
+                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:17px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:12px; font-weight:600; color:var(--text-secondary);">${progress}</span></div></div>`;
                       });
-                } else {
-                    list.forEach(item => { html += createCard(item, false, false); });
-                }
+                } else { list.forEach(item => { html += createCard(item, false, false); }); }
             }
-            html += `</div>`;
-            container.innerHTML = html;
-            updateBadges();
+            html += `</div>`; container.innerHTML = html; updateBadges();
         }
 
         window.createCard = function(item, isDoneView, isProjectCard) {
@@ -611,147 +559,30 @@
             if(item.timeStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-clock"></i> ${item.timeStr}</span>`;
             if(item.assignee) metaHtml += `<span class="tag project"><i class="ph-fill ph-user"></i> ${item.assignee}</span>`;
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
-
             let buttons = '';
             if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`;
-            
-            if(currentView === 'trash') {
-                buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`;
-            } else if (isDoneView) {
-                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`;
-            } else {
-                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`;
-            }
-
+            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; } else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
             const displayTitle = item.title || item.text;
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
-            
             let checkboxHtml = '';
-            if(['today','calendar','inbox'].includes(currentView)) {
-                checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`;
-            } else if (isDoneView) {
-                checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`;
-            }
-
-            return `
-            <div class="task-card">
-                <div class="task-left">
-                    ${checkboxHtml}
-                    <div class="task-content">
-                        <div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${displayTitle}</div>
-                        <div class="task-meta">${metaHtml}</div>
-                    </div>
-                </div>
-                <div class="actions">${buttons}</div>
-            </div>`;
+            if(['today','calendar','inbox'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
+            return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${displayTitle}</div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
-        // --- ACTIONS ---
-        window.addTask = function() {
-            window.haptic('light');
-            const val = document.getElementById('main-input').value.trim();
-            if(!val) return;
-            if(!db.inbox) db.inbox = [];
-            db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false });
-            document.getElementById('main-input').value = '';
-            saveDB();
-        }
-
-        window.moveToTrash = function(from, id) { 
-            window.haptic('medium'); 
-            const idx = db[from].findIndex(t => t.id === id); 
-            if(idx > -1) { 
-                const item = db[from].splice(idx, 1)[0]; 
-                item.originalFolder = from; 
-                if(!db.trash) db.trash = [];
-                db.trash.unshift(item); 
-                saveDB(); 
-            } 
-        }
+        window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; saveDB(); }
+        window.moveToTrash = function(from, id) { window.haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; if(!db.trash) db.trash = []; db.trash.unshift(item); saveDB(); } }
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
         window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
         window.emptyTrash = function() { window.haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; saveDB(); } }
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); saveDB(); } }
+        window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } saveDB(); }
 
-        window.completeTask = function(from, id) {
-            window.haptic('success');
-            id = Number(id);
-            const idx = db[from].findIndex(t => t.id === id); 
-            if(idx === -1) return; 
-            
-            const task = db[from][idx];
-
-            if (task.projectId) {
-                const project = db.projects.find(p => p.id === task.projectId);
-                if (project) {
-                    const step = project.steps.find(s => s.id === task.stepId);
-                    if(step) step.completed = true;
-                    
-                    const nextStep = project.steps.find(s => !s.completed);
-                    if(nextStep) {
-                        alert(`Отлично! Следующий шаг: "${nextStep.text}"`);
-                        db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false });
-                    } else {
-                        alert("🎉 Проект завершен!");
-                        db.projects = db.projects.filter(p => p.id !== project.id);
-                        project.isProject = true; project.completedAt = new Date().toLocaleString();
-                        if(!db.done) db.done = [];
-                        db.done.unshift(project);
-                    }
-                }
-                db[from].splice(idx, 1);
-            } else {
-                const item = db[from].splice(idx, 1)[0];
-                item.completedAt = new Date().toLocaleString();
-                if(!db.done) db.done = [];
-                db.done.unshift(item);
-            }
-            saveDB();
-        }
-
-        // --- WIZARD LOGIC ---
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
-        const questions = [
-            { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" },
-            { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" },
-            { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" },
-            { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" },
-            { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" },
-            { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" }
-        ];
-
-        window.startWizard = function() { 
-            if(db.inbox.length===0) return; 
-            window.haptic('light'); wizardTask=db.inbox[0]; wizardStep=0; 
-            document.getElementById('wizard-modal').style.display='flex'; renderWizard(); 
-        }
-        window.renderWizard = function() {
-            const q = questions[wizardStep];
-            document.getElementById('wizard-task-text').innerText = wizardTask.text;
-            document.getElementById('wizard-question-text').innerText = q.text;
-            document.getElementById('btn-no').innerText = q.noTxt;
-            document.getElementById('btn-yes').innerText = q.yesTxt;
-        }
-        window.handleWizardAnswer = function(yes) {
-            window.haptic('light');
-            const q = questions[wizardStep];
-            if(!yes) {
-                if(q.no==='reference') return moveTo('reference');
-                if(q.no==='someday') return moveTo('someday');
-                if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; }
-                if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; }
-            } else {
-                if(q.yes==='DO_NOW') { 
-                    moveTo('today', { isQuick: true }); 
-                    alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!");
-                    return; 
-                }
-                if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; }
-            }
-            wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard();
-        }
+        const questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
+        window.startWizard = function() { if(db.inbox.length===0) return; window.haptic('light'); wizardTask=db.inbox[0]; wizardStep=0; document.getElementById('wizard-modal').style.display='flex'; renderWizard(); }
+        window.renderWizard = function() { const q = questions[wizardStep]; document.getElementById('wizard-task-text').innerText = wizardTask.text; document.getElementById('wizard-question-text').innerText = q.text; document.getElementById('btn-no').innerText = q.noTxt; document.getElementById('btn-yes').innerText = q.yesTxt; }
+        window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
         window.moveTo = function(f, e={}) { db.inbox.shift(); if(!db[f]) db[f]=[]; db[f].unshift({...wizardTask, ...e, id:Date.now()}); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
-
         window.closeModal = function(id) { document.getElementById(id).style.display='none'; }
         window.openInput = function(t, cb) { document.getElementById('input-modal').style.display='flex'; document.getElementById('input-modal-title').innerText=t; inputCallback=cb; }
         window.submitInputModal = function() { const v=document.getElementById('input-modal-field').value; if(v&&inputCallback) inputCallback(v); closeModal('input-modal'); }
@@ -760,107 +591,70 @@
         window.openMoveModal = function(id) { moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
         window.submitMove = function(f) { if(!moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); saveDB(); } closeModal('move-modal'); }
 
-        // --- PROJECTS AND LIMITS ---
         let tempSteps=[];
-        
-        // НОВАЯ ФУНКЦИЯ ОТКРЫТИЯ ПРОЕКТА
         window.openProjectModal = function(eid=null, src=null) {
             closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[];
-            
-            // Управление видимостью кнопки AI
             const aiBtn = document.getElementById('btn-ai-magic');
-            if(aiBtn) {
-                // Если нет премиума по дате, скрываем кнопку
-                aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none';
-            }
-
+            if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none';
             if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); }
             else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; }
             renderSteps();
         }
-
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
         window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:15px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
         window.updateStep = function(i,v) { tempSteps[i].text=v };
 
-        // --- AI LOGIC ---
         window.askAIForSteps = async function() {
             const title = document.getElementById('proj-name').value;
             if(!title) return alert("Сначала напишите название проекта!");
-
             const btn = document.getElementById('btn-ai-magic');
             const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...';
-            btn.disabled = true;
-
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
             try {
-                const response = await fetch(`${API_URL}/api/ask-ai`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: `Я создаю проект: "${title}". Распиши мне 3-5 конкретных первых шагов для выполнения этого проекта. Ответь только списком шагов, без лишних слов.` 
-                    })
-                });
-
+                // ПРИМЕЧАНИЕ: Текст запроса уже улучшен на сервере, здесь просто шлем задачу
+                const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".` }) });
                 const data = await response.json();
-                
                 if(data.reply) {
                     const lines = data.reply.split('\n').filter(line => line.trim().length > 0);
-                    lines.forEach(line => {
-                        const cleanText = line.replace(/^[\d\.\-\s]+/, '');
-                        tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false});
-                    });
-                    renderSteps();
-                    window.haptic('success');
+                    lines.forEach(line => { const cleanText = line.replace(/^[\d\.\-\s]+/, ''); tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false}); });
+                    renderSteps(); window.haptic('success');
                 }
-            } catch (e) {
-                alert("Ошибка ИИ: " + e.message);
-            } finally {
-                btn.innerHTML = oldText;
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
         }
         
         window.saveProject = function() {
-            window.haptic('success');
-            const eid=document.getElementById('proj-edit-id').value; 
-            
-            if (!eid) {
-                if (!checkPremiumLimits()) return;
-            }
-
-            const t=document.getElementById('proj-name').value; 
-            const g=document.getElementById('proj-goal').value;
-            
+            window.haptic('success'); const eid=document.getElementById('proj-edit-id').value; 
+            if (!eid) { if (!checkPremiumLimits()) return; }
+            const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value;
             if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!");
-            
             if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
-            else { 
-                const nid=Date.now(); 
-                if(!db.projects) db.projects = [];
-                db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); 
-                if(wizardTask) {
-                     if(!db.inbox) db.inbox = [];
-                     db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); 
-                }
-                if(!db.today) db.today = [];
-                db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); 
-            }
-            saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
+            else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); 
+                if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); }
+                if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); 
+            } saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
         }
         window.editProject = function(id) { openProjectModal(id); }
-
+        
+        // --- ОБНОВЛЕННАЯ ФУНКЦИЯ БЕЙДЖЕЙ (Для всех иконок) ---
         window.updateBadges = function() { 
-            for(let k in db) { 
-                const el=document.getElementById('badge-'+k); if(el) el.innerText=db[k] ? db[k].length : 0; 
-                const mel=document.getElementById('mob-badge-'+k); if(mel) mel.innerText=(db[k] && db[k].length>0) ? `(${db[k].length})`:'';
-            } 
+            const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash'];
+            views.forEach(view => {
+                // Desktop Sidebar
+                const el = document.getElementById('badge-' + view); 
+                if(el) el.innerText = db[view] ? db[view].length : 0;
+                
+                // Mobile Nav (Red Dot)
+                const mobEl = document.getElementById('mob-badge-' + view);
+                if(mobEl) {
+                    const count = db[view] ? db[view].length : 0;
+                    mobEl.innerText = count;
+                    mobEl.style.display = count > 0 ? 'flex' : 'none';
+                }
+            });
         }
-
-        // START
-        initUserInfo();
-        switchView('inbox');
+        
+        initUserInfo(); switchView('inbox');
     </script>
 </body>
 </html>
