@@ -460,14 +460,36 @@
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-        window.switchView = function(view) {
-            window.haptic('light'); currentView = view;
+       window.switchView = function(view) {
+            window.haptic('light'); 
+            currentView = view;
+
+            // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
+            // Сообщаем Яндексу, что пользователь перешел в новую "папку"
+            if (typeof ym !== 'undefined') {
+                ym(106183159, 'hit', '#' + view, { title: view });
+            }
+            // --- КОНЕЦ: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
+
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
-            for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
+            for(let item of items) { 
+                if(item.getAttribute('onclick').includes(view)) { 
+                    item.classList.add('active'); 
+                    break; 
+                } 
+            }
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navItems = document.querySelectorAll('.nav-item');
-            for(let item of navItems) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; } }
+            for(let item of navItems) { 
+                if(item.getAttribute('onclick').includes(view)) { 
+                    item.classList.add('active'); 
+                    item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
+                    break; 
+                } 
+            }
+            
             renderCurrentView();
         }
 
@@ -706,3 +728,4 @@
     </script>
 </body>
 </html>
+
