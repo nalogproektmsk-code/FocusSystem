@@ -81,7 +81,10 @@
         input::placeholder { color: #94A3B8; }
         
         .input-wrapper { background: #fff; border: 1px solid transparent; }
-        .input-group input { border: none; box-shadow: none; background: transparent; }
+        
+        /* 🔥 FIX INBOX LAYOUT: Кнопка всегда справа */
+        .input-group { display: flex; gap: 8px; background: transparent; padding: 6px; align-items: center; width: 100%; box-sizing: border-box; }
+        .input-group input { border: none; box-shadow: none; background: transparent; flex: 1; min-width: 0; }
         
         /* --- SIDEBAR --- */
         .sidebar { 
@@ -92,7 +95,7 @@
             flex-direction: column; 
             padding: 32px 20px; 
             flex-shrink: 0; 
-            overflow-y: auto; /* 🔥 ВКЛЮЧИЛИ СКРОЛЛ, ЧТОБЫ "АРХИВ" НЕ ОБРЕЗАЛСЯ */
+            overflow-y: auto; 
         }
         
         .logo { font-size: 20px; font-weight: 800; margin-bottom: 40px; color: var(--text-main); padding-left: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; flex-shrink: 0; }
@@ -106,7 +109,7 @@
         .menu-item.active .badge { background: #FED7AA; color: #9A3412; }
         .spacer { height: 1px; background: var(--border-color); margin: 20px 0; flex-shrink: 0; }
         
-        /* --- MOBILE NAV (УЛУЧШЕННАЯ) --- */
+        /* --- MOBILE NAV --- */
         .bottom-nav { 
             display: none; 
             position: fixed; bottom: 0; left: 0; right: 0; 
@@ -166,7 +169,7 @@
                 bottom: 0 !important; 
                 top: auto !important; 
                 max-height: 85vh; 
-                overflow-y: auto; /* ВКЛЮЧАЕМ СКРОЛЛ ДЛЯ МОДАЛОК */
+                overflow-y: auto;
                 display: flex;
                 flex-direction: column;
             }
@@ -178,7 +181,8 @@
         .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
         .title { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
         
-        .btn-add { background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-add { background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .btn-add:active { transform: scale(0.9); }
         .btn-wizard { width: 100%; background: linear-gradient(135deg, #10B981, #059669); color: white; margin-bottom: 24px; font-size: 15px; font-weight: 700; height: 48px; border-radius: var(--radius-md); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
         /* --- TASKS --- */
@@ -320,7 +324,7 @@
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
 
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v1.3 • Анонимно & Безопасно
+                FocusSystem v1.5 • Maximum Efficiency
             </div>
         </div>
     </div>
@@ -384,7 +388,8 @@
     <div id="move-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">Куда переместить?</div>
-            <div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"> <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
+            <div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"> 
+                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button>
@@ -559,22 +564,45 @@
             if(item.timeStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-clock"></i> ${item.timeStr}</span>`;
             if(item.assignee) metaHtml += `<span class="tag project"><i class="ph-fill ph-user"></i> ${item.assignee}</span>`;
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
+            
             let buttons = '';
-            if(!['trash','done'].includes(currentView)) buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`;
-            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; } else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
+            // Кнопка ПЕРЕМЕСТИТЬ (везде, кроме Корзины и Готово)
+            if(!['trash','done'].includes(currentView)) {
+                buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`;
+            }
+            
+            if(currentView === 'trash') { 
+                buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
+            } else if (isDoneView) { 
+                // Кнопка ВЕРНУТЬ + Кнопка УДАЛИТЬ (для Готово)
+                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; 
+                buttons += `<button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-trash"></i></button>`;
+            } else { 
+                // Кнопка УДАЛИТЬ (обычная, в корзину)
+                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; 
+            }
+
             const displayTitle = item.title || item.text;
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
+            
             let checkboxHtml = '';
-            if(['today','calendar','inbox'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
+            // 🔥 ВКЛЮЧАЕМ ГАЛОЧКУ ДЛЯ: Сегодня, Календарь, Inbox, Waiting, Someday
+            if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { 
+                checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; 
+            } else if (isDoneView) { 
+                checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; 
+            }
+            
             return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${displayTitle}</div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
         window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; saveDB(); }
         window.moveToTrash = function(from, id) { window.haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; if(!db.trash) db.trash = []; db.trash.unshift(item); saveDB(); } }
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
-        window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
+        window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); if(db.done) db.done = db.done.filter(t => t.id !== id); saveDB(); } }
         window.emptyTrash = function() { window.haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; saveDB(); } }
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); saveDB(); } }
+        
         window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } saveDB(); }
 
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
@@ -612,7 +640,6 @@
             const oldText = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
             try {
-                // ПРИМЕЧАНИЕ: Текст запроса уже улучшен на сервере, здесь просто шлем задачу
                 const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".` }) });
                 const data = await response.json();
                 if(data.reply) {
@@ -636,15 +663,11 @@
         }
         window.editProject = function(id) { openProjectModal(id); }
         
-        // --- ОБНОВЛЕННАЯ ФУНКЦИЯ БЕЙДЖЕЙ (Для всех иконок) ---
         window.updateBadges = function() { 
             const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash'];
             views.forEach(view => {
-                // Desktop Sidebar
                 const el = document.getElementById('badge-' + view); 
                 if(el) el.innerText = db[view] ? db[view].length : 0;
-                
-                // Mobile Nav (Red Dot)
                 const mobEl = document.getElementById('mob-badge-' + view);
                 if(mobEl) {
                     const count = db[view] ? db[view].length : 0;
