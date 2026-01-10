@@ -295,6 +295,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // 👇 ДОБАВИЛИ БИБЛИОТЕКУ АВТОРИЗАЦИИ
+        import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // 👇 ТВОЯ ССЫЛКА НА REPLIT
         const API_URL = 'https://636a13eb-9e28-4f04-a3b6-37318d504198-00-1eel6lm7asdp7.janeway.replit.dev'; 
@@ -312,6 +314,7 @@
 
         const app = initializeApp(firebaseConfig);
         const dbRef = getDatabase(app);
+        const auth = getAuth(app); // Инициализация Auth
         const tg = window.Telegram.WebApp;
         tg.expand();
         
@@ -339,31 +342,62 @@
             }, 2000);
         }
 
-        function initUserInfo() {
+        // 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ ВХОДА (С ЗАЩИТОЙ)
+        async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
+            
             if (user) {
                 currentUserID = String(user.id);
                 const name = user.first_name;
                 const logoEl = document.querySelector('.logo');
                 if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
+
+                // 1. ЗАПРОС ТОКЕНА У СЕРВЕРА
+                try {
+                    const response = await fetch(`${API_URL}/api/auth`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ initData: tg.initData })
+                    });
+                    
+                    if (!response.ok) throw new Error("Auth Failed");
+                    const { token } = await response.json();
+                    
+                    // 2. ВХОД В FIREBASE
+                    await signInWithCustomToken(auth, token);
+                    console.log("✅ Успешная авторизация в базе!");
+
+                } catch (e) {
+                    console.error("Auth Error:", e);
+                    // Если авторизация не прошла, база данных не отдаст данные (после включения правил)
+                }
             } else {
+                // Гость (база будет недоступна на запись)
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
             
+            // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ
             const userRef = ref(dbRef, 'users/' + currentUserID);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) db = data; else saveDB();
                 updateBadges();
                 renderCurrentView();
+            }, (error) => {
+                // Если сработали правила защиты и нас не пустили
+                if (error.code === 'PERMISSION_DENIED') {
+                    console.error("Доступ к базе запрещен.");
+                }
             });
         }
 
         function saveDB() {
-            set(ref(dbRef, 'users/' + currentUserID), db);
+            set(ref(dbRef, 'users/' + currentUserID), db).catch(e => {
+                console.error("Save Error:", e);
+            });
             updateBadges();
             renderCurrentView();
         }
@@ -601,22 +635,22 @@
             btn.disabled = true;
 
             try {
-                // Sending initData for security validation
+                // 👇 ГЛАВНОЕ: Отправляем initData
                 const response = await fetch(`${API_URL}/api/ask-ai`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         message: `Я создаю проект: "${title}".`,
-                        initData: tg.initData // <--- CRITICAL ADDITION
+                        initData: tg.initData 
                     })
                 });
 
                 if (response.status === 402) {
-                    alert("⛔️ Ошибка доступа: Ваша подписка истекла или не найдена. Проверьте Настройки.");
+                    alert("⛔️ Подписка не активна. Проверьте Настройки.");
                     return;
                 }
                 if (response.status === 403) {
-                    alert("⛔️ Ошибка безопасности: Запрос отклонен сервером.");
+                    alert("⛔️ Ошибка доступа. Запрос отклонен.");
                     return;
                 }
 
@@ -633,7 +667,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                alert("Ошибка ИИ: " + e.message);
+                alert("Ошибка ИИ");
             } finally {
                 btn.innerHTML = oldText;
                 btn.disabled = false;
