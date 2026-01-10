@@ -332,7 +332,6 @@
             const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
             document.getElementById('splash-quote').innerText = `"${q.t}"`;
             document.getElementById('splash-author').innerText = `— ${q.a}`;
-            // Скрываем через 2 секунды
             setTimeout(() => {
                 const s = document.getElementById('splash-screen');
                 s.style.opacity = '0';
@@ -443,7 +442,6 @@
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
             
-            // Кнопка очистки для DONE
             if (currentView === 'done' && (db.done && db.done.length > 0)) {
                 html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
             }
@@ -472,7 +470,6 @@
                       });
                 } else { 
                     list.forEach((item, index) => { 
-                        // Добавляем нумерацию только для Inbox
                         let prefix = '';
                         if(currentView === 'inbox') prefix = `<span class="task-num">${index+1}.</span>`;
                         html += createCard(item, false, false, prefix); 
@@ -499,7 +496,6 @@
                 buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
             } else if (isDoneView) { 
                 buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; 
-                // Кнопка удаления в корзину для DONE
                 buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`;
             } else { 
                 buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; 
@@ -509,14 +505,12 @@
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
             
             let checkboxHtml = '';
-            // ГАЛОЧКА ТЕПЕРЬ ЕСТЬ ПОЧТИ ВЕЗДЕ (Кроме reference, projects, trash)
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { 
                 checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; 
             } else if (isDoneView) { 
                 checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; 
             }
             
-            // Вставляем префикс (номер) перед заголовком
             return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">
             ${prefixHtml} ${displayTitle}
             </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
@@ -539,7 +533,6 @@
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
         window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
         
-        // НОВАЯ ФУНКЦИЯ ОЧИСТКИ DONE (В корзину)
         window.emptyDone = function() {
             if(confirm("Переместить все выполненные в корзину?")) {
                 if(!db.trash) db.trash = [];
@@ -556,11 +549,10 @@
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
         const questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
         
-        // --- WIZARD FIX (FIFO - Берем последнюю, то есть старую задачу) ---
         window.startWizard = function() { 
             if(db.inbox.length===0) return; 
             window.haptic('light'); 
-            wizardTask=db.inbox[db.inbox.length - 1]; // БЕРЕМ СТАРУЮ
+            wizardTask=db.inbox[db.inbox.length - 1]; 
             wizardStep=0; 
             document.getElementById('wizard-modal').style.display='flex'; renderWizard(); 
         }
@@ -569,7 +561,6 @@
         window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
         
         window.moveTo = function(f, e={}) { 
-            // Удаляем именно ту задачу, которую разбирали (по ID), а не просто первую
             db.inbox = db.inbox.filter(t => t.id !== wizardTask.id);
             if(!db[f]) db[f]=[]; 
             db[f].unshift({...wizardTask, ...e, id:Date.now()}); 
@@ -603,18 +594,50 @@
         window.askAIForSteps = async function() {
             const title = document.getElementById('proj-name').value;
             if(!title) return alert("Сначала напишите название проекта!");
+
             const btn = document.getElementById('btn-ai-magic');
             const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...';
+            btn.disabled = true;
+
             try {
-                const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".` }) });
+                // Sending initData for security validation
+                const response = await fetch(`${API_URL}/api/ask-ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: `Я создаю проект: "${title}".`,
+                        initData: tg.initData // <--- CRITICAL ADDITION
+                    })
+                });
+
+                if (response.status === 402) {
+                    alert("⛔️ Ошибка доступа: Ваша подписка истекла или не найдена. Проверьте Настройки.");
+                    return;
+                }
+                if (response.status === 403) {
+                    alert("⛔️ Ошибка безопасности: Запрос отклонен сервером.");
+                    return;
+                }
+
                 const data = await response.json();
+                
                 if(data.reply) {
                     const lines = data.reply.split('\n').filter(line => line.trim().length > 0);
-                    lines.forEach(line => { const cleanText = line.replace(/^[\d\.\-\s]+/, ''); tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false}); });
-                    renderSteps(); window.haptic('success');
+                    lines.forEach(line => {
+                        const cleanText = line.replace(/^[\d\.\-\s]+/, '');
+                        tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false});
+                    });
+                    renderSteps();
+                    window.haptic('success');
                 }
-            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
+            } catch (e) {
+                console.error(e);
+                alert("Ошибка ИИ: " + e.message);
+            } finally {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
         }
         
         window.saveProject = function() {
@@ -624,7 +647,7 @@
             if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!");
             if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
             else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); 
-                if(wizardTask) { db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); }
+                if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); }
                 if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); 
             } saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
         }
@@ -644,7 +667,6 @@
             });
         }
         
-        // START SPLASH
         initSplash();
         initUserInfo(); switchView('inbox');
     </script>
