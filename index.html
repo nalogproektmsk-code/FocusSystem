@@ -42,6 +42,8 @@
             --text-main: #1E293B; 
             --text-secondary: #64748B; 
             --border-color: #E2E8F0;
+            --input-bg: #FFFFFF; 
+            --input-border: #CBD5E1; 
             --shadow-soft: 0 4px 20px rgba(148, 163, 184, 0.1);
             --shadow-hover: 0 10px 25px rgba(148, 163, 184, 0.15);
             --radius-xl: 20px;
@@ -64,6 +66,29 @@
             font-size: 15px; 
             line-height: 1.5;
         }
+
+        /* УЛУЧШЕННЫЕ ПОЛЯ ВВОДА */
+        input, textarea, select { 
+            flex: 1; 
+            padding: 14px 16px; 
+            border: 1px solid var(--input-border); 
+            border-radius: var(--radius-md);
+            font-size: 16px; 
+            font-family: 'Inter', sans-serif; 
+            outline: none; 
+            background: var(--input-bg); 
+            color: var(--text-main); 
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        input:focus, textarea:focus { 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+        input::placeholder { color: #94A3B8; }
+        
+        .input-wrapper { background: #fff; border: 1px solid transparent; }
+        .input-group input { border: none; box-shadow: none; background: transparent; }
         
         /* --- SIDEBAR --- */
         .sidebar { 
@@ -165,9 +190,6 @@
         .input-wrapper:focus-within { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
         .input-group { display: flex; gap: 0; background: transparent; padding: 6px; }
         
-        input, textarea { flex: 1; padding: 16px 20px; border: none; font-size: 16px; font-family: 'Inter', sans-serif; outline: none; background: transparent; color: var(--text-main); }
-        input::placeholder { color: #94A3B8; }
-        
         .btn-add { background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn-add:active { transform: scale(0.9); }
         
@@ -210,6 +232,11 @@
         .wizard-btn { flex: 1; padding: 16px; border-radius: 16px; border: 2px solid #F1F5F9; background: #fff; font-weight: 700; font-size: 16px; cursor: pointer; }
         .wizard-btn:hover { border-color: var(--primary-color); background: #FFF7ED; }
         .step-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; padding: 8px 12px; background: #F8FAFC; border-radius: 12px; }
+
+        /* Стили для профиля */
+        .premium-status { padding: 12px; border-radius: 12px; margin-bottom: 20px; background: #F1F5F9; font-size: 14px; }
+        .premium-status.active { background: #ECFDF5; color: #065F46; border: 1px solid #10B981; }
+        .premium-status.expired { background: #FEF2F2; color: #991B1B; }
     </style>
 </head>
 <body>
@@ -217,16 +244,21 @@
     <div class="sidebar">
         <div class="logo"><i class="ph-fill ph-rocket-launch"></i> GTD Focus</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
-        <div class="spacer"></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
-        <div class="menu-item" onclick="switchView('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span><span class="badge" id="badge-calendar">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
+        <div class="spacer"></div>
+        <div class="menu-item" onclick="switchView('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span><span class="badge" id="badge-calendar">0</span></div>
         <div class="menu-item" onclick="switchView('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span><span class="badge" id="badge-waiting">0</span></div>
         <div class="menu-item" onclick="switchView('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span><span class="badge" id="badge-someday">0</span></div>
         <div class="menu-item" onclick="switchView('reference')"><span><i class="ph ph-archive-box"></i> Архив</span><span class="badge" id="badge-reference">0</span></div>
         <div class="spacer"></div>
         <div class="menu-item" onclick="switchView('done')"><span><i class="ph ph-check-circle"></i> Готово</span><span class="badge" id="badge-done">0</span></div>
         <div class="menu-item" onclick="switchView('trash')"><span><i class="ph ph-trash"></i> Корзина</span><span class="badge" id="badge-trash">0</span></div>
+        
+        <div class="spacer"></div>
+        <div class="menu-item" onclick="openSettings()">
+            <span style="color:var(--text-main)"><i class="ph ph-gear"></i> Настройки</span>
+        </div>
     </div>
 
     <div class="main"><div id="app-view"></div></div>
@@ -235,15 +267,35 @@
         <div style="width: 10px; flex-shrink: 0;"></div>
         <div class="nav-item active" onclick="switchView('inbox')"><div class="nav-icon"><i class="ph ph-tray"></i></div>Inbox <span id="mob-badge-inbox"></span></div>
         <div class="nav-item" onclick="switchView('today')"><div class="nav-icon"><i class="ph ph-fire"></i></div>Сегодня <span id="mob-badge-today"></span></div>
-        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon"><i class="ph ph-calendar-blank"></i></div>Календ.</div>
         <div class="nav-item" onclick="switchView('projects')"><div class="nav-icon"><i class="ph ph-kanban"></i></div>Проекты</div>
-        <div class="nav-item" onclick="switchView('waiting')"><div class="nav-icon"><i class="ph ph-clock-user"></i></div>Поруч.</div>
-        <div class="nav-item" onclick="switchView('someday')"><div class="nav-icon"><i class="ph ph-lightbulb"></i></div>Потом</div>
-        <div class="nav-item" onclick="switchView('reference')"><div class="nav-icon"><i class="ph ph-archive-box"></i></div>Архив</div>
-        <div class="nav-item" onclick="switchView('done')"><div class="nav-icon"><i class="ph ph-check-circle"></i></div>Готово</div>
-        <div class="nav-item" onclick="switchView('trash')"><div class="nav-icon"><i class="ph ph-trash"></i></div>Корзина</div>
+        <div class="nav-item" onclick="switchView('calendar')"><div class="nav-icon"><i class="ph ph-calendar-blank"></i></div>Календ.</div>
+        <div class="nav-item" onclick="openSettings()"><div class="nav-icon"><i class="ph ph-gear"></i></div>Меню</div>
         <div style="width: 10px; flex-shrink: 0;"></div>
     </nav>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">⚙️ Настройки<i class="ph ph-x close-btn" onclick="closeModal('settings-modal')" style="cursor:pointer"></i></div>
+            
+            <div id="premium-status-box" class="premium-status">Загрузка...</div>
+
+            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
+            <div style="display:flex; gap:8px; margin-bottom:24px;">
+                <input type="text" id="promo-input" placeholder="Введите код" style="text-transform:uppercase;">
+                <button class="btn-primary" style="width:auto; padding:0 20px;" onclick="activatePromo()">OK</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
+            <textarea id="feedback-text" placeholder="Нашли ошибку или есть идея? Напишите нам, мы читаем!" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить разработчику</button>
+
+            <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
+                FocusSystem v1.2 • Анонимно & Безопасно
+            </div>
+        </div>
+    </div>
 
     <div id="wizard-modal" class="modal-overlay">
         <div class="modal">
@@ -262,22 +314,42 @@
         <div class="modal">
             <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
             <input type="hidden" id="proj-edit-id"> 
+            
             <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
-            <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px; background:#F8FAFC; border-radius:12px;" placeholder="Например: Сделать ремонт">
+            <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px;" placeholder="Например: Сделать ремонт">
+            
             <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
-            <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px; background:#F8FAFC; border-radius:12px;">
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПЕРВЫЕ ШАГИ</label>
+            <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:800; color:var(--text-secondary);">ПЕРВЫЕ ШАГИ</label>
+                <button id="btn-ai-magic" onclick="askAIForSteps()" style="border:none; background: linear-gradient(135deg, #a855f7, #ec4899); color:white; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; display:none; box-shadow:0 2px 10px rgba(168, 85, 247, 0.3);">
+                    <i class="ph-bold ph-magic-wand"></i> Авто-план
+                </button>
+            </div>
+
             <div id="proj-steps-container" style="margin-bottom: 12px;"></div>
             <div style="display:flex; gap:12px; margin-bottom:24px;">
-                <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1; background:#F8FAFC; border-radius:12px;">
+                <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1;">
                 <button class="btn-primary" style="width:50px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
             </div>
             <button class="btn-primary" onclick="saveProject()">Сохранить проект</button>
         </div>
     </div>
     
-    <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px; background:#F8FAFC; border-radius:12px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
-    <div id="date-modal" class="modal-overlay"><div class="modal"><div class="modal-header">📅 Выберите время</div><input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px; background:#F8FAFC; border-radius:12px;"><input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px; background:#F8FAFC; border-radius:12px;"><button class="btn-primary" onclick="submitDateModal()">Сохранить</button></div></div>
+    <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
+    
+    <div id="date-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">📅 Выберите время</div>
+            <label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ДАТА</label>
+            <input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ВРЕМЯ</label>
+            <input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
+            <button class="btn-primary" onclick="submitDateModal()">Сохранить</button>
+        </div>
+    </div>
+
     <div id="move-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">Куда переместить?</div>
@@ -297,6 +369,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // 👇 ТВОЙ СЕРВЕР REPLIT (Мозг ИИ)
+        const API_URL = 'https://636a13eb-9e28-4f04-a3b6-37318d504198-00-1eel6lm7asdp7.janeway.replit.dev'; 
+
         const firebaseConfig = {
             apiKey: "AIzaSyALuLfaVgYjc3rHXJz9g8TMJpO9Lzryfj4",
             authDomain: "gtd-focus-app.firebaseapp.com",
@@ -310,12 +385,11 @@
 
         const app = initializeApp(firebaseConfig);
         const dbRef = getDatabase(app);
-
-        // --- CORE APP VARIABLES ---
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], isPremium: false };
+        // Добавили premiumUntil в базу
+        let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], premiumUntil: null };
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
 
@@ -357,15 +431,79 @@
             renderCurrentView();
         }
 
-        // --- PREMIUM CHECKER ---
+        // --- PREMIUM CHECKER (UPDATED: Check by Date) ---
         function checkPremiumLimits() {
-            if (db.isPremium) return true;
+            // Если есть дата и она больше текущей
+            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
+                return true;
+            }
+            // Совместимость со старым Premium (на всякий случай)
+            if (db.isPremium === true && !db.premiumUntil) return true;
+
             const activeProjects = (db.projects || []).filter(p => !p.completedAt).length;
             if (activeProjects >= 3) {
-                alert("💎 Лимит бесплатной версии!\n\nВы можете вести одновременно только 3 проекта.\n\nЧтобы создавать бесконечное количество проектов и получить доступ к ИИ-помощнику, оформите Premium.");
+                alert("💎 Лимит бесплатной версии!\n\nВы можете вести одновременно только 3 проекта.\n\nЧтобы создавать бесконечное количество проектов и получить доступ к ИИ-помощнику, оформите подписку в Настройках.");
                 return false; 
             }
             return true;
+        }
+
+        // --- NEW: SETTINGS & PROMO ---
+        window.openSettings = function() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            const statusBox = document.getElementById('premium-status-box');
+            
+            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
+                const date = new Date(db.premiumUntil).toLocaleDateString();
+                statusBox.className = 'premium-status active';
+                statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
+            } else {
+                statusBox.className = 'premium-status expired';
+                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><a href="#" onclick="tg.close();" style="color:#991B1B">Купить в боте</a>`;
+            }
+        }
+
+        window.activatePromo = async function() {
+            const code = document.getElementById('promo-input').value.trim();
+            if (!code) return;
+            
+            const btn = document.querySelector('#settings-modal .btn-primary');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = 'Проверка...';
+            
+            try {
+                const res = await fetch(`${API_URL}/api/promo`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ userId: currentUserID, code: code })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('🎉 ' + data.message);
+                    closeModal('settings-modal');
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (e) { alert('Ошибка сети: ' + e.message); } 
+            
+            btn.innerHTML = oldText;
+        }
+
+        window.sendFeedback = async function() {
+            const text = document.getElementById('feedback-text').value.trim();
+            if(!text) return;
+            
+            try {
+                await fetch(`${API_URL}/api/feedback`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' })
+                });
+                alert("Сообщение отправлено! Спасибо за ваш вклад.");
+                document.getElementById('feedback-text').value = '';
+                closeModal('settings-modal');
+            } catch(e) { alert("Ошибка отправки"); }
         }
 
         // --- GLOBAL FUNCTIONS EXPORT ---
@@ -624,22 +762,70 @@
 
         // --- PROJECTS AND LIMITS ---
         let tempSteps=[];
+        
+        // НОВАЯ ФУНКЦИЯ ОТКРЫТИЯ ПРОЕКТА
         window.openProjectModal = function(eid=null, src=null) {
             closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[];
+            
+            // Управление видимостью кнопки AI
+            const aiBtn = document.getElementById('btn-ai-magic');
+            if(aiBtn) {
+                // Если нет премиума по дате, скрываем кнопку
+                aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none';
+            }
+
             if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); }
-            else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src.text; document.getElementById('proj-goal').value=""; }
+            else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; }
             renderSteps();
         }
+
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
         window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:15px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
         window.updateStep = function(i,v) { tempSteps[i].text=v };
+
+        // --- AI LOGIC ---
+        window.askAIForSteps = async function() {
+            const title = document.getElementById('proj-name').value;
+            if(!title) return alert("Сначала напишите название проекта!");
+
+            const btn = document.getElementById('btn-ai-magic');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/ask-ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: `Я создаю проект: "${title}". Распиши мне 3-5 конкретных первых шагов для выполнения этого проекта. Ответь только списком шагов, без лишних слов.` 
+                    })
+                });
+
+                const data = await response.json();
+                
+                if(data.reply) {
+                    const lines = data.reply.split('\n').filter(line => line.trim().length > 0);
+                    lines.forEach(line => {
+                        const cleanText = line.replace(/^[\d\.\-\s]+/, '');
+                        tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false});
+                    });
+                    renderSteps();
+                    window.haptic('success');
+                }
+            } catch (e) {
+                alert("Ошибка ИИ: " + e.message);
+            } finally {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
+        }
         
         window.saveProject = function() {
             window.haptic('success');
             const eid=document.getElementById('proj-edit-id').value; 
             
-            // CHECK LIMITS FOR NEW PROJECTS
             if (!eid) {
                 if (!checkPremiumLimits()) return;
             }
