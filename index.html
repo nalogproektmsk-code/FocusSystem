@@ -57,7 +57,8 @@
             color: var(--text-main); 
             margin: 0; display: flex; height: 100vh; overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
-            font-size: 15px; line-height: 1.5;
+            font-size: 16px; /* УВЕЛИЧЕН ШРИФТ */
+            line-height: 1.5;
         }
 
         /* SPLASH SCREEN */
@@ -66,17 +67,23 @@
             background: var(--bg-dark);
             z-index: 9999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; padding: 40px; text-align: center;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
         }
-        .quote-text { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px; font-style: italic; opacity: 0.9; }
-        .quote-author { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+        #brain-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; opacity: 0.6;
+        }
+        .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+        .quote-text { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 16px; font-style: italic; opacity: 0.9; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        .quote-author { font-size: 15px; font-weight: 500; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
 
         /* INPUTS */
         input, textarea, select { 
             flex: 1; padding: 14px 16px; 
             border: 1px solid var(--input-border); 
             border-radius: var(--radius-md);
-            font-size: 16px; font-family: 'Inter', sans-serif; 
+            font-size: 17px; /* Увеличен */
+            font-family: 'Inter', sans-serif; 
             outline: none; background: var(--input-bg); 
             color: #fff; transition: all 0.2s;
             backdrop-filter: var(--glass-blur);
@@ -92,9 +99,9 @@
         }
         .input-group input { border: none; background: transparent !important; backdrop-filter: none; }
         
-        /* SIDEBAR (Desktop Default) */
+        /* SIDEBAR (Desktop) */
         .sidebar { 
-            width: 260px; 
+            width: 280px; /* Чуть шире */
             background: var(--sidebar-bg); 
             border-right: 1px solid var(--border-color); 
             display: flex; flex-direction: column; 
@@ -102,175 +109,165 @@
             flex-shrink: 0; 
             overflow-y: auto; 
         }
-        .logo { font-size: 20px; font-weight: 800; margin-bottom: 40px; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .logo i { color: var(--primary-color); font-size: 24px; }
-        .menu-item { height: 44px; padding: 0 16px; cursor: pointer; border-radius: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); transition: 0.2s; }
+        .logo { font-size: 22px; font-weight: 800; margin-bottom: 40px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--primary-color); font-size: 26px; }
+        .menu-item { height: 48px; padding: 0 16px; cursor: pointer; border-radius: 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); transition: 0.2s; font-size: 16px; font-weight: 500; }
         .menu-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .menu-item.active { background: rgba(62, 123, 255, 0.15); color: var(--primary-color); }
-        .badge { background: rgba(255,255,255,0.1); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 11px; }
+        .badge { background: rgba(255,255,255,0.1); color: #fff; padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
 
         /* MAIN AREA */
         .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; box-sizing: border-box; }
-        .header { margin-bottom: 32px; }
-        .title { font-size: 28px; font-weight: 800; color: #fff; }
+        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+        .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
         
-        /* КНОПКА ДОБАВЛЕНИЯ */
+        /* КНОПКА ДОБАВЛЕНИЯ (ИСПРАВЛЕНА ДЛЯ iOS) */
         .btn-add { 
             background: var(--primary-color); color: white; width: 48px; height: 48px; 
-            border-radius: 16px; border: none; font-size: 24px; cursor: pointer; 
+            border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
+            /* Flexbox для идеального центра */
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 0; 
+            margin: 0;
+            flex-shrink: 0;
         }
         .btn-add:active { transform: translateY(2px); box-shadow: none; }
 
+        /* КНОПКА WIZARD (РАЗОБРАТЬ ИНБОКС) */
+        .btn-wizard {
+            width: 100%;
+            background: rgba(62, 123, 255, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(62, 123, 255, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: 0.2s;
+        }
+        .btn-wizard:active { background: rgba(62, 123, 255, 0.2); transform: scale(0.98); }
+
         /* TASK CARDS */
-        .task-list { display: flex; flex-direction: column; gap: 12px; }
+        .task-list { display: flex; flex-direction: column; gap: 14px; }
         .task-card { 
-            background: var(--card-bg); padding: 18px; border-radius: var(--radius-xl); 
+            background: var(--card-bg); padding: 20px; border-radius: var(--radius-xl); 
             border: 1px solid var(--border-color); backdrop-filter: var(--glass-blur);
             display: flex; justify-content: space-between; transition: 0.2s;
+            align-items: flex-start;
         }
         .task-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
         
-        .task-left { display: flex; align-items: flex-start; gap: 14px; flex: 1; }
-        .task-check { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; transition: 0.2s; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .task-left { display: flex; align-items: flex-start; gap: 16px; flex: 1; }
+        .task-check { width: 26px; height: 26px; border: 2px solid rgba(255,255,255,0.2); border-radius: 9px; transition: 0.2s; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
         .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
         .task-content { flex: 1; }
-        .task-title { font-size: 15px; font-weight: 500; color: #fff; line-height: 1.4; margin-bottom: 6px; }
-        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; }
-        .task-num { color: var(--text-secondary); font-size: 12px; font-weight: 700; margin-right: 4px; opacity: 0.6; }
+        .task-title { font-size: 17px; font-weight: 600; color: #fff; line-height: 1.4; margin-bottom: 8px; }
+        .task-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+        .task-num { color: var(--text-secondary); font-size: 14px; font-weight: 800; margin-right: 6px; opacity: 0.5; }
 
-        .actions { display: flex; gap: 8px; opacity: 0.6; transition: 0.2s; }
-        .task-card:hover .actions { opacity: 1; }
-        .btn-action { background: rgba(255,255,255,0.1); border: none; color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-action:hover { background: rgba(255,255,255,0.2); }
-        .btn-action.delete:hover { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
-        .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
+        .actions { display: flex; gap: 10px; opacity: 0.8; transition: 0.2s; align-items: center; }
+        .btn-action { 
+            background: rgba(255,255,255,0.08); 
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #ccc; 
+            width: 38px; height: 38px; /* Кнопки крупнее */
+            border-radius: 10px; 
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; 
+        }
+        .btn-action i { font-size: 20px; } /* Иконки крупнее */
+        .btn-action:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .btn-action.delete:hover { background: rgba(255, 77, 77, 0.2); color: var(--danger); border-color: var(--danger); }
+        .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); border: none; color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
 
         .tag.quick { 
             background: linear-gradient(90deg, #FACC15, #EAB308); 
-            color: #000 !important; font-weight: 800; padding: 4px 10px;
+            color: #000 !important; font-weight: 800; padding: 4px 12px;
             box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px;
         }
-        .tag { padding: 4px 10px; background: rgba(255,255,255,0.08); color: var(--text-secondary); border-radius: 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; }
+        .tag { padding: 5px 12px; background: rgba(255,255,255,0.08); color: var(--text-secondary); border-radius: 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+        /* EMPTY STATE CARDS */
+        .empty-state-container {
+            display: flex; flex-direction: column; gap: 12px; margin-top: 20px;
+        }
+        .empty-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .empty-card:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.06); }
+        .empty-icon-box {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .empty-text strong { display: block; font-size: 16px; color: #fff; margin-bottom: 2px; }
+        .empty-text span { font-size: 13px; color: var(--text-secondary); }
 
         /* MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: #1C1E26; width: 450px; max-width: 90%; padding: 32px; border-radius: 32px; border: 1px solid var(--border-color); display: flex; flex-direction: column; max-height: 85vh; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: 700; margin-bottom: 24px; color: #fff; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: #1C1E26; width: 450px; max-width: 90%; padding: 32px; border-radius: 32px; border: 1px solid var(--border-color); display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: 800; margin-bottom: 24px; color: #fff; }
         .btn-primary { 
-            background: var(--primary-color); color: white; height: 52px; 
-            border-radius: 16px; border: none; font-weight: 700; width: 100%;
+            background: var(--primary-color); color: white; height: 56px; 
+            border-radius: 18px; border: none; font-weight: 700; font-size: 16px; width: 100%;
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.2); cursor: pointer;
         }
-
         .wizard-buttons { display: flex; gap: 12px; margin-top: 20px; }
-        .wizard-btn { flex: 1; padding: 16px; border-radius: 16px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .wizard-btn { flex: 1; padding: 18px; border-radius: 18px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: white; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         
-        .step-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; }
+        .step-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 14px; margin-bottom: 8px; }
 
-        .premium-status { padding: 16px; border-radius: 16px; margin-bottom: 24px; font-size: 14px; line-height: 1.5; border: 1px solid transparent; }
+        .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
         .premium-status.expired { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
 
-        /* --- ВАЖНО: СТИЛИ НИЖНЕЙ ПАНЕЛИ (ПО УМОЛЧАНИЮ СКРЫТА) --- */
+        /* BOTTOM NAV */
         .bottom-nav { display: none; }
 
-        /* --- MEDIA QUERIES (АДАПТИВ ПОД МОБИЛЬНЫЕ) --- */
+        /* MEDIA QUERIES */
         @media (max-width: 768px) {
-            /* Скрываем боковую панель на телефоне */
-            .sidebar { 
-                display: none; 
-            }
+            .sidebar { display: none; }
+            .main { padding: 20px; padding-bottom: 120px; }
+            .title { font-size: 28px; }
+            .header { margin-bottom: 24px; }
 
-            /* Настраиваем главную область для телефона */
-            .main { 
-                padding: 20px; 
-                padding-bottom: 120px; /* Отступ снизу, чтобы капсула не перекрывала контент */
-            }
-
-            .title { font-size: 24px; }
-            .header { margin-bottom: 20px; }
-
-            /* ПОКАЗЫВАЕМ КАПСУЛУ ТОЛЬКО ЗДЕСЬ */
             .bottom-nav { 
-                position: fixed; 
-                bottom: 20px; /* Отступ от нижнего края */
-                left: 16px; 
-                right: 16px; 
-                background: rgba(30, 32, 40, 0.85); /* Темный полупрозрачный фон */
-                backdrop-filter: blur(20px); 
-                -webkit-backdrop-filter: blur(20px);
-                padding: 8px 12px; 
-                border-radius: 30px; /* Скругление капсулы */
-                border: 1px solid rgba(255, 255, 255, 0.08); 
-                z-index: 1000; 
-                
-                /* Скроллинг */
-                overflow-x: auto; 
-                white-space: nowrap; 
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                
-                /* Скрываем полосу прокрутки */
-                scrollbar-width: none; 
-                -ms-overflow-style: none;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                position: fixed; bottom: 20px; left: 16px; right: 16px; 
+                background: rgba(30, 32, 40, 0.9); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+                padding: 10px 12px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.08); 
+                z-index: 1000; overflow-x: auto; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+                scrollbar-width: none; -ms-overflow-style: none; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             }
-
             .bottom-nav::-webkit-scrollbar { display: none; }
 
-            /* ЭЛЕМЕНТ МЕНЮ */
             .nav-item { 
-                display: inline-flex; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: center; 
-                min-width: 65px; 
-                padding: 6px 4px; 
-                color: #94A3B8; 
-                font-size: 10px; 
-                font-weight: 500; 
-                border-radius: 20px; 
-                transition: all 0.3s ease; 
-                position: relative;
-                flex-shrink: 0;
+                display: inline-flex; flex-direction: column; align-items: center; justify-content: center; 
+                min-width: 70px; padding: 6px 4px; color: #94A3B8; font-size: 11px; font-weight: 600; 
+                border-radius: 20px; transition: all 0.3s ease; position: relative; flex-shrink: 0;
             }
-
-            /* ПОДСВЕТКА ВЫБРАННОЙ ВКЛАДКИ */
-            .nav-item.active { 
-                color: #FFFFFF; 
-                background: rgba(255, 255, 255, 0.1); 
-            }
-
-            /* ИКОНКА */
-            .nav-icon { 
-                font-size: 22px; 
-                margin-bottom: 2px; 
-                position: relative; 
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* ЯРЛЫЧОК-ИНДИКАТОР */
+            .nav-item.active { color: #FFFFFF; background: rgba(255, 255, 255, 0.12); }
+            .nav-icon { font-size: 24px; margin-bottom: 3px; position: relative; display: flex; align-items: center; justify-content: center; }
             .nav-badge { 
-                position: absolute; 
-                top: -5px; 
-                right: -8px; 
-                background: var(--primary-color); 
-                color: white; 
-                font-size: 9px; 
-                font-weight: 800; 
-                min-width: 15px; 
-                height: 15px; 
-                border-radius: 10px; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                padding: 0 3px; 
-                border: 1.5px solid #1e2028; 
-                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                position: absolute; top: -4px; right: -6px; background: var(--primary-color); color: white; 
+                font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 10px; 
+                display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #1e2028; 
             }
         }
     </style>
@@ -278,26 +275,31 @@
 <body>
 
     <div id="splash-screen">
-        <div style="font-size: 48px; color: #F97316; margin-bottom: 20px;"><i class="ph-fill ph-rocket-launch"></i></div>
-        <div class="quote-text" id="splash-quote">"Секрет успеха — начать."</div>
-        <div class="quote-author" id="splash-author">— Марк Твен</div>
+        <canvas id="brain-canvas"></canvas>
+        <div class="splash-content">
+            <div style="font-size: 56px; color: var(--primary-color); margin-bottom: 24px; text-shadow: 0 0 30px rgba(62,123,255,0.5);">
+                <i class="ph-fill ph-brain"></i>
+            </div>
+            <div class="quote-text" id="splash-quote"></div>
+            <div class="quote-author" id="splash-author"></div>
+        </div>
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-rocket-launch"></i> GTD Focus</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI</div>
         
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
-        <div class="spacer"></div>
+        <div class="spacer" style="height:20px;"></div>
         <div class="menu-item" onclick="switchView('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span><span class="badge" id="badge-calendar">0</span></div>
         <div class="menu-item" onclick="switchView('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span><span class="badge" id="badge-waiting">0</span></div>
         <div class="menu-item" onclick="switchView('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span><span class="badge" id="badge-someday">0</span></div>
         <div class="menu-item" onclick="switchView('reference')"><span><i class="ph ph-archive-box"></i> Архив</span><span class="badge" id="badge-reference">0</span></div>
-        <div class="spacer"></div>
+        <div class="spacer" style="height:20px;"></div>
         <div class="menu-item" onclick="switchView('done')"><span><i class="ph ph-check-circle"></i> Готово</span><span class="badge" id="badge-done">0</span></div>
         <div class="menu-item" onclick="switchView('trash')"><span><i class="ph ph-trash"></i> Корзина</span><span class="badge" id="badge-trash">0</span></div>
-        <div class="spacer"></div>
+        <div class="spacer" style="flex:1;"></div>
         <div class="menu-item" onclick="openSettings()">
             <span style="color:var(--text-main)"><i class="ph ph-gear"></i> Настройки</span>
         </div>
@@ -324,17 +326,17 @@
         <div class="modal">
             <div class="modal-header">⚙️ Настройки<i class="ph ph-x close-btn" onclick="closeModal('settings-modal')" style="cursor:pointer"></i></div>
             <div id="premium-status-box" class="premium-status">Загрузка...</div>
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
+            <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
             <div style="display:flex; gap:8px; margin-bottom:24px;">
                 <input type="text" id="promo-input" placeholder="Введите код" style="text-transform:uppercase;">
-                <button class="btn-primary" style="width:auto; padding:0 20px;" onclick="activatePromo()">OK</button>
+                <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
             <div class="spacer"></div>
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Нашли ошибку или есть идея? Напишите нам!" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
+            <textarea id="feedback-text" placeholder="Ваши идеи или баги..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v1.5 • Maximum Efficiency<br>
+                FocusSystem v2.0 • AI Edition<br>
                 <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
@@ -342,14 +344,14 @@
 
     <div id="wizard-modal" class="modal-overlay">
         <div class="modal">
-            <div style="text-align:center; font-size:11px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
-            <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 20px; line-height: 1.4;">...</strong></div>
-            <div id="wizard-question-text" style="text-align:center; font-size:20px; font-weight:600; margin:32px 0;">...</div>
+            <div style="text-align:center; font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
+            <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 22px; line-height: 1.4;">...</strong></div>
+            <div id="wizard-question-text" style="text-align:center; font-size:22px; font-weight:600; margin:32px 0;">...</div>
             <div class="wizard-buttons">
                 <button class="wizard-btn" style="color:var(--danger);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
                 <button class="wizard-btn" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
             </div>
-            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:14px; padding: 10px; cursor:pointer;">Отмена</button>
+            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
     
@@ -358,20 +360,20 @@
             <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
             <div style="overflow-y:auto; flex:1;"> 
                 <input type="hidden" id="proj-edit-id"> 
-                <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
+                <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">НАЗВАНИЕ</label>
                 <input type="text" id="proj-name" style="width:100%; box-sizing:border-box; margin-bottom:20px;" placeholder="Например: Сделать ремонт">
-                <label style="display:block; font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
+                <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">РЕЗУЛЬТАТ (ЦЕЛЬ)</label>
                 <input type="text" id="proj-goal" placeholder="Как поймешь, что готово?" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary);">ПЕРВЫЕ ШАГИ</label>
-                    <button id="btn-ai-magic" onclick="askAIForSteps()" style="border:none; background: linear-gradient(135deg, #a855f7, #ec4899); color:white; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; display:none; box-shadow:0 2px 10px rgba(168, 85, 247, 0.3);">
-                        <i class="ph-bold ph-magic-wand"></i> Авто-план
+                    <label style="font-size:12px; font-weight:800; color:var(--text-secondary);">ПЕРВЫЕ ШАГИ</label>
+                    <button id="btn-ai-magic" onclick="askAIForSteps()" style="border:none; background: linear-gradient(135deg, #a855f7, #ec4899); color:white; font-size:12px; font-weight:700; padding:8px 16px; border-radius:10px; cursor:pointer; display:none; box-shadow:0 4px 15px rgba(168, 85, 247, 0.4);">
+                        <i class="ph-bold ph-magic-wand"></i> Авто-план (AI)
                     </button>
                 </div>
                 <div id="proj-steps-container" style="margin-bottom: 12px;"></div>
                 <div style="display:flex; gap:12px; margin-bottom:24px;">
                     <input type="text" id="proj-new-step" placeholder="Добавить следующий шаг..." style="flex:1;">
-                    <button class="btn-primary" style="width:50px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
+                    <button class="btn-primary" style="width:60px;" onclick="addStepToUI()"><i class="ph ph-plus"></i></button>
                 </div>
             </div>
             <button class="btn-primary" onclick="saveProject()" style="margin-top:20px; flex-shrink:0;">Сохранить проект</button>
@@ -402,7 +404,7 @@
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span></button>
                 <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('reference')"><span><i class="ph ph-archive-box"></i> Архив</span></button>
             </div>
-            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:14px; padding: 10px; cursor:pointer;">Отмена</button>
+            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
 
@@ -411,7 +413,6 @@
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 👇 ТВОЯ ССЫЛКА НА REPLIT
         const API_URL = 'https://636a13eb-9e28-4f04-a3b6-37318d504198-00-1eel6lm7asdp7.janeway.replit.dev'; 
 
         const firebaseConfig = {
@@ -436,29 +437,108 @@
         let currentUserID = 'guest_user';
         let isLoaded = false; 
 
-        // Кнопка "Купить в боте"
         window.closeApp = function() { if(tg) tg.close(); }
 
+        /* --- РАСШИРЕННЫЕ ЦИТАТЫ --- */
         const QUOTES = [
             { t: "Секрет успеха — начать.", a: "Марк Твен" },
             { t: "Делай то, что можешь, с тем, что имеешь.", a: "Теодор Рузвельт" },
             { t: "Занятость не означает продуктивность.", a: "Тим Феррис" },
             { t: "Твой мозг — для идей, а не для хранения.", a: "Дэвид Аллен" },
-            { t: "Фокус — это сказать 'нет'.", a: "Стив Джобс" }
+            { t: "Фокус — это сказать 'нет'.", a: "Стив Джобс" },
+            { t: "Дисциплина — это решение делать то, чего очень не хочется.", a: "Майк Тайсон" },
+            { t: "Будущее зависит от того, что вы делаете сегодня.", a: "Махатма Ганди" },
+            { t: "Планы ничто, планирование — всё.", a: "Дуайт Эйзенхауэр" },
+            { t: "Простота — высшая ступень утонченности.", a: "Леонардо да Винчи" },
+            { t: "Не ждите. Время никогда не будет подходящим.", a: "Наполеон Хилл" },
+            { t: "Успех — это сумма небольших усилий, повторяющихся изо дня в день.", a: "Роберт Кольер" },
+            { t: "Любитель сидит и ждет вдохновения, остальные просто встают и идут работать.", a: "Стивен Кинг" },
+            { t: "Ваше время ограничено, не тратьте его, живя чужой жизнью.", a: "Стив Джобс" },
+            { t: "Действие — основной ключ к успеху.", a: "Пабло Пикассо" },
+            { t: "Каждая минута, потраченная на организацию, экономит час.", a: "Бенджамин Франклин" }
         ];
 
+        /* --- АНИМАЦИЯ МОЗГА (CANVAS) --- */
+        function initBrainAnimation() {
+            const canvas = document.getElementById('brain-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let points = [];
+            const maxDist = 120; // Дистанция соединения линий
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                initPoints();
+            }
+
+            function initPoints() {
+                points = [];
+                const numPoints = Math.floor((width * height) / 10000); // Плотность точек
+                for (let i = 0; i < numPoints; i++) {
+                    points.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * 0.8, // Скорость
+                        vy: (Math.random() - 0.5) * 0.8
+                    });
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = '#3E7BFF';
+                ctx.strokeStyle = 'rgba(62, 123, 255, 0.2)';
+
+                for (let i = 0; i < points.length; i++) {
+                    let p = points[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > width) p.vx *= -1;
+                    if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    for (let j = i + 1; j < points.length; j++) {
+                        let p2 = points[j];
+                        let dx = p.x - p2.x;
+                        let dy = p.y - p2.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+
+                        if (dist < maxDist) {
+                            ctx.beginPath();
+                            ctx.lineWidth = 1 - (dist / maxDist);
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            draw();
+        }
+
         function initSplash() {
+            initBrainAnimation();
             const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
             document.getElementById('splash-quote').innerText = `"${q.t}"`;
             document.getElementById('splash-author').innerText = `— ${q.a}`;
+            
+            // Увеличено время показа до 4000мс (4 сек)
             setTimeout(() => {
                 const s = document.getElementById('splash-screen');
                 s.style.opacity = '0';
-                setTimeout(() => s.style.display = 'none', 500);
-            }, 2000);
+                setTimeout(() => s.style.display = 'none', 800);
+            }, 4000);
         }
 
-        // 👇 ВСТАВЬ ЭТО ВМЕСТО СТАРОЙ initUserInfo
         async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
             
@@ -466,44 +546,27 @@
                 currentUserID = String(user.id);
                 const name = user.first_name;
                 const logoEl = document.querySelector('.logo');
-                if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
+                if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-brain"></i> ${name}'s Focus`;
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
 
                 try {
-                    // 1. Попытка получить токен
-                    // Добавили alert для отладки старта
-                    // alert("1. Запрос токена..."); 
-                    
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ initData: tg.initData }) 
                     });
                     
-                    if (!response.ok) {
-                        // Если сервер ответил ошибкой (403, 500 и т.д.)
-                        const errText = await response.text();
-                        alert(`❌ Ошибка Сервера Replit:\nStatus: ${response.status}\nText: ${errText}`);
-                        throw new Error(`Server Error: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`Server Error: ${response.status}`);
                     
                     const data = await response.json();
-                    if (!data.token) {
-                         alert("❌ Сервер не прислал токен (Token is empty)");
-                         throw new Error("No token received");
-                    }
+                    if (!data.token) throw new Error("No token received");
 
-                    // 2. Входим в Firebase
                     await signInWithCustomToken(auth, data.token);
-                    
-                    // ЕСЛИ МЫ ЗДЕСЬ - ЗНАЧИТ ВСЁ РАБОТАЕТ
-                    // alert("✅ АВТОРИЗАЦИЯ УСПЕШНА!"); 
                     console.log("✅ Auth Success");
 
                 } catch (e) {
-                    // 👇 ВОТ ЭТО САМОЕ ВАЖНОЕ: ПОКАЖИ МНЕ ЭТОТ ALERT
                     console.error(e);
-                    alert(`🚨 Ошибка Входа:\n${e.message}\n\nПроверь консоль Replit!`);
+                    // alert(`🚨 Ошибка Входа:\n${e.message}`); // Скрыл алерт, чтобы не пугать, если оффлайн
                 }
             } else {
                 let storedId = localStorage.getItem('gtd_guest_id');
@@ -511,11 +574,8 @@
                 currentUserID = storedId;
             }
             
-            // 3. Подключение к базе (оставляем как было)
             let userPathId = currentUserID;
-            if (auth.currentUser) {
-                userPathId = auth.currentUser.uid;
-            }
+            if (auth.currentUser) userPathId = auth.currentUser.uid;
             
             const userRef = ref(dbRef, 'users/' + userPathId);
             onValue(userRef, (snapshot) => {
@@ -534,10 +594,8 @@
             });
         }
 
-        // ЗАЩИЩЕННОЕ СОХРАНЕНИЕ
         function saveDB() {
             if (!isLoaded) return;
-            
             const dataToSave = { 
                 inbox: db.inbox || [],
                 today: db.today || [],
@@ -547,10 +605,8 @@
                 someday: db.someday || [],
                 reference: db.reference || [],
                 done: db.done || [],
-                trash: db.trash || [],
-                // ВАЖНО: Мы НЕ отправляем premiumUntil и isPremium
+                trash: db.trash || []
             };
-            
             const userPathId = auth.currentUser?.uid || currentUserID;
             update(ref(dbRef, 'users/' + userPathId), dataToSave).catch(e => console.error("Save Error:", e));
             updateBadges();
@@ -579,8 +635,6 @@
                 statusBox.className = 'premium-status expired';
                 statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
             }
-            
-            // Чистый Support ID
             const debugEl = document.getElementById('debug-id');
             const uid = auth.currentUser?.uid || currentUserID;
             if(debugEl) debugEl.innerText = 'Support ID: ' + uid;
@@ -636,54 +690,78 @@
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-       window.switchView = function(view) {
-    window.haptic('light'); 
-    currentView = view;
-    
-    // 1. Убираем активный класс у всех
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        window.switchView = function(view) {
+            window.haptic('light'); 
+            currentView = view;
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
 
-    // 2. Добавляем активный класс текущему (мобильном и десктопном)
-    const activeNavs = document.querySelectorAll(`[onclick="switchView('${view}')"]`);
-    activeNavs.forEach(el => el.classList.add('active'));
+            const activeNavs = document.querySelectorAll(`[onclick="switchView('${view}')"]`);
+            activeNavs.forEach(el => el.classList.add('active'));
 
-    // 3. Скроллим панель к выбранному элементу, если он скрыт
-    const targetNav = document.querySelector(`.nav-item.active`);
-    if (targetNav) {
-        targetNav.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
+            const targetNav = document.querySelector(`.nav-item.active`);
+            if (targetNav) { targetNav.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }
 
-    renderCurrentView();
-}
+            renderCurrentView();
+        }
 
         window.renderCurrentView = function() {
             const container = document.getElementById('app-view');
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            if (currentView === 'done' && (db.done && db.done.length > 0)) html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
-            if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
+            if (currentView === 'done' && (db.done && db.done.length > 0)) html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:14px; font-weight:600;">Очистить всё</button>`;
+            if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:14px; font-weight:600;">Очистить</button>`;
             html += `</div>`;
             
             if(!db[currentView]) db[currentView] = [];
+            
+            // ВВОД ЗАДАЧ И WIZARD ТОЛЬКО В INBOX
             if (currentView === 'inbox') {
                 html += `<div class="input-wrapper"><div class="input-group"><input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()"><button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button></div></div>`;
-                if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph ph-lightning"></i> Разобрать Инбокс (${db.inbox.length})</button>`;
+                if(db.inbox.length > 0) {
+                    html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
+                }
             }
+            
             html += `<div class="task-list">`;
             const list = db[currentView] || [];
-            if(list.length === 0) { html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:15px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:40px; margin-bottom:10px; display:block;"></i>Задач нет</div>`; } else {
+            
+            // ПУСТОЕ СОСТОЯНИЕ (КАРТОЧКИ В ИНБОКСЕ, ИНАЧЕ ПРОСТО ТЕКСТ)
+            if(list.length === 0) { 
+                if (currentView === 'inbox') {
+                    // КРАСИВЫЕ КАРТОЧКИ ДЛЯ ПУСТОГО ИНБОКСА
+                    html += `
+                    <div class="empty-state-container">
+                        <div style="text-align:center; color:var(--text-secondary); margin-bottom:12px; font-size:15px;">Входящих нет. Отличная работа! 🎉</div>
+                        <div class="empty-card" onclick="document.getElementById('main-input').focus()">
+                             <div class="empty-icon-box" style="background: rgba(62, 123, 255, 0.1); color: #3E7BFF;"><i class="ph-fill ph-plus-circle"></i></div>
+                             <div class="empty-text"><strong>Добавить задачу</strong><span>Быстрый сброс мыслей</span></div>
+                        </div>
+                        <div class="empty-card" onclick="switchView('projects')">
+                             <div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div>
+                             <div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div>
+                        </div>
+                        <div class="empty-card" onclick="switchView('today')">
+                             <div class="empty-icon-box" style="background: rgba(250, 204, 21, 0.1); color: #FACC15;"><i class="ph-fill ph-sun"></i></div>
+                             <div class="empty-text"><strong>План на сегодня</strong><span>Фокус на главном</span></div>
+                        </div>
+                    </div>`;
+                } else {
+                    html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:16px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:48px; margin-bottom:12px; display:block;"></i>Задач нет</div>`; 
+                }
+            } else {
                 if (currentView === 'done') {
                     const doneProjects = list.filter(i => i.isProject);
                     const doneTasks = list.filter(i => !i.isProject);
-                    if (doneProjects.length > 0) { html += `<div class="section-title">Проекты</div>`; doneProjects.forEach(item => { html += createCard(item, true, true); }); }
-                    if (doneTasks.length > 0) { html += `<div class="section-title">Задачи</div>`; doneTasks.forEach(item => { html += createCard(item, true, false); }); }
+                    if (doneProjects.length > 0) { html += `<div class="section-title" style="margin-top:10px; font-weight:700; color:var(--text-secondary);">Проекты</div>`; doneProjects.forEach(item => { html += createCard(item, true, true); }); }
+                    if (doneTasks.length > 0) { html += `<div class="section-title" style="margin-top:20px; font-weight:700; color:var(--text-secondary);">Задачи</div>`; doneTasks.forEach(item => { html += createCard(item, true, false); }); }
                 } else if (currentView === 'projects') {
                       list.forEach(item => {
                         if(!item.steps) item.steps = [];
                         const activeStep = item.steps.find(s => !s.completed);
                         const progress = item.steps.filter(s=>s.completed).length + '/' + item.steps.length;
-                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:17px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:12px; font-weight:600; color:var(--text-secondary);">${progress}</span></div></div>`;
+                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:18px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:15px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:13px; font-weight:700; color:var(--text-secondary);">${progress}</span></div></div>`;
                       });
                 } else { 
                     list.forEach((item, index) => { 
@@ -705,7 +783,7 @@
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
             
             let buttons = '';
-            // 👇 КНОПКА AI-МАГИИ
+            // КНОПКИ ДЕЙСТВИЙ
             if(!['trash','done'].includes(currentView)) { 
                 buttons += `<button class="btn-action ai-magic" onclick="magicDecompose(${item.id})"><i class="ph-bold ph-magic-wand"></i></button>`;
                 buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; 
@@ -720,16 +798,16 @@
             return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
-        // 👇 НОВАЯ ФУНКЦИЯ: ПРЕВРАЩЕНИЕ ЗАДАЧИ В ПРОЕКТ С ПОМОЩЬЮ ИИ
         window.magicDecompose = async function(id) {
+            // ВАЖНО: ПРОВЕРКА ЛИМИТОВ ПЕРЕД AI
             if (!checkPremiumLimits()) return;
+            
             const task = db[currentView].find(t => t.id === id);
             if(!task) return;
 
             if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return;
             window.haptic('medium');
             
-            // Открываем модалку проекта и сразу запускаем AI
             openProjectModal(null, task);
             setTimeout(() => {
                 askAIForSteps();
@@ -764,10 +842,13 @@
         window.openProjectModal = function(eid=null, src=null) { closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[]; const aiBtn = document.getElementById('btn-ai-magic'); if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none'; if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); } else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; } renderSteps(); }
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
-        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:15px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
+        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:16px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
         window.updateStep = function(i,v) { tempSteps[i].text=v };
 
         window.askAIForSteps = async function() {
+            // ВАЖНО: ПРОВЕРКА ЛИМИТОВ ПЕРЕД ЗАПРОСОМ
+            if (!checkPremiumLimits()) return;
+            
             const title = document.getElementById('proj-name').value;
             if(!title) return alert("Сначала напишите название проекта!");
             const btn = document.getElementById('btn-ai-magic');
