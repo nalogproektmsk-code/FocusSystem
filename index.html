@@ -302,8 +302,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        // 👇 ДОБАВИЛИ БИБЛИОТЕКУ АВТОРИЗАЦИИ
+        // 👇 ДОБАВЛЕНО: update (для безопасного сохранения)
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // 👇 ТВОЯ ССЫЛКА НА REPLIT
@@ -322,7 +322,7 @@
 
         const app = initializeApp(firebaseConfig);
         const dbRef = getDatabase(app);
-        const auth = getAuth(app); // Инициализация Auth
+        const auth = getAuth(app); 
         const tg = window.Telegram.WebApp;
         tg.expand();
         
@@ -330,7 +330,7 @@
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
 
-        // ИСПРАВЛЕНИЕ: Выносим функцию закрытия в глобальную область, чтобы onclick="closeApp()" работал
+        // Глобальная функция для кнопки "Купить в боте"
         window.closeApp = function() {
             tg.close();
         }
@@ -371,7 +371,7 @@
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData }) // Теперь backend тут сохранит имя
+                        body: JSON.stringify({ initData: tg.initData }) // Backend теперь тут сохранит имя
                     });
                     
                     if (!response.ok) throw new Error("Auth Failed");
@@ -383,10 +383,8 @@
 
                 } catch (e) {
                     console.error("Auth Error:", e);
-                    // Если авторизация не прошла, база данных не отдаст данные (после включения правил)
                 }
             } else {
-                // Гость (база будет недоступна на запись)
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
@@ -396,18 +394,37 @@
             const userRef = ref(dbRef, 'users/' + currentUserID);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) db = data; else saveDB();
+                if (data) {
+                    // Объединяем, чтобы не потерять структуру
+                    db = { ...db, ...data };
+                } else {
+                    saveDB();
+                }
                 updateBadges();
                 renderCurrentView();
                 
-                // Обновляем ID в настройках для отладки
+                // ОТЛАДКА ID
                 const debugEl = document.getElementById('debug-id');
                 if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
             });
         }
 
+        // 👇 ВАЖНОЕ ИСПРАВЛЕНИЕ: БЕЗОПАСНОЕ СОХРАНЕНИЕ
+        // Мы используем update() и УДАЛЯЕМ поля премиума из сохраняемого объекта,
+        // чтобы фронтенд никогда не мог стереть премиум, выданный сервером.
         function saveDB() {
-            set(ref(dbRef, 'users/' + currentUserID), db).catch(e => {
+            const dataToSave = { ...db }; // Копируем объект
+            
+            // Удаляем поля, которые контролирует только сервер
+            delete dataToSave.premiumUntil;
+            delete dataToSave.isPremium;
+            delete dataToSave.usedPromos;
+            // Имена тоже лучше не перезаписывать отсюда
+            delete dataToSave.username; 
+            delete dataToSave.name;
+
+            // Используем update вместо set, чтобы не затереть отсутствующие поля
+            update(ref(dbRef, 'users/' + currentUserID), dataToSave).catch(e => {
                 console.error("Save Error:", e);
             });
             updateBadges();
@@ -425,7 +442,7 @@
             return true;
         }
 
-        // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ЗАКРЫВАЕТ APP ЧЕРЕЗ closeApp()
+        // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ССЫЛКА НА closeApp()
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
@@ -435,10 +452,10 @@
                 statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
             } else {
                 statusBox.className = 'premium-status expired';
-                // Вызываем глобальную функцию closeApp()
-                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:bold; text-decoration:underline; cursor:pointer; margin-top:5px;">👉 Купить в боте</div>`;
+                // Сделали кнопку более явной и рабочей
+                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px; font-size:15px;">👉 КУПИТЬ В БОТЕ</div>`;
             }
-            // Показываем ID юзера внизу для отладки
+            // ID для отладки
             const debugEl = document.getElementById('debug-id');
             if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
         }
@@ -462,12 +479,10 @@
                     if (data.newPremiumUntil) {
                         db.premiumUntil = data.newPremiumUntil;
                         db.isPremium = true;
-                        saveDB(); // Сохраняем, чтобы не потерялось
-                        openSettings(); // Перерисовываем окно настроек, чтобы увидеть новый статус
-                    } else {
-                        // Если сервер не вернул дату, просто закроем (но лучше обновить)
-                        closeModal('settings-modal'); 
+                        // Не вызываем saveDB() здесь, чтобы не перезаписать сразу же
+                        openSettings(); 
                     }
+                    closeModal('settings-modal'); 
                 } 
                 else { alert('❌ ' + data.message); }
             } catch (e) { alert('Ошибка сети'); } 
@@ -511,9 +526,7 @@
             currentView = view;
 
             // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
-            // Сообщаем Яндексу, что пользователь перешел в новую "папку"
             if (typeof ym !== 'undefined') {
-                // Создаем полный виртуальный адрес
                 var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
                 ym(106183159, 'hit', virtualUrl, { 
                     title: view,
@@ -598,60 +611,21 @@
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
             
             let buttons = '';
-            if(!['trash','done'].includes(currentView)) {
-                buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`;
-            }
-            
-            if(currentView === 'trash') { 
-                buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
-            } else if (isDoneView) { 
-                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; 
-                buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`;
-            } else { 
-                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; 
-            }
+            if(!['trash','done'].includes(currentView)) { buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; }
+            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; } else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
 
             const displayTitle = item.title || item.text;
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
-            
             let checkboxHtml = '';
-            if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { 
-                checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; 
-            } else if (isDoneView) { 
-                checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; 
-            }
-            
-            return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">
-            ${prefixHtml} ${displayTitle}
-            </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
+            if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
+            return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
         window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; saveDB(); }
-        
-        window.moveToTrash = function(from, id) { 
-            window.haptic('medium'); 
-            const idx = db[from].findIndex(t => t.id === id); 
-            if(idx > -1) { 
-                const item = db[from].splice(idx, 1)[0]; 
-                item.originalFolder = from; 
-                if(!db.trash) db.trash = []; 
-                db.trash.unshift(item); 
-                saveDB(); 
-            } 
-        }
-        
+        window.moveToTrash = function(from, id) { window.haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; if(!db.trash) db.trash = []; db.trash.unshift(item); saveDB(); } }
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); saveDB(); } }
         window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); saveDB(); } }
-        
-        window.emptyDone = function() {
-            if(confirm("Переместить все выполненные в корзину?")) {
-                if(!db.trash) db.trash = [];
-                db.trash.push(...db.done.map(i => ({...i, originalFolder: 'done'})));
-                db.done = [];
-                saveDB();
-            }
-        }
-        
+        window.emptyDone = function() { if(confirm("Переместить все выполненные в корзину?")) { if(!db.trash) db.trash = []; db.trash.push(...db.done.map(i => ({...i, originalFolder: 'done'}))); db.done = []; saveDB(); } }
         window.emptyTrash = function() { window.haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; saveDB(); } }
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); saveDB(); } }
         window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } saveDB(); }
@@ -659,26 +633,10 @@
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
         const questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
         
-        window.startWizard = function() { 
-            if(db.inbox.length===0) return; 
-            window.haptic('light'); 
-            wizardTask=db.inbox[db.inbox.length - 1]; 
-            wizardStep=0; 
-            document.getElementById('wizard-modal').style.display='flex'; renderWizard(); 
-        }
-        
+        window.startWizard = function() { if(db.inbox.length===0) return; window.haptic('light'); wizardTask=db.inbox[db.inbox.length - 1]; wizardStep=0; document.getElementById('wizard-modal').style.display='flex'; renderWizard(); }
         window.renderWizard = function() { const q = questions[wizardStep]; document.getElementById('wizard-task-text').innerText = wizardTask.text; document.getElementById('wizard-question-text').innerText = q.text; document.getElementById('btn-no').innerText = q.noTxt; document.getElementById('btn-yes').innerText = q.yesTxt; }
         window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
-        
-        window.moveTo = function(f, e={}) { 
-            db.inbox = db.inbox.filter(t => t.id !== wizardTask.id);
-            if(!db[f]) db[f]=[]; 
-            db[f].unshift({...wizardTask, ...e, id:Date.now()}); 
-            saveDB(); 
-            closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); 
-            if(db.inbox.length>0) setTimeout(startWizard,300); 
-        }
-        
+        window.moveTo = function(f, e={}) { db.inbox = db.inbox.filter(t => t.id !== wizardTask.id); if(!db[f]) db[f]=[]; db[f].unshift({...wizardTask, ...e, id:Date.now()}); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
         window.closeModal = function(id) { document.getElementById(id).style.display='none'; }
         window.openInput = function(t, cb) { document.getElementById('input-modal').style.display='flex'; document.getElementById('input-modal-title').innerText=t; inputCallback=cb; }
         window.submitInputModal = function() { const v=document.getElementById('input-modal-field').value; if(v&&inputCallback) inputCallback(v); closeModal('input-modal'); }
@@ -688,14 +646,7 @@
         window.submitMove = function(f) { if(!moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); saveDB(); } closeModal('move-modal'); }
 
         let tempSteps=[];
-        window.openProjectModal = function(eid=null, src=null) {
-            closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[];
-            const aiBtn = document.getElementById('btn-ai-magic');
-            if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none';
-            if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); }
-            else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; }
-            renderSteps();
-        }
+        window.openProjectModal = function(eid=null, src=null) { closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[]; const aiBtn = document.getElementById('btn-ai-magic'); if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none'; if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); } else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; } renderSteps(); }
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
         window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:15px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
@@ -704,78 +655,22 @@
         window.askAIForSteps = async function() {
             const title = document.getElementById('proj-name').value;
             if(!title) return alert("Сначала напишите название проекта!");
-
             const btn = document.getElementById('btn-ai-magic');
             const oldText = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...';
             btn.disabled = true;
-
             try {
-                // 👇 ГЛАВНОЕ: Отправляем initData
-                const response = await fetch(`${API_URL}/api/ask-ai`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: `Я создаю проект: "${title}".`,
-                        initData: tg.initData 
-                    })
-                });
-
-                if (response.status === 402) {
-                    alert("⛔️ Подписка не активна. Проверьте Настройки.");
-                    return;
-                }
-                if (response.status === 403) {
-                    alert("⛔️ Ошибка доступа. Запрос отклонен.");
-                    return;
-                }
-
+                const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".`, initData: tg.initData }) });
+                if (response.status === 402) { alert("⛔️ Подписка не активна. Проверьте Настройки."); return; }
+                if (response.status === 403) { alert("⛔️ Ошибка доступа. Запрос отклонен."); return; }
                 const data = await response.json();
-                
-                if(data.reply) {
-                    const lines = data.reply.split('\n').filter(line => line.trim().length > 0);
-                    lines.forEach(line => {
-                        const cleanText = line.replace(/^[\d\.\-\s]+/, '');
-                        tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false});
-                    });
-                    renderSteps();
-                    window.haptic('success');
-                }
-            } catch (e) {
-                console.error(e);
-                alert("Ошибка ИИ");
-            } finally {
-                btn.innerHTML = oldText;
-                btn.disabled = false;
-            }
+                if(data.reply) { const lines = data.reply.split('\n').filter(line => line.trim().length > 0); lines.forEach(line => { const cleanText = line.replace(/^[\d\.\-\s]+/, ''); tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false}); }); renderSteps(); window.haptic('success'); }
+            } catch (e) { console.error(e); alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
         }
         
-        window.saveProject = function() {
-            window.haptic('success'); const eid=document.getElementById('proj-edit-id').value; 
-            if (!eid) { if (!checkPremiumLimits()) return; }
-            const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value;
-            if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!");
-            if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } }
-            else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); 
-                if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); }
-                if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); 
-            } saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300);
-        }
+        window.saveProject = function() { window.haptic('success'); const eid=document.getElementById('proj-edit-id').value; if (!eid) { if (!checkPremiumLimits()) return; } const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
         window.editProject = function(id) { openProjectModal(id); }
-        
-        window.updateBadges = function() { 
-            const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash'];
-            views.forEach(view => {
-                const el = document.getElementById('badge-' + view); 
-                if(el) el.innerText = db[view] ? db[view].length : 0;
-                const mobEl = document.getElementById('mob-badge-' + view);
-                if(mobEl) {
-                    const count = db[view] ? db[view].length : 0;
-                    mobEl.innerText = count;
-                    mobEl.style.display = count > 0 ? 'flex' : 'none';
-                }
-            });
-        }
+        window.updateBadges = function() { const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash']; views.forEach(view => { const el = document.getElementById('badge-' + view); if(el) el.innerText = db[view] ? db[view].length : 0; const mobEl = document.getElementById('mob-badge-' + view); if(mobEl) { const count = db[view] ? db[view].length : 0; mobEl.innerText = count; mobEl.style.display = count > 0 ? 'flex' : 'none'; } }); }
         
         initSplash();
         initUserInfo(); switchView('inbox');
