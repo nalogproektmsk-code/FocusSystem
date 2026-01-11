@@ -332,7 +332,7 @@
 
         // Глобальная функция для кнопки "Купить в боте"
         window.closeApp = function() {
-            tg.close();
+            if(tg) tg.close();
         }
 
         // QUOTES FOR SPLASH
@@ -371,7 +371,7 @@
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData }) // Backend теперь тут сохранит имя
+                        body: JSON.stringify({ initData: tg.initData }) // Теперь backend тут сохранит имя
                     });
                     
                     if (!response.ok) throw new Error("Auth Failed");
@@ -383,8 +383,10 @@
 
                 } catch (e) {
                     console.error("Auth Error:", e);
+                    // Если авторизация не прошла, база данных не отдаст данные (после включения правил)
                 }
             } else {
+                // Гость (база будет недоступна на запись)
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
