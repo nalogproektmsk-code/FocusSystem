@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem AI 3.1</title>
+    <title>FocusSystem AI 3.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,7 +86,7 @@
         input:focus { border-color: var(--primary-color); background: rgba(255,255,255,0.07); }
         input::placeholder { color: #64748B; }
         
-        .input-wrapper { background: transparent; border: none; margin-bottom: 24px; position: relative; z-index: 2; }
+        .input-wrapper { background: transparent; border: none; margin-bottom: 24px; position: relative; z-index: 10; }
         .input-group { 
             display: flex; gap: 8px; padding: 6px; align-items: center; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
@@ -117,11 +117,13 @@
             border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
             display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0;
+            position: relative; z-index: 20; /* FIX CLICK ISSUE */
         }
         .btn-mic {
             background: rgba(255,255,255,0.1); color: white; width: 48px; height: 48px;
             border-radius: 16px; border: none; font-size: 24px; cursor: pointer;
             display: flex; justify-content: center; align-items: center; transition: 0.2s; flex-shrink: 0;
+            position: relative; z-index: 20;
         }
         .btn-mic.listening { background: #EF4444; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
@@ -133,39 +135,63 @@
             cursor: pointer; margin-bottom: 24px; transition: 0.2s; backdrop-filter: blur(5px);
         }
 
-        /* TASK CARDS */
+        /* --- НОВАЯ СТРУКТУРА КАРТОЧКИ --- */
         .task-list { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 2; }
+        
         .task-card { 
-            background: var(--card-bg); padding: 20px; border-radius: var(--radius-xl); 
+            background: var(--card-bg); padding: 16px; border-radius: var(--radius-xl); 
             border: 1px solid var(--border-color); backdrop-filter: var(--glass-blur);
-            display: flex; justify-content: space-between; transition: 0.2s; align-items: flex-start;
+            display: flex; flex-direction: column; /* Вертикальное расположение */
+            gap: 12px; transition: 0.2s;
         }
         
-        /* 2-MIN RULE HIGHLIGHT */
+        /* Верхний ряд: Чекбокс + Текст */
+        .task-top-row {
+            display: flex; align-items: flex-start; gap: 14px; width: 100%;
+        }
+        
+        .task-check { 
+            width: 26px; height: 26px; border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 9px; transition: 0.2s; flex-shrink: 0; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; margin-top: 2px; 
+        }
+        .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
+        
+        .task-title { 
+            font-size: 17px; font-weight: 600; color: #fff; line-height: 1.5; 
+            word-break: break-word; /* Перенос слов */
+            flex: 1;
+        }
+
+        /* Нижний ряд: Теги + Кнопки */
+        .task-bottom-row {
+            display: flex; justify-content: space-between; align-items: center; 
+            width: 100%; gap: 10px;
+            flex-wrap: wrap; /* Чтобы кнопки перенеслись если совсем тесно */
+        }
+
+        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        
+        .actions { display: flex; gap: 8px; opacity: 1; align-items: center; margin-left: auto; }
+        
+        /* Кнопки действий */
+        .btn-action { 
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
+            color: #ccc; width: 38px; height: 38px; border-radius: 12px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; 
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .btn-action i { font-size: 20px; }
+        .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); border: none; color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
+
         .task-card.quick-task {
             border: 1px solid rgba(250, 204, 21, 0.3);
             background: linear-gradient(90deg, rgba(250, 204, 21, 0.05) 0%, rgba(255,255,255,0.02) 100%);
         }
 
-        .task-left { display: flex; align-items: flex-start; gap: 16px; flex: 1; }
-        .task-check { width: 26px; height: 26px; border: 2px solid rgba(255,255,255,0.2); border-radius: 9px; transition: 0.2s; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
-        .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
-        .task-content { flex: 1; }
-        .task-title { font-size: 17px; font-weight: 600; color: #fff; line-height: 1.4; margin-bottom: 8px; }
-        .task-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-        
-        .actions { display: flex; gap: 10px; opacity: 0.9; align-items: center; }
-        .btn-action { 
-            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
-            color: #ccc; width: 40px; height: 40px; border-radius: 12px; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; 
-        }
-        .btn-action i { font-size: 22px; }
-        .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); border: none; color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
-
-        /* ЯРЛЫЧОК МОЛНИИ ДЛЯ БЫСТРЫХ ЗАДАЧ */
-        .tag.quick { background: linear-gradient(90deg, #FACC15, #EAB308); color: #000 !important; font-weight: 800; padding: 4px 12px; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px; display:inline-flex; align-items:center; gap:4px; }
-        .tag { padding: 5px 12px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border-radius: 8px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        /* Теги */
+        .tag.quick { background: linear-gradient(90deg, #FACC15, #EAB308); color: #000 !important; font-weight: 800; padding: 4px 10px; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px; display:inline-flex; align-items:center; gap:4px; }
+        .tag { padding: 4px 10px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
         .tag.context-tag { color: #60A5FA; background: rgba(96, 165, 250, 0.1); }
 
         /* EMPTY STATE */
@@ -189,19 +215,33 @@
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.2); cursor: pointer;
         }
         
-        /* ИСПРАВЛЕННЫЙ ЦВЕТ ТЕКСТА В ШАГАХ ПРОЕКТА */
+        /* FIXED: PROJECT STEPS COLOR */
+        .project-progress-bar {
+            background: rgba(255, 255, 255, 0.05); /* Темный полупрозрачный фон */
+            padding: 12px; border-radius: 12px; font-size: 14px; display: flex; 
+            justify-content: space-between; align-items: center; margin-top: 10px;
+        }
+
         .step-row { 
             display: flex; align-items: center; gap: 10px; 
             background: #0f1014; /* Темный фон */
             padding: 14px; border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);
         }
         .step-row input { 
-            background: transparent !important; 
-            border: none !important; 
-            font-size: 16px; 
-            color: #FFFFFF !important; /* Белый текст */
-            font-weight: 600; 
-            opacity: 1;
+            background: transparent !important; border: none !important; 
+            font-size: 16px; color: #FFFFFF !important; font-weight: 600; opacity: 1;
+        }
+
+        /* WIZARD VISUALS */
+        .wizard-visual {
+            display: flex; justify-content: center; margin-bottom: 24px;
+        }
+        .wizard-icon-circle {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(62, 123, 255, 0.1); border: 2px solid rgba(62, 123, 255, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: var(--primary-color);
+            box-shadow: 0 0 30px rgba(62, 123, 255, 0.2);
         }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
@@ -250,7 +290,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.1</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.2</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -308,8 +348,18 @@
             <textarea id="feedback-text" placeholder="Ваши идеи..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v3.1 • AI Edition<br>
+                FocusSystem v3.2 • AI Edition<br>
                 <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="search-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">🔍 Поиск<i class="ph ph-x close-btn" onclick="closeModal('search-modal')" style="cursor:pointer"></i></div>
+            <input type="text" id="search-input" placeholder="Найти задачу..." style="width:100%; box-sizing:border-box; margin-bottom:20px;" oninput="performSearch()">
+            <div id="search-results" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
+                <div style="text-align:center; color:var(--text-secondary); font-size:14px;">Введите текст для поиска...</div>
             </div>
         </div>
     </div>
@@ -340,13 +390,21 @@
     </div>
     
     <div id="wizard-modal" class="modal-overlay">
-        <div class="modal">
-            <div style="text-align:center; font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
-            <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 22px; line-height: 1.4;">...</strong></div>
-            <div id="wizard-question-text" style="text-align:center; font-size:22px; font-weight:600; margin:32px 0;">...</div>
+        <div class="modal" style="text-align:center;">
+            <div style="font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:20px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
+            
+            <div class="wizard-visual">
+                <div class="wizard-icon-circle">
+                    <i id="wizard-icon" class="ph-fill ph-question"></i>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 20px; line-height: 1.4; color:#fff;">...</strong></div>
+            <div id="wizard-question-text" style="font-size:18px; font-weight:600; margin-bottom:32px; color:var(--primary-color);">...</div>
+            
             <div class="wizard-buttons">
-                <button class="wizard-btn" style="color:var(--danger);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
-                <button class="wizard-btn" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
+                <button class="wizard-btn" style="color:var(--danger); border-color:rgba(255,77,77,0.3);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
+                <button class="wizard-btn" style="color:var(--success); border-color:rgba(34,197,94,0.3);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
             </div>
             <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
@@ -612,7 +670,7 @@
             
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) { 
-                alert("🎙 Ваш браузер (или Telegram на iPhone) блокирует микрофон из соображений приватности Apple. Попробуйте открыть веб-версию в Safari/Chrome или используйте текстовый ввод."); 
+                alert("🎙 Apple блокирует доступ к микрофону в Telegram.\n\nПожалуйста, используйте кнопку микрофона на стандартной клавиатуре iPhone."); 
                 return; 
             }
             
@@ -628,7 +686,7 @@
             };
             recognition.onerror = (e) => { 
                 console.error(e);
-                alert("Ошибка распознавания или доступ запрещен. На iPhone микрофон в Telegram часто заблокирован системой."); 
+                alert("🎙 Ошибка доступа. На iPhone используйте кнопку микрофона на клавиатуре."); 
                 btn.classList.remove('listening'); 
             };
             recognition.start();
@@ -682,6 +740,52 @@
             if (stagnant > 0) msg += `\n⚠️ Проектов без движения: ${stagnant}. Добавь микро-шаг!`;
             
             alert(msg);
+        }
+        
+        /* --- SEARCH --- */
+        window.openSearch = function() {
+             document.getElementById('search-modal').style.display = 'flex';
+             document.getElementById('search-input').focus();
+             performSearch();
+        }
+        
+        window.performSearch = function() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+            
+            if(query.length < 2) {
+                resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Введите минимум 2 буквы</div>';
+                return;
+            }
+
+            const allTasks = [];
+            // Collect all tasks with source info
+            ['inbox','today','projects','waiting','someday','done'].forEach(view => {
+                 if(db[view]) db[view].forEach(t => allTasks.push({...t, source: view}));
+            });
+
+            const found = allTasks.filter(t => t.text.toLowerCase().includes(query));
+            
+            if(found.length === 0) {
+                 resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Ничего не найдено</div>';
+            } else {
+                 found.forEach(t => {
+                     const iconMap = {'inbox':'ph-tray','today':'ph-fire','projects':'ph-kanban','waiting':'ph-clock-user','someday':'ph-lightbulb','done':'ph-check-circle'};
+                     resultsContainer.innerHTML += `
+                     <div onclick="jumpToTask('${t.source}')" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; cursor:pointer;">
+                        <div style="font-weight:600; color:#fff; margin-bottom:4px;">${t.text}</div>
+                        <div style="font-size:12px; color:var(--primary-color); display:flex; align-items:center; gap:4px;">
+                            <i class="ph ${iconMap[t.source]||'ph-circle'}"></i> ${t.source.toUpperCase()}
+                        </div>
+                     </div>`;
+                 });
+            }
+        }
+        
+        window.jumpToTask = function(view) {
+            closeModal('search-modal');
+            switchView(view);
         }
 
         /* --- UI LOGIC --- */
@@ -776,6 +880,10 @@
                              <div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div>
                              <div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div>
                         </div>
+                         <div class="empty-card" onclick="openSearch()">
+                             <div class="empty-icon-box" style="background: rgba(255, 255, 255, 0.1); color: #fff;"><i class="ph-fill ph-magnifying-glass"></i></div>
+                             <div class="empty-text"><strong>Найти задачу</strong><span>Поиск по всем папкам</span></div>
+                        </div>
                     </div>`;
                 } else {
                     html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:16px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:48px; margin-bottom:12px; display:block;"></i>Задач нет</div>`; 
@@ -786,7 +894,7 @@
                         if(!item.steps) item.steps = [];
                         const activeStep = item.steps.find(s => !s.completed);
                         const progress = item.steps.filter(s=>s.completed).length + '/' + item.steps.length;
-                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:18px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:15px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:#F8FAFC; padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:13px; font-weight:700; color:var(--text-secondary);">${progress}</span></div></div>`;
+                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:18px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:15px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:13px; font-weight:700; color:var(--text-secondary);">${progress}</span></div></div>`;
                       });
                 } else { 
                     list.forEach((item, index) => { 
@@ -844,9 +952,20 @@
             let checkboxHtml = '';
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
             
-            // Highlight quick tasks
             const cardClass = item.isQuick ? 'task-card quick-task' : 'task-card';
-            return `<div class="${cardClass}"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
+            
+            /* --- НОВАЯ ВЕРСТКА КАРТОЧКИ --- */
+            return `
+            <div class="${cardClass}">
+                <div class="task-top-row">
+                    ${checkboxHtml}
+                    <div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${prefixHtml} ${displayTitle}</div>
+                </div>
+                <div class="task-bottom-row">
+                     <div class="task-meta">${metaHtml}</div>
+                     <div class="actions">${buttons}</div>
+                </div>
+            </div>`;
         }
 
         /* --- STANDARD FUNCTIONS --- */
@@ -880,8 +999,19 @@
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); renderCurrentView(); saveDB(); } }
         window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } renderCurrentView(); saveDB(); }
         window.startWizard = function() { if(db.inbox.length===0) return; window.haptic('light'); wizardTask=db.inbox[db.inbox.length - 1]; wizardStep=0; document.getElementById('wizard-modal').style.display='flex'; renderWizard(); }
-        let wizardTask=null, wizardStep=0, questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
-        window.renderWizard = function() { const q = questions[wizardStep]; document.getElementById('wizard-task-text').innerText = wizardTask.text; document.getElementById('wizard-question-text').innerText = q.text; document.getElementById('btn-no').innerText = q.noTxt; document.getElementById('btn-yes').innerText = q.yesTxt; }
+        
+        /* WIZARD VISUALS */
+        let wizardTask=null, wizardStep=0, questions = [ { text: "Нужно делать?", icon: "ph-person-simple-run", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", icon: "ph-calendar-plus", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", icon: "ph-users-three", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", icon: "ph-steps", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", icon: "ph-lightning", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", icon: "ph-calendar-check", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
+        
+        window.renderWizard = function() { 
+            const q = questions[wizardStep]; 
+            document.getElementById('wizard-task-text').innerText = wizardTask.text; 
+            document.getElementById('wizard-question-text').innerText = q.text; 
+            document.getElementById('wizard-icon').className = `ph-fill ${q.icon}`;
+            document.getElementById('btn-no').innerText = q.noTxt; 
+            document.getElementById('btn-yes').innerText = q.yesTxt; 
+        }
+        
         window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
         window.moveTo = function(f, e={}) { db.inbox = db.inbox.filter(t => t.id !== wizardTask.id); if(!db[f]) db[f]=[]; db[f].unshift({...wizardTask, ...e, id:Date.now()}); renderCurrentView(); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
         window.closeModal = function(id) { document.getElementById(id).style.display='none'; }
