@@ -103,20 +103,88 @@
         .badge { background: rgba(255,255,255,0.1); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 11px; }
 
         /* MOBILE NAV (Glassmorphism) */
-        .bottom-nav { 
-            display: none; position: fixed; bottom: 0; left: 0; right: 0; 
-            background: rgba(15, 17, 22, 0.85); backdrop-filter: blur(20px); 
-            padding-bottom: max(15px, env(safe-area-inset-bottom)); padding-top: 12px;
-            border-top: 1px solid var(--border-color); z-index: 100; gap: 8px;
-        }
-        .nav-item { color: var(--text-secondary); transition: 0.2s; }
-        .nav-item.active { color: var(--primary-color); }
+      /* ОБНОВЛЕННАЯ ПАНЕЛЬ-КАПСУЛА */
+.bottom-nav { 
+    display: none; 
+    position: fixed; 
+    bottom: 20px; /* Отступ от нижнего края */
+    left: 16px; 
+    right: 16px; 
+    background: rgba(30, 32, 40, 0.85); /* Темный полупрозрачный фон */
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    padding: 8px 12px; 
+    border-radius: 30px; /* Скругление капсулы */
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    z-index: 1000; 
+    
+    /* Скроллинг */
+    overflow-x: auto; 
+    white-space: nowrap; 
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    /* Скрываем полосу прокрутки */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-        @media (max-width: 768px) { 
-            .sidebar { display: none; } .bottom-nav { display: flex; } 
-            .main { padding: 20px 16px; padding-bottom: 110px; } 
-            .modal { width: 100% !important; border-radius: 32px 32px 0 0 !important; background: #16181D !important; }
-        }
+.bottom-nav::-webkit-scrollbar { display: none; }
+
+/* ЭЛЕМЕНТ МЕНЮ */
+.nav-item { 
+    display: inline-flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    min-width: 65px; 
+    padding: 6px 4px; 
+    color: #94A3B8; 
+    font-size: 10px; 
+    font-weight: 500; 
+    border-radius: 20px; 
+    transition: all 0.3s ease; 
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* ПОДСВЕТКА ВЫБРАННОЙ ВКЛАДКИ (как в референсе) */
+.nav-item.active { 
+    color: #FFFFFF; 
+    background: rgba(255, 255, 255, 0.1); /* Легкий фон для активной кнопки */
+}
+
+/* ИКОНКА */
+.nav-icon { 
+    font-size: 22px; 
+    margin-bottom: 2px; 
+    position: relative; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ВАША ВИШЕНКА: ЦВЕТНОЙ ЯРЛЫЧОК-ИНДИКАТОР */
+.nav-badge { 
+    position: absolute; 
+    top: -5px; 
+    right: -8px; 
+    background: var(--primary-color); /* Ваш синий цвет */
+    color: white; 
+    font-size: 9px; 
+    font-weight: 800; 
+    min-width: 15px; 
+    height: 15px; 
+    border-radius: 10px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 0 3px; 
+    border: 1.5px solid #1e2028; /* Ободок, чтобы не сливалось */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
 
         /* MAIN AREA */
         .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; box-sizing: border-box; }
@@ -672,5 +740,6 @@
     </script>
 </body>
 </html>
+
 
 
