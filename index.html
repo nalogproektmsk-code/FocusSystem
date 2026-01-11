@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem AI 3.2</title>
+    <title>FocusSystem AI 3.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +49,10 @@
             font-family: 'Inter', -apple-system, sans-serif; 
             background: linear-gradient(180deg, #1A1C24 0%, #0A0B10 100%);
             color: var(--text-main); 
-            margin: 0; display: flex; height: 100vh; overflow: hidden; 
+            margin: 0; 
+            display: flex; 
+            height: 100dvh; /* FIX: Dynamic Viewport Height for Mobile/Web */
+            overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
             font-size: 16px; line-height: 1.5;
         }
@@ -112,18 +115,21 @@
         .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
         /* КНОПКИ */
+        /* FIX: Increased specificty and pointer events for Add button */
         .btn-add { 
             background: var(--primary-color); color: white; width: 48px; height: 48px; 
             border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
             display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0;
-            position: relative; z-index: 20; /* FIX CLICK ISSUE */
+            position: relative; z-index: 50; pointer-events: auto;
         }
+        .btn-add:active { transform: scale(0.95); }
+
         .btn-mic {
             background: rgba(255,255,255,0.1); color: white; width: 48px; height: 48px;
             border-radius: 16px; border: none; font-size: 24px; cursor: pointer;
             display: flex; justify-content: center; align-items: center; transition: 0.2s; flex-shrink: 0;
-            position: relative; z-index: 20;
+            position: relative; z-index: 50; pointer-events: auto;
         }
         .btn-mic.listening { background: #EF4444; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
@@ -232,7 +238,7 @@
             font-size: 16px; color: #FFFFFF !important; font-weight: 600; opacity: 1;
         }
 
-        /* WIZARD VISUALS */
+        /* WIZARD VISUALS - NEW BUTTONS */
         .wizard-visual {
             display: flex; justify-content: center; margin-bottom: 24px;
         }
@@ -243,6 +249,15 @@
             font-size: 40px; color: var(--primary-color);
             box-shadow: 0 0 30px rgba(62, 123, 255, 0.2);
         }
+        
+        .wizard-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 10px; }
+        .wizard-btn { 
+            width: 100%; padding: 18px; border-radius: 18px; border: 1px solid; 
+            background: rgba(255,255,255,0.03); color: white; font-size: 17px; 
+            font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; 
+            justify-content: center; align-items: center;
+        }
+        .wizard-btn:active { transform: scale(0.98); }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
@@ -252,7 +267,7 @@
 
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .main { padding: 20px; padding-bottom: 120px; }
+            .main { padding: 20px; padding-bottom: 120px; overflow-y: auto; height: 100%; }
             .title { font-size: 28px; }
             .header { margin-bottom: 24px; }
             .bottom-nav { 
@@ -290,7 +305,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.2</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.3</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -348,7 +363,7 @@
             <textarea id="feedback-text" placeholder="Ваши идеи..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v3.2 • AI Edition<br>
+                FocusSystem v3.3 • AI Edition<br>
                 <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
@@ -357,7 +372,10 @@
     <div id="search-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">🔍 Поиск<i class="ph ph-x close-btn" onclick="closeModal('search-modal')" style="cursor:pointer"></i></div>
-            <input type="text" id="search-input" placeholder="Найти задачу..." style="width:100%; box-sizing:border-box; margin-bottom:20px;" oninput="performSearch()">
+            <div style="display:flex; gap:8px; margin-bottom:20px;">
+                <input type="text" id="search-input" placeholder="Найти задачу..." style="flex:1;" oninput="performSearch()">
+                <button class="btn-primary" style="width:auto; padding:0 20px;" onclick="performSearch()"><i class="ph-bold ph-magnifying-glass"></i></button>
+            </div>
             <div id="search-results" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
                 <div style="text-align:center; color:var(--text-secondary); font-size:14px;">Введите текст для поиска...</div>
             </div>
@@ -403,8 +421,8 @@
             <div id="wizard-question-text" style="font-size:18px; font-weight:600; margin-bottom:32px; color:var(--primary-color);">...</div>
             
             <div class="wizard-buttons">
-                <button class="wizard-btn" style="color:var(--danger); border-color:rgba(255,77,77,0.3);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
-                <button class="wizard-btn" style="color:var(--success); border-color:rgba(34,197,94,0.3);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
+                <button class="wizard-btn" style="background:rgba(255,77,77,0.1); color:#FF4D4D; border-color:rgba(255,77,77,0.3);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
+                <button class="wizard-btn" style="background:rgba(34,197,94,0.1); color:#22C55E; border-color:rgba(34,197,94,0.3);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
             </div>
             <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
@@ -578,6 +596,11 @@
                 } 
                 isLoaded = true; updateBadges(); renderCurrentView();
                 if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + userPathId;
+                
+                // Hide mic on iPhone
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const micBtn = document.getElementById('btn-mic');
+                if(isIOS && micBtn) micBtn.style.display = 'none';
             });
         }
         function saveDB() {
@@ -742,6 +765,29 @@
             alert(msg);
         }
         
+        /* --- AI FOCUS (NEW) --- */
+        window.activateFocusMode = function() {
+            if (!checkAIPremium()) return;
+            if (db.today.length === 0) return alert("Список 'Сегодня' пуст. Нечего фокусировать.");
+            
+            // Score tasks
+            let scored = db.today.map(t => {
+                let score = 0;
+                if (t.isQuick) score += 20; // Easy wins
+                if (t.tags && t.tags.some(tag => tag.includes('Срочно'))) score += 30;
+                score += Math.random() * 10; // AI magic variation
+                return { ...t, score };
+            });
+            
+            scored.sort((a,b) => b.score - a.score);
+            const top3 = scored.slice(0, 3);
+            
+            let msg = "⚡️ AI FOCUS: Твои 3 главные задачи:\n\n";
+            top3.forEach((t, i) => msg += `${i+1}. ${t.text}\n`);
+            msg += "\nЗабудь об остальном. Действуй!";
+            alert(msg);
+        }
+        
         /* --- SEARCH --- */
         window.openSearch = function() {
              document.getElementById('search-modal').style.display = 'flex';
@@ -754,8 +800,8 @@
             const resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
             
-            if(query.length < 2) {
-                resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Введите минимум 2 буквы</div>';
+            if(query.length < 1) {
+                resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Начните вводить...</div>';
                 return;
             }
 
@@ -859,6 +905,11 @@
                 if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
             }
             
+            // AI FOCUS BUTTON FOR TODAY
+            if (currentView === 'today' && db.today.length > 0) {
+                html += `<button class="btn-wizard" style="background:rgba(250, 204, 21, 0.1); color:#FACC15; border-color:rgba(250, 204, 21, 0.3); margin-bottom:16px;" onclick="activateFocusMode()"><i class="ph-fill ph-lightning"></i> AI Focus: Что делать?</button>`;
+            }
+            
             html += `<div class="task-list">`;
             let list = [...db[currentView]]; // copy
 
@@ -940,7 +991,7 @@
             } 
             else if (isDoneView) { 
                 // RESTORE FROM DONE (NEW)
-                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; 
+                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph-bold ph-arrow-u-up-left"></i></button>`; 
                 buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; 
             } 
             else { 
