@@ -590,20 +590,26 @@
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-        window.switchView = function(view) {
-            window.haptic('light'); currentView = view;
-            if (typeof ym !== 'undefined') {
-                var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
-                ym(106183159, 'hit', virtualUrl, { title: view, referer: window.location.href });
-            }
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            const items = document.querySelectorAll('.menu-item');
-            for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const navItems = document.querySelectorAll('.nav-item');
-            for(let item of navItems) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; } }
-            renderCurrentView();
-        }
+       window.switchView = function(view) {
+    window.haptic('light'); 
+    currentView = view;
+    
+    // 1. Убираем активный класс у всех
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+
+    // 2. Добавляем активный класс текущему (мобильном и десктопном)
+    const activeNavs = document.querySelectorAll(`[onclick="switchView('${view}')"]`);
+    activeNavs.forEach(el => el.classList.add('active'));
+
+    // 3. Скроллим панель к выбранному элементу, если он скрыт
+    const targetNav = document.querySelector(`.nav-item.active`);
+    if (targetNav) {
+        targetNav.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    renderCurrentView();
+}
 
         window.renderCurrentView = function() {
             const container = document.getElementById('app-view');
@@ -740,6 +746,7 @@
     </script>
 </body>
 </html>
+
 
 
 
