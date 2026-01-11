@@ -302,7 +302,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // 👇 ДОБАВЛЕНО: update (для безопасного сохранения)
+        // 👇 ДОБАВЛЕНО: update для защиты данных
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -329,6 +329,7 @@
         let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], premiumUntil: null };
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
+        let isLoaded = false; // Предохранитель
 
         // Глобальная функция для кнопки "Купить в боте"
         window.closeApp = function() {
@@ -383,10 +384,8 @@
 
                 } catch (e) {
                     console.error("Auth Error:", e);
-                    // Если авторизация не прошла, база данных не отдаст данные (после включения правил)
                 }
             } else {
-                // Гость (база будет недоступна на запись)
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
@@ -400,8 +399,9 @@
                     // Объединяем, чтобы не потерять структуру
                     db = { ...db, ...data };
                 } else {
-                    saveDB();
+                    saveDB(true); // Сохраняем только если пусто (force=true)
                 }
+                isLoaded = true; // Снимаем предохранитель
                 updateBadges();
                 renderCurrentView();
                 
@@ -411,21 +411,27 @@
             });
         }
 
-        // 👇 ВАЖНОЕ ИСПРАВЛЕНИЕ: БЕЗОПАСНОЕ СОХРАНЕНИЕ
+        // 👇 ГЛАВНОЕ ИСПРАВЛЕНИЕ: БЕЗОПАСНОЕ СОХРАНЕНИЕ
         // Мы используем update() и УДАЛЯЕМ поля премиума из сохраняемого объекта,
         // чтобы фронтенд никогда не мог стереть премиум, выданный сервером.
-        function saveDB() {
-            const dataToSave = { ...db }; // Копируем объект
-            
-            // Удаляем поля, которые контролирует только сервер
-            delete dataToSave.premiumUntil;
-            delete dataToSave.isPremium;
-            delete dataToSave.usedPromos;
-            // Имена тоже лучше не перезаписывать отсюда
-            delete dataToSave.username; 
-            delete dataToSave.name;
+        function saveDB(force = false) {
+             // Если данные не загружены и не форсировано - стоп (защита от перезаписи пустотой)
+            if (!isLoaded && !force) return;
 
-            // Используем update вместо set, чтобы не затереть отсутствующие поля
+            const dataToSave = { 
+                inbox: db.inbox || [],
+                today: db.today || [],
+                calendar: db.calendar || [],
+                projects: db.projects || [],
+                waiting: db.waiting || [],
+                someday: db.someday || [],
+                reference: db.reference || [],
+                done: db.done || [],
+                trash: db.trash || [],
+                // СЮДА СПЕЦИАЛЬНО НЕ ВКЛЮЧЕНЫ premiumUntil и isPremium
+            };
+
+            // Используем update вместо set
             update(ref(dbRef, 'users/' + currentUserID), dataToSave).catch(e => {
                 console.error("Save Error:", e);
             });
@@ -522,43 +528,19 @@
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-        // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
         window.switchView = function(view) {
-            window.haptic('light'); 
-            currentView = view;
-
-            // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
+            window.haptic('light'); currentView = view;
             if (typeof ym !== 'undefined') {
                 var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
-                ym(106183159, 'hit', virtualUrl, { 
-                    title: view,
-                    referer: window.location.href 
-                });
+                ym(106183159, 'hit', virtualUrl, { title: view, referer: window.location.href });
                 console.log('[Metrica] Hit sent:', virtualUrl);
-            } else {
-                console.log('[Metrica] Not loaded yet');
             }
-            // --- КОНЕЦ: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
-
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
-            for(let item of items) { 
-                if(item.getAttribute('onclick').includes(view)) { 
-                    item.classList.add('active'); 
-                    break; 
-                } 
-            }
-            
+            for(let item of items) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); break; } }
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navItems = document.querySelectorAll('.nav-item');
-            for(let item of navItems) { 
-                if(item.getAttribute('onclick').includes(view)) { 
-                    item.classList.add('active'); 
-                    item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
-                    break; 
-                } 
-            }
-            
+            for(let item of navItems) { if(item.getAttribute('onclick').includes(view)) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', inline: 'center' }); break; } }
             renderCurrentView();
         }
 
@@ -566,7 +548,6 @@
             const container = document.getElementById('app-view');
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            
             if (currentView === 'done' && (db.done && db.done.length > 0)) {
                 html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
             }
