@@ -144,7 +144,7 @@
         .task-content { flex: 1; padding-right: 10px; }
         .task-title { font-weight: 600; font-size: 16px; line-height: 1.4; color: var(--text-main); margin-bottom: 8px; }
         .task-meta { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag { padding: 4px 10px; background: #F1F5F9; color: var(--text-secondary); border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .tag { padding: 4px 10px; background: #F1F5F9; color: var(--text-secondary); border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-right: 4px; }
         .tag.quick { background: #FFF7ED; color: #EA580C; }
         .tag.date { background: #F0F9FF; color: #0284C7; }
         .tag.project { background: #F5F3FF; color: #7C3AED; }
@@ -152,6 +152,10 @@
         .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #94A3B8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
         .btn-action:hover { background: #F1F5F9; color: var(--text-main); }
         .btn-action.delete:hover { background: #FEF2F2; color: var(--danger); }
+        /* 👇 СТИЛЬ ДЛЯ КНОПКИ AI */
+        .btn-action.ai-magic { color: #8B5CF6; } 
+        .btn-action.ai-magic:hover { background: #F3E8FF; color: #7C3AED; }
+
         .section-title { font-size: 12px; font-weight: 800; color: var(--text-secondary); margin-top: 30px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
         .task-num { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-right: 2px; background: #F1F5F9; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-top: 2px; }
 
@@ -301,7 +305,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // 👇 ДОБАВЛЕНО: update для безопасного сохранения
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -328,14 +331,11 @@
         let db = { inbox: [], today: [], calendar: [], projects: [], waiting: [], someday: [], reference: [], done: [], trash: [], premiumUntil: null };
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
-        let isLoaded = false; // 👇 ГЛАВНЫЙ ПРЕДОХРАНИТЕЛЬ
+        let isLoaded = false; 
 
-        // Глобальная функция для кнопки "Купить в боте"
-        window.closeApp = function() {
-            if(tg) tg.close();
-        }
+        // Кнопка "Купить в боте"
+        window.closeApp = function() { if(tg) tg.close(); }
 
-        // QUOTES
         const QUOTES = [
             { t: "Секрет успеха — начать.", a: "Марк Твен" },
             { t: "Делай то, что можешь, с тем, что имеешь.", a: "Теодор Рузвельт" },
@@ -355,7 +355,7 @@
             }, 2000);
         }
 
-        // 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ ВХОДА (С ЗАЩИТОЙ)
+        // 🔥 ПРАВИЛЬНАЯ АВТОРИЗАЦИЯ + БЕЗОПАСНАЯ ПОДГРУЗКА
         async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
             
@@ -366,58 +366,66 @@
                 if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
 
-                // 1. ЗАПРОС ТОКЕНА У СЕРВЕРА
                 try {
+                    // 1. Получаем токен от сервера
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData }) // Теперь backend тут сохранит имя
+                        body: JSON.stringify({ initData: tg.initData }) 
                     });
                     
-                    if (!response.ok) throw new Error("Auth Failed");
-                    const { token } = await response.json();
-                    
-                    // 2. ВХОД В FIREBASE
-                    await signInWithCustomToken(auth, token);
-                    console.log("✅ Успешная авторизация в базе!");
-
+                    if (!response.ok) {
+                        console.error('Auth response NOT OK', response.status);
+                        // Не бросаем ошибку, чтобы продолжить работу с открытыми правилами
+                    } else {
+                        const { token } = await response.json();
+                        // 2. Входим в Firebase
+                        await signInWithCustomToken(auth, token);
+                        console.log("✅ Успешная авторизация в Firebase", auth.currentUser?.uid);
+                    }
                 } catch (e) {
                     console.error("Auth Error:", e);
                 }
             } else {
+                // Гостевой режим
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
             
-            // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ
-            const userRef = ref(dbRef, 'users/' + currentUserID);
+            // 3. Подключаемся к базе. Используем UID из авторизации, если он есть. Если нет - Fallback на ID из Телеграма.
+            // Это обеспечивает работу и со строгими правилами (в будущем), и с открытыми (сейчас).
+            let userPathId = currentUserID;
+            if (auth.currentUser) {
+                userPathId = auth.currentUser.uid;
+            }
+            
+            console.log('DB path users/', userPathId);
+            const userRef = ref(dbRef, 'users/' + userPathId);
+            
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     db = { ...db, ...data };
-                } else {
-                    // Если данных нет ВООБЩЕ - сохраняем дефолт
-                    // Но если это первый запуск, то сервер мог уже создать премиум запись
-                    // Поэтому аккуратно. В данном случае лучше не сохранять сразу.
-                    // saveDB();  <-- УБРАЛИ АВТО-СОХРАНЕНИЕ ПРИ ПУСТОЙ БАЗЕ
-                }
-                isLoaded = true; // Снимаем предохранитель
+                    // Приведение типов для надежности
+                    if(!Array.isArray(db.inbox)) db.inbox = Object.values(db.inbox || {});
+                    if(!Array.isArray(db.today)) db.today = Object.values(db.today || {});
+                    if(!Array.isArray(db.projects)) db.projects = Object.values(db.projects || {});
+                } 
+                isLoaded = true; 
                 updateBadges();
                 renderCurrentView();
                 
+                // Support ID (без красного текста)
                 const debugEl = document.getElementById('debug-id');
-                if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
+                if(debugEl) debugEl.innerText = 'Support ID: ' + userPathId;
             });
         }
 
-        // 👇 ГЛАВНОЕ ИСПРАВЛЕНИЕ: БЕЗОПАСНОЕ СОХРАНЕНИЕ
-        // Мы используем update() и УДАЛЯЕМ поля премиума из сохраняемого объекта,
-        // чтобы фронтенд никогда не мог стереть премиум, выданный сервером.
+        // ЗАЩИЩЕННОЕ СОХРАНЕНИЕ
         function saveDB() {
-             // Если данные не загружены - стоп (защита от перезаписи пустотой)
             if (!isLoaded) return;
-
+            
             const dataToSave = { 
                 inbox: db.inbox || [],
                 today: db.today || [],
@@ -428,13 +436,11 @@
                 reference: db.reference || [],
                 done: db.done || [],
                 trash: db.trash || [],
-                // СЮДА СПЕЦИАЛЬНО НЕ ВКЛЮЧЕНЫ premiumUntil и isPremium
+                // ВАЖНО: Мы НЕ отправляем premiumUntil и isPremium
             };
-
-            // Используем update вместо set
-            update(ref(dbRef, 'users/' + currentUserID), dataToSave).catch(e => {
-                console.error("Save Error:", e);
-            });
+            
+            const userPathId = auth.currentUser?.uid || currentUserID;
+            update(ref(dbRef, 'users/' + userPathId), dataToSave).catch(e => console.error("Save Error:", e));
             updateBadges();
             renderCurrentView();
         }
@@ -450,13 +456,9 @@
             return true;
         }
 
-        // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ССЫЛКА НА closeApp()
-       // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ДЛЯ ОТЛАДКИ ID
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
-            
-            // Логика статуса
             if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
                 const date = new Date(db.premiumUntil).toLocaleDateString();
                 statusBox.className = 'premium-status active';
@@ -465,29 +467,13 @@
                 statusBox.className = 'premium-status expired';
                 statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
             }
-
-            // 👇 ГЛАВНАЯ ЧАСТЬ: ВЫВОДИМ ОБА ID НА ЭКРАН
+            
+            // Чистый Support ID
             const debugEl = document.getElementById('debug-id');
-            const authUser = auth.currentUser; // Получаем текущего юзера Firebase
-            
-            let debugText = `TG ID: ${currentUserID}`; // ID из Телеграма (название папки)
-            
-            if (authUser) {
-                debugText += `<br>Auth UID: ${authUser.uid}`; // ID из Токена (пропуск)
-                // Сравниваем их
-                if (String(currentUserID) === String(authUser.uid)) {
-                    debugText += `<br>✅ <span style="color:green">СОВПАДАЮТ</span>`;
-                } else {
-                    debugText += `<br>❌ <span style="color:red">НЕ СОВПАДАЮТ</span>`;
-                }
-            } else {
-                debugText += `<br>Auth UID: ⚠️ НЕТ АВТОРИЗАЦИИ`;
-            }
-            
-            if(debugEl) debugEl.innerHTML = debugText;
+            const uid = auth.currentUser?.uid || currentUserID;
+            if(debugEl) debugEl.innerText = 'Support ID: ' + uid;
         }
 
-        // 👇 ИСПРАВЛЕНИЕ: МГНОВЕННОЕ ОБНОВЛЕНИЕ СТАТУСА ПРИ АКТИВАЦИИ
         window.activatePromo = async function() {
             const code = document.getElementById('promo-input').value.trim();
             if (!code) return;
@@ -502,11 +488,9 @@
                 const data = await res.json();
                 if (data.success) { 
                     alert('🎉 ' + data.message); 
-                    // МГНОВЕННО ОБНОВЛЯЕМ ЛОКАЛЬНЫЕ ДАННЫЕ
                     if (data.newPremiumUntil) {
                         db.premiumUntil = data.newPremiumUntil;
                         db.isPremium = true;
-                        // Не вызываем saveDB() здесь, чтобы не перезаписать сразу же
                         openSettings(); 
                     }
                     closeModal('settings-modal'); 
@@ -516,14 +500,10 @@
             btn.innerHTML = 'OK';
         }
 
-        // 👇 ОБНОВЛЕНО: ОТПРАВКА НИКНЕЙМА
         window.sendFeedback = async function() {
             const text = document.getElementById('feedback-text').value.trim();
             if(!text) return;
-            
-            // Пытаемся получить username
             const username = tg.initDataUnsafe?.user?.username || 'hidden';
-
             try {
                 await fetch(`${API_URL}/api/feedback`, {
                     method: 'POST',
@@ -532,16 +512,13 @@
                         userId: currentUserID, 
                         text: text, 
                         name: tg.initDataUnsafe?.user?.first_name || 'Guest',
-                        username: username // Отправляем на сервер
+                        username: username 
                     })
                 });
                 alert("Сообщение отправлено!"); 
                 document.getElementById('feedback-text').value = ''; 
                 closeModal('settings-modal');
-            } catch(e) { 
-                console.error(e);
-                alert("Ошибка отправки"); 
-            }
+            } catch(e) { console.error(e); alert("Ошибка отправки"); }
         }
 
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
@@ -552,7 +529,6 @@
             if (typeof ym !== 'undefined') {
                 var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
                 ym(106183159, 'hit', virtualUrl, { title: view, referer: window.location.href });
-                console.log('[Metrica] Hit sent:', virtualUrl);
             }
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.menu-item');
@@ -567,10 +543,7 @@
             const container = document.getElementById('app-view');
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            
-            if (currentView === 'done' && (db.done && db.done.length > 0)) {
-                html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
-            }
+            if (currentView === 'done' && (db.done && db.done.length > 0)) html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
             if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
             html += `</div>`;
             
@@ -614,7 +587,12 @@
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
             
             let buttons = '';
-            if(!['trash','done'].includes(currentView)) { buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; }
+            // 👇 КНОПКА AI-МАГИИ
+            if(!['trash','done'].includes(currentView)) { 
+                buttons += `<button class="btn-action ai-magic" onclick="magicDecompose(${item.id})"><i class="ph-bold ph-magic-wand"></i></button>`;
+                buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; 
+            }
+
             if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; } else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
 
             const displayTitle = item.title || item.text;
@@ -622,6 +600,22 @@
             let checkboxHtml = '';
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
             return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
+        }
+
+        // 👇 НОВАЯ ФУНКЦИЯ: ПРЕВРАЩЕНИЕ ЗАДАЧИ В ПРОЕКТ С ПОМОЩЬЮ ИИ
+        window.magicDecompose = async function(id) {
+            if (!checkPremiumLimits()) return;
+            const task = db[currentView].find(t => t.id === id);
+            if(!task) return;
+
+            if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return;
+            window.haptic('medium');
+            
+            // Открываем модалку проекта и сразу запускаем AI
+            openProjectModal(null, task);
+            setTimeout(() => {
+                askAIForSteps();
+            }, 500);
         }
 
         window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; renderCurrentView(); saveDB(); }
@@ -680,4 +674,3 @@
     </script>
 </body>
 </html>
-
