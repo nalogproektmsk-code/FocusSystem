@@ -30,17 +30,80 @@
     <noscript><div><img src="https://mc.yandex.ru/watch/106183159" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 
     <style>
-        :root { --bg-color: #F8FAFC; --sidebar-bg: #FFFFFF; --card-bg: #FFFFFF; --primary-color: #F97316; --primary-hover: #EA580C; --primary-text: #FFFFFF; --text-main: #1E293B; --text-secondary: #64748B; --border-color: #E2E8F0; --input-bg: #FFFFFF; --input-border: #CBD5E1; --shadow-soft: 0 4px 20px rgba(148, 163, 184, 0.1); --shadow-hover: 0 10px 25px rgba(148, 163, 184, 0.15); --radius-xl: 20px; --radius-md: 12px; --radius-sm: 8px; --danger: #EF4444; --success: #10B981; --warning: #F59E0B; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; font-size: 15px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
-        #splash-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; transition: opacity 0.5s ease; }
+        /* --- DESIGN SYSTEM VARS --- */
+        :root {
+            --bg-color: #F8FAFC; 
+            --sidebar-bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --primary-color: #F97316; 
+            --primary-hover: #EA580C;
+            --primary-text: #FFFFFF;
+            --text-main: #1E293B; 
+            --text-secondary: #64748B; 
+            --border-color: #E2E8F0;
+            --input-bg: #FFFFFF; 
+            --input-border: #CBD5E1; 
+            --shadow-soft: 0 4px 20px rgba(148, 163, 184, 0.1);
+            --shadow-hover: 0 10px 25px rgba(148, 163, 184, 0.15);
+            --radius-xl: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            -webkit-tap-highlight-color: transparent;
+            font-size: 15px; 
+            line-height: 1.5;
+        }
+
+        /* SPLASH SCREEN */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
         .quote-text { font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 16px; font-style: italic; }
         .quote-author { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
-        input, textarea, select { flex: 1; padding: 14px 16px; border: 1px solid var(--input-border); border-radius: var(--radius-md); font-size: 16px; font-family: 'Inter', sans-serif; outline: none; background: var(--input-bg); color: var(--text-main); transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        /* INPUTS */
+        input, textarea, select { 
+            flex: 1; 
+            padding: 14px 16px; 
+            border: 1px solid var(--input-border); 
+            border-radius: var(--radius-md);
+            font-size: 16px; 
+            font-family: 'Inter', sans-serif; 
+            outline: none; 
+            background: var(--input-bg); 
+            color: var(--text-main); 
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
         input:focus, textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
         input::placeholder { color: #94A3B8; }
+        
         .input-wrapper { background: #fff; border: 1px solid transparent; }
         .input-group { display: flex; gap: 8px; background: transparent; padding: 6px; align-items: center; width: 100%; box-sizing: border-box; }
         .input-group input { border: none; box-shadow: none; background: transparent; flex: 1; min-width: 0; }
+        
+        /* SIDEBAR */
         .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 32px 20px; flex-shrink: 0; overflow-y: auto; }
         .logo { font-size: 20px; font-weight: 800; margin-bottom: 40px; color: var(--text-main); padding-left: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; flex-shrink: 0; }
         .logo i { color: var(--primary-color); font-size: 24px; }
@@ -52,32 +115,47 @@
         .badge { background: #F1F5F9; color: var(--text-secondary); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
         .menu-item.active .badge { background: #FED7AA; color: #9A3412; }
         .spacer { height: 1px; background: var(--border-color); margin: 20px 0; flex-shrink: 0; }
+        
+        /* MOBILE NAV */
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); padding-bottom: max(15px, env(safe-area-inset-bottom)); padding-top: 12px; border-top: 1px solid var(--border-color); z-index: 100; overflow-x: auto; white-space: nowrap; scrollbar-width: none; gap: 8px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
         .nav-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 72px; padding: 4px; color: var(--text-secondary); font-size: 11px; font-weight: 600; border-radius: 12px; transition: 0.2s; position: relative; }
         .nav-item.active { color: var(--primary-color); }
         .nav-icon { font-size: 26px; margin-bottom: 3px; position: relative; }
         .nav-item.active .nav-icon { font-weight: bold; }
         .nav-badge { position: absolute; top: -4px; right: -6px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 99px; display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #fff; display: none; }
+
         @media (max-width: 768px) { .sidebar { display: none; } .bottom-nav { display: flex; } .main { padding: 20px 16px; padding-bottom: 110px; } .modal { width: 100% !important; border-radius: 24px 24px 0 0 !important; bottom: 0 !important; top: auto !important; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; } .modal-overlay { align-items: flex-end; } }
+
+        /* MAIN AREA */
         .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; } .title { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+        .title { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+        
         .btn-add { background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
         .btn-add:active { transform: scale(0.9); }
         .btn-wizard { width: 100%; background: linear-gradient(135deg, #10B981, #059669); color: white; margin-bottom: 24px; font-size: 15px; font-weight: 700; height: 48px; border-radius: var(--radius-md); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+
         .task-list { display: flex; flex-direction: column; gap: 16px; }
         .task-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius-xl); border: 1px solid transparent; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: var(--shadow-soft); transition: all 0.2s ease; }
         .task-left { display: flex; gap: 16px; align-items: flex-start; flex: 1; }
         .task-check { width: 24px; height: 24px; border: 2px solid #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: transparent; margin-top: 2px; transition: 0.2s; }
+        .task-check:hover { border-color: var(--primary-color); }
         .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
         .task-content { flex: 1; padding-right: 10px; }
         .task-title { font-weight: 600; font-size: 16px; line-height: 1.4; color: var(--text-main); margin-bottom: 8px; }
         .task-meta { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag { padding: 4px 10px; background: #F1F5F9; color: var(--text-secondary); border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-right: 4px; }
-        .actions { display: flex; gap: 4px; } .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #94A3B8; cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .tag { padding: 4px 10px; background: #F1F5F9; color: var(--text-secondary); border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .tag.quick { background: #FFF7ED; color: #EA580C; }
+        .tag.date { background: #F0F9FF; color: #0284C7; }
+        .tag.project { background: #F5F3FF; color: #7C3AED; }
+        .actions { display: flex; gap: 4px; }
+        .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #94A3B8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
         .btn-action:hover { background: #F1F5F9; color: var(--text-main); }
         .btn-action.delete:hover { background: #FEF2F2; color: var(--danger); }
         .section-title { font-size: 12px; font-weight: 800; color: var(--text-secondary); margin-top: 30px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
         .task-num { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-right: 2px; background: #F1F5F9; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-top: 2px; }
+
+        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal { background: #fff; width: 450px; padding: 32px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.5); }
         .modal-header { font-size: 20px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -100,6 +178,7 @@
 
     <div class="sidebar">
         <div class="logo"><i class="ph-fill ph-rocket-launch"></i> GTD Focus</div>
+        
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -222,7 +301,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // 👇 ДОБАВЛЕНО: update для безопасного обновления
+        // 👇 ДОБАВЛЕНО: update для безопасного сохранения
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -276,8 +355,10 @@
             }, 2000);
         }
 
+        // 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ ВХОДА (С ЗАЩИТОЙ)
         async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
+            
             if (user) {
                 currentUserID = String(user.id);
                 const name = user.first_name;
@@ -285,37 +366,43 @@
                 if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-rocket-launch"></i> ${name}'s Focus`;
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
 
+                // 1. ЗАПРОС ТОКЕНА У СЕРВЕРА
                 try {
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData })
+                        body: JSON.stringify({ initData: tg.initData }) // Теперь backend тут сохранит имя
                     });
                     
                     if (!response.ok) throw new Error("Auth Failed");
                     const { token } = await response.json();
+                    
+                    // 2. ВХОД В FIREBASE
                     await signInWithCustomToken(auth, token);
-                    console.log("✅ Auth Success");
-                } catch (e) { console.error("Auth Error:", e); }
+                    console.log("✅ Успешная авторизация в базе!");
+
+                } catch (e) {
+                    console.error("Auth Error:", e);
+                }
             } else {
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
             
+            // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ
             const userRef = ref(dbRef, 'users/' + currentUserID);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     db = { ...db, ...data };
-                    // Безопасное приведение типов массивов (Firebase иногда возвращает объекты)
-                    if(!Array.isArray(db.inbox)) db.inbox = Object.values(db.inbox || {});
-                    if(!Array.isArray(db.today)) db.today = Object.values(db.today || {});
-                    if(!Array.isArray(db.projects)) db.projects = Object.values(db.projects || {});
-                    // ... можно добавить для остальных, но это главные
+                } else {
+                    // Если данных нет ВООБЩЕ - сохраняем дефолт
+                    // Но если это первый запуск, то сервер мог уже создать премиум запись
+                    // Поэтому аккуратно. В данном случае лучше не сохранять сразу.
+                    // saveDB();  <-- УБРАЛИ АВТО-СОХРАНЕНИЕ ПРИ ПУСТОЙ БАЗЕ
                 }
-                // Мы НЕ вызываем saveDB здесь, чтобы не перезаписать пустой базой
-                isLoaded = true; // Разрешаем сохранения
+                isLoaded = true; // Снимаем предохранитель
                 updateBadges();
                 renderCurrentView();
                 
@@ -324,11 +411,13 @@
             });
         }
 
-        // 👇 ГЛАВНАЯ ЗАЩИТА ОТ ПЕРЕЗАПИСИ
+        // 👇 ГЛАВНОЕ ИСПРАВЛЕНИЕ: БЕЗОПАСНОЕ СОХРАНЕНИЕ
+        // Мы используем update() и УДАЛЯЕМ поля премиума из сохраняемого объекта,
+        // чтобы фронтенд никогда не мог стереть премиум, выданный сервером.
         function saveDB() {
-            if(!isLoaded) return; // Не сохраняем, пока не загрузились
+             // Если данные не загружены - стоп (защита от перезаписи пустотой)
+            if (!isLoaded) return;
 
-            // Формируем белый список (только задачи!)
             const dataToSave = { 
                 inbox: db.inbox || [],
                 today: db.today || [],
@@ -338,16 +427,16 @@
                 someday: db.someday || [],
                 reference: db.reference || [],
                 done: db.done || [],
-                trash: db.trash || []
-                // НЕТ ПОЛЕЙ PREMIUM
+                trash: db.trash || [],
+                // СЮДА СПЕЦИАЛЬНО НЕ ВКЛЮЧЕНЫ premiumUntil и isPremium
             };
 
+            // Используем update вместо set
             update(ref(dbRef, 'users/' + currentUserID), dataToSave).catch(e => {
                 console.error("Save Error:", e);
             });
-            // Обновляем UI *до* сохранения для быстродействия
             updateBadges();
-            renderCurrentView(); 
+            renderCurrentView();
         }
 
         function checkPremiumLimits() {
@@ -361,6 +450,7 @@
             return true;
         }
 
+        // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ССЫЛКА НА closeApp()
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
@@ -370,12 +460,15 @@
                 statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
             } else {
                 statusBox.className = 'premium-status expired';
+                // Сделали кнопку более явной и рабочей
                 statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
             }
+            // ID для отладки
             const debugEl = document.getElementById('debug-id');
             if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
         }
 
+        // 👇 ИСПРАВЛЕНИЕ: МГНОВЕННОЕ ОБНОВЛЕНИЕ СТАТУСА ПРИ АКТИВАЦИИ
         window.activatePromo = async function() {
             const code = document.getElementById('promo-input').value.trim();
             if (!code) return;
@@ -390,9 +483,11 @@
                 const data = await res.json();
                 if (data.success) { 
                     alert('🎉 ' + data.message); 
+                    // МГНОВЕННО ОБНОВЛЯЕМ ЛОКАЛЬНЫЕ ДАННЫЕ
                     if (data.newPremiumUntil) {
                         db.premiumUntil = data.newPremiumUntil;
                         db.isPremium = true;
+                        // Не вызываем saveDB() здесь, чтобы не перезаписать сразу же
                         openSettings(); 
                     }
                     closeModal('settings-modal'); 
@@ -402,20 +497,32 @@
             btn.innerHTML = 'OK';
         }
 
+        // 👇 ОБНОВЛЕНО: ОТПРАВКА НИКНЕЙМА
         window.sendFeedback = async function() {
             const text = document.getElementById('feedback-text').value.trim();
             if(!text) return;
+            
+            // Пытаемся получить username
             const username = tg.initDataUnsafe?.user?.username || 'hidden';
+
             try {
                 await fetch(`${API_URL}/api/feedback`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest', username: username })
+                    body: JSON.stringify({ 
+                        userId: currentUserID, 
+                        text: text, 
+                        name: tg.initDataUnsafe?.user?.first_name || 'Guest',
+                        username: username // Отправляем на сервер
+                    })
                 });
                 alert("Сообщение отправлено!"); 
                 document.getElementById('feedback-text').value = ''; 
                 closeModal('settings-modal');
-            } catch(e) { console.error(e); alert("Ошибка отправки"); }
+            } catch(e) { 
+                console.error(e);
+                alert("Ошибка отправки"); 
+            }
         }
 
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
@@ -438,13 +545,16 @@
         }
 
         window.renderCurrentView = function() {
-            // Рисуем интерфейс СРАЗУ, не дожидаясь базы (она подтянется)
             const container = document.getElementById('app-view');
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            if (currentView === 'done' && (db.done && db.done.length > 0)) html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
+            
+            if (currentView === 'done' && (db.done && db.done.length > 0)) {
+                html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:13px;">Очистить всё</button>`;
+            }
             if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:13px;">Очистить</button>`;
             html += `</div>`;
+            
             if(!db[currentView]) db[currentView] = [];
             if (currentView === 'inbox') {
                 html += `<div class="input-wrapper"><div class="input-group"><input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()"><button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button></div></div>`;
@@ -495,70 +605,14 @@
             return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
-        // Обновленные функции действий: Сначала меняем данные -> обновляем UI -> потом сохраняем
-        window.addTask = function() { 
-            window.haptic('light'); 
-            const val = document.getElementById('main-input').value.trim(); 
-            if(!val) return; 
-            if(!db.inbox) db.inbox = []; 
-            db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); 
-            document.getElementById('main-input').value = ''; 
-            // Сначала рисуем, потом сохраняем!
-            renderCurrentView();
-            saveDB(); 
-        }
-
-        window.moveToTrash = function(from, id) { 
-            window.haptic('medium'); 
-            const idx = db[from].findIndex(t => t.id === id); 
-            if(idx > -1) { 
-                const item = db[from].splice(idx, 1)[0]; 
-                item.originalFolder = from; 
-                if(!db.trash) db.trash = []; 
-                db.trash.unshift(item); 
-                renderCurrentView();
-                saveDB(); 
-            } 
-        }
-
+        window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; renderCurrentView(); saveDB(); }
+        window.moveToTrash = function(from, id) { window.haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; if(!db.trash) db.trash = []; db.trash.unshift(item); renderCurrentView(); saveDB(); } }
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); renderCurrentView(); saveDB(); } }
         window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); renderCurrentView(); saveDB(); } }
         window.emptyDone = function() { if(confirm("Переместить все выполненные в корзину?")) { if(!db.trash) db.trash = []; db.trash.push(...db.done.map(i => ({...i, originalFolder: 'done'}))); db.done = []; renderCurrentView(); saveDB(); } }
         window.emptyTrash = function() { window.haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; renderCurrentView(); saveDB(); } }
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); renderCurrentView(); saveDB(); } }
-        
-        window.completeTask = function(from, id) { 
-            window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); 
-            if(idx === -1) return; 
-            const task = db[from][idx]; 
-            if (task.projectId) { 
-                const project = db.projects.find(p => p.id === task.projectId); 
-                if (project) { 
-                    const step = project.steps.find(s => s.id === task.stepId); 
-                    if(step) step.completed = true; 
-                    const nextStep = project.steps.find(s => !s.completed); 
-                    if(nextStep) { 
-                        alert(`Отлично! Следующий шаг: "${nextStep.text}"`); 
-                        db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); 
-                    } else { 
-                        alert("🎉 Проект завершен!"); 
-                        db.projects = db.projects.filter(p => p.id !== project.id); 
-                        project.isProject = true; 
-                        project.completedAt = new Date().toLocaleString(); 
-                        if(!db.done) db.done = []; 
-                        db.done.unshift(project); 
-                    } 
-                } 
-                db[from].splice(idx, 1); 
-            } else { 
-                const item = db[from].splice(idx, 1)[0]; 
-                item.completedAt = new Date().toLocaleString(); 
-                if(!db.done) db.done = []; 
-                db.done.unshift(item); 
-            } 
-            renderCurrentView();
-            saveDB(); 
-        }
+        window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } renderCurrentView(); saveDB(); }
 
         let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
         const questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
