@@ -19,10 +19,16 @@
        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-       ym(106183159, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true, ssr:true, ecommerce:"dataLayer" });
+       // 👇 ИСПРАВЛЕНИЕ: Добавлен triggerEvent:true для лучшей работы в SPA
+       ym(106183159, "init", { 
+            clickmap:true, 
+            trackLinks:true, 
+            accurateTrackBounce:true, 
+            webvisor:true, 
+            triggerEvent:true 
+       });
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106183159" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-
     <style>
         /* --- DESIGN SYSTEM VARS --- */
         :root {
@@ -460,14 +466,25 @@
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-       window.switchView = function(view) {
+        // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
+        window.switchView = function(view) {
             window.haptic('light'); 
             currentView = view;
 
-            // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
-            // Сообщаем Яндексу, что пользователь перешел в новую "папку"
+            // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ (ИСПРАВЛЕННЫЙ) ---
             if (typeof ym !== 'undefined') {
-                ym(106183159, 'hit', '#' + view, { title: view });
+                // Создаем полный виртуальный адрес, чтобы Яндекс понял, что это "страница"
+                var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
+                
+                ym(106183159, 'hit', virtualUrl, { 
+                    title: view,
+                    referer: window.location.href 
+                });
+                
+                // Вывод в консоль для проверки (виден если подключить отладку к телефону)
+                console.log('[Metrica] Hit sent:', virtualUrl);
+            } else {
+                console.log('[Metrica] Not loaded yet');
             }
             // --- КОНЕЦ: КОД ДЛЯ ЯНДЕКС МЕТРИКИ ---
 
@@ -728,4 +745,3 @@
     </script>
 </body>
 </html>
-
