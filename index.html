@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem AI 3.5 Fixed</title>
+    <title>FocusSystem AI 3.6 Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,13 +115,13 @@
         .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
         .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        /* КНОПКИ (FIXED Z-INDEX) */
+        /* КНОПКИ */
         .btn-add { 
             background: var(--primary-color); color: white; width: 48px; height: 48px; 
             border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
             display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0;
-            position: relative; z-index: 100; /* FORCE TOP LAYER */
+            position: relative; z-index: 100;
         }
         .btn-add:active { transform: scale(0.95); }
 
@@ -141,14 +141,13 @@
             cursor: pointer; margin-bottom: 24px; transition: 0.2s; backdrop-filter: blur(5px);
         }
 
-        /* --- НОВАЯ СТРУКТУРА КАРТОЧКИ --- */
+        /* --- TASK CARD --- */
         .task-list { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 2; }
         
         .task-card { 
             background: var(--card-bg); padding: 16px; border-radius: var(--radius-xl); 
             border: 1px solid var(--border-color); backdrop-filter: var(--glass-blur);
-            display: flex; flex-direction: column; /* Вертикальное расположение */
-            gap: 12px; transition: 0.2s;
+            display: flex; flex-direction: column; gap: 12px; transition: 0.2s;
         }
         
         .task-top-row { display: flex; align-items: flex-start; gap: 14px; width: 100%; }
@@ -222,7 +221,7 @@
             font-size: 16px; color: #FFFFFF !important; font-weight: 600; opacity: 1;
         }
 
-        /* WIZARD VISUALS - STYLED BUTTONS */
+        /* WIZARD & FOCUS STYLES */
         .wizard-visual { display: flex; justify-content: center; margin-bottom: 24px; }
         .wizard-icon-circle {
             width: 80px; height: 80px; border-radius: 50%;
@@ -240,13 +239,19 @@
         }
         .wizard-btn:active { transform: scale(0.98); }
 
-        /* FOCUS MODE MODAL */
         .focus-item { 
             background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3);
             padding: 16px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
         }
         .focus-num { font-size: 18px; font-weight: 800; color: #FACC15; }
         .focus-text { font-size: 16px; font-weight: 600; color: #fff; }
+        
+        /* REVIEW MODAL TEXT */
+        .review-text-content {
+            white-space: pre-wrap; color: #e2e8f0; line-height: 1.6; font-size: 15px; 
+            background: rgba(255,255,255,0.03); padding: 16px; border-radius: 16px;
+            max-height: 400px; overflow-y: auto;
+        }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
@@ -278,7 +283,7 @@
                 position: absolute; top: -4px; right: -6px; background: var(--primary-color); color: white; 
                 font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 10px; 
                 display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #1e2028; 
-                display: none; /* Скрыто по умолчанию, покажется через JS если > 0 */
+                display: none; 
             }
         }
     </style>
@@ -297,7 +302,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.5</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.6</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -337,8 +342,8 @@
             <div id="ai-review-btn-container" style="display:none; margin-bottom:20px;">
                 <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">AI ФУНКЦИИ</label>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="btn-primary" style="background: linear-gradient(135deg, #10B981, #059669); font-size:14px; flex:1;" onclick="generateWeeklyReview()"><i class="ph-bold ph-chart-line-up"></i> Weekly Review</button>
-                    <button class="btn-primary" style="background: linear-gradient(135deg, #3B82F6, #2563EB); font-size:14px; flex:1;" onclick="retroactiveTagging()"><i class="ph-bold ph-tag"></i> Обновить теги (AI)</button>
+                    <button id="btn-week-review" class="btn-primary" style="background: linear-gradient(135deg, #10B981, #059669); font-size:14px; flex:1;" onclick="generateWeeklyReview()"><i class="ph-bold ph-chart-line-up"></i> Weekly Review</button>
+                    <button id="btn-auto-tag" class="btn-primary" style="background: linear-gradient(135deg, #3B82F6, #2563EB); font-size:14px; flex:1;" onclick="retroactiveTagging()"><i class="ph-bold ph-tag"></i> Обновить теги (AI)</button>
                 </div>
             </div>
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
@@ -350,7 +355,7 @@
             <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v3.5 • AI Edition<br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
+                FocusSystem v3.6 • AI Edition<br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
     </div>
@@ -368,6 +373,14 @@
         </div>
     </div>
     
+    <div id="review-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">📊 Weekly Review<i class="ph ph-x close-btn" onclick="closeModal('review-modal')" style="cursor:pointer"></i></div>
+            <div id="review-content" class="review-text-content"></div>
+            <button class="btn-primary" style="margin-top:24px;" onclick="closeModal('review-modal')">Отлично</button>
+        </div>
+    </div>
+
     <div id="project-modal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header"><span id="proj-modal-title">Новый проект</span><i class="ph ph-x close-btn" onclick="closeModal('project-modal')"></i></div>
@@ -673,7 +686,6 @@
                 } else { 
                     list.forEach((item, index) => { 
                         let prefix = currentView === 'inbox' ? `<span style="opacity:0.5; margin-right:6px;">${index+1}.</span>` : '';
-                        // FIXED: Pass correct isDoneView boolean
                         html += createCard(item, currentView === 'done', false, prefix); 
                     }); 
                 }
@@ -688,10 +700,8 @@
             if(item.dateStr) metaHtml += `<span class="tag">${formatDateRUS(item.dateStr)}</span>`;
             
             let buttons = '';
-            // Edit button
             if(['inbox', 'today', 'calendar', 'waiting', 'someday'].includes(currentView)) buttons += `<button class="btn-action" onclick="editTask(${item.id})"><i class="ph ph-pencil-simple"></i></button>`;
             
-            // New Info Button
             if(['today', 'projects', 'calendar', 'waiting', 'done'].includes(currentView)) {
                  buttons += `<button class="btn-action" onclick="showTaskInfo(${item.id})"><i class="ph-bold ph-info"></i></button>`;
             }
@@ -703,7 +713,6 @@
             } else if (currentView === 'trash') { 
                 buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
             } else if (isDoneView) { 
-                // FIXED: Returned the missing return and delete buttons for Done view
                 buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph-bold ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; 
             }
 
@@ -740,21 +749,81 @@
             try { 
                 await fetch(`${API_URL}/api/feedback`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' }) }); 
                 alert("Отправлено!"); 
-                textField.value = ''; // Clear text
+                textField.value = ''; 
                 closeModal('settings-modal'); 
             } catch(e) { alert("Ошибка отправки"); } 
         }
 
+        /* --- FIXED AI FEATURES --- */
         window.generateWeeklyReview = async function() {
             if (!checkAIPremium()) return;
-            alert("🤖 AI анализирует вашу неделю... (Эмуляция)");
-            // Здесь будет логика запроса к API
+            const btn = document.getElementById('btn-week-review');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Анализ...';
+            btn.disabled = true;
+
+            const doneCount = (db.done || []).length;
+            const inboxCount = (db.inbox || []).length;
+            const todayCount = (db.today || []).length;
+            const projectCount = (db.projects || []).length;
+
+            const prompt = `Я пользователь системы GTD. Сделай краткий "Weekly Review" (Недельный обзор). Моя статистика: Выполнено задач всего: ${doneCount}. Во входящих висит: ${inboxCount}. На сегодня: ${todayCount}. Активных проектов: ${projectCount}. Дай краткую оценку продуктивности и 1 совет. Используй эмодзи.`;
+
+            try {
+                const res = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt, initData: tg.initData }) });
+                const data = await res.json();
+                if(data.reply) {
+                    const cleanText = data.reply.replace(/\*\*/g, '').replace(/##/g, '').trim(); // Simple cleanup
+                    document.getElementById('review-content').innerText = cleanText;
+                    closeModal('settings-modal');
+                    document.getElementById('review-modal').style.display = 'flex';
+                } else {
+                    alert("AI не ответил. Попробуйте позже.");
+                }
+            } catch (e) {
+                alert("Ошибка соединения с AI.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         window.retroactiveTagging = async function() {
             if (!checkAIPremium()) return;
-            alert("🤖 AI обновляет теги во всех задачах... (Эмуляция)");
-            // Здесь будет логика запроса к API
+            const btn = document.getElementById('btn-auto-tag');
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Сканирую...';
+            btn.disabled = true;
+
+            let updatedCount = 0;
+            const folders = ['inbox', 'today', 'waiting', 'someday'];
+            
+            folders.forEach(folder => {
+                if(db[folder]) {
+                    db[folder].forEach(task => {
+                        const newTags = applyAITags(task.text || "");
+                        if (newTags.length > 0) {
+                            // Merge existing tags with new ones uniquely
+                            const existing = task.tags || [];
+                            const merged = [...new Set([...existing, ...newTags])];
+                            if (merged.length > existing.length) {
+                                task.tags = merged;
+                                updatedCount++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (updatedCount > 0) {
+                saveDB();
+                alert(`✅ Обновлено задач: ${updatedCount}. Теги расставлены.`);
+                closeModal('settings-modal');
+            } else {
+                alert("🔍 Новых тегов для добавления не найдено.");
+            }
+            
+            btn.innerHTML = '<i class="ph-bold ph-tag"></i> Обновить теги (AI)';
+            btn.disabled = false;
         }
 
         window.showTaskInfo = function(id) {
@@ -795,12 +864,11 @@
                 if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } 
             } else { 
                 if(q.yes==='DO_NOW') { 
-                    // Move and notify without blocking UI excessively
                     moveTo('today', { isQuick: true }); 
                     return; 
                 } 
                 if(q.yes==='CALENDAR') { 
-                    closeModal('wizard-modal'); // CLOSE WIZARD BEFORE OPENING CALENDAR
+                    closeModal('wizard-modal'); 
                     setTimeout(() => openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})), 100);
                     return; 
                 } 
@@ -822,7 +890,6 @@
             renderCurrentView(); 
             saveDB(); 
 
-            // Re-open wizard if items remain
             if(db.inbox.length>0) {
                 setTimeout(startWizard, 300); 
             }
@@ -842,10 +909,25 @@
             const q = document.getElementById('search-input').value.toLowerCase();
             const res = document.getElementById('search-results'); res.innerHTML = '';
             if(q.length<1) return res.innerHTML = '<div style="text-align:center;color:#94A3B8">Начните вводить...</div>';
-            const all=[]; ['inbox','today','projects','waiting','someday','done'].forEach(v=>{ if(db[v]) db[v].forEach(t=>all.push({...t,s:v})) });
-            const found = all.filter(t=>t.text.toLowerCase().includes(q));
+            
+            const all=[]; 
+            // Fix: Normalize data structure. Projects have 'title', tasks have 'text'.
+            ['inbox','today','projects','waiting','someday','done'].forEach(v=>{ 
+                if(db[v]) db[v].forEach(t=>{
+                    // Create a normalized search string combining text and title
+                    const searchStr = (t.text || t.title || "").toLowerCase();
+                    all.push({...t, s:v, searchStr: searchStr})
+                }) 
+            });
+            
+            const found = all.filter(t=>t.searchStr.includes(q));
+            
             if(found.length===0) res.innerHTML='<div style="text-align:center;color:#94A3B8">Ничего не найдено</div>';
-            else found.forEach(t=>{ res.innerHTML+=`<div onclick="closeModal('search-modal');switchView('${t.s}')" style="background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;cursor:pointer;"><div style="font-weight:600;color:#fff">${t.text}</div><div style="font-size:12px;color:#3E7BFF">${t.s.toUpperCase()}</div></div>` });
+            else found.forEach(t=>{ 
+                // Display Title for projects or Text for tasks
+                const display = t.title || t.text || "Без названия";
+                res.innerHTML+=`<div onclick="closeModal('search-modal');switchView('${t.s}')" style="background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;cursor:pointer;"><div style="font-weight:600;color:#fff">${display}</div><div style="font-size:12px;color:#3E7BFF">${t.s.toUpperCase()}</div></div>` 
+            });
         }
         
         let tempSteps=[];
