@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem AI 3.3</title>
+    <title>FocusSystem AI 3.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,6 +51,7 @@
             color: var(--text-main); 
             margin: 0; 
             display: flex; 
+            height: 100vh; 
             height: 100dvh; /* FIX: Dynamic Viewport Height for Mobile/Web */
             overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
@@ -114,14 +115,13 @@
         .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
         .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        /* КНОПКИ */
-        /* FIX: Increased specificty and pointer events for Add button */
+        /* КНОПКИ (FIXED Z-INDEX) */
         .btn-add { 
             background: var(--primary-color); color: white; width: 48px; height: 48px; 
             border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
             display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0;
-            position: relative; z-index: 50; pointer-events: auto;
+            position: relative; z-index: 100; /* FORCE TOP LAYER */
         }
         .btn-add:active { transform: scale(0.95); }
 
@@ -129,7 +129,7 @@
             background: rgba(255,255,255,0.1); color: white; width: 48px; height: 48px;
             border-radius: 16px; border: none; font-size: 24px; cursor: pointer;
             display: flex; justify-content: center; align-items: center; transition: 0.2s; flex-shrink: 0;
-            position: relative; z-index: 50; pointer-events: auto;
+            position: relative; z-index: 90;
         }
         .btn-mic.listening { background: #EF4444; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
@@ -151,10 +151,7 @@
             gap: 12px; transition: 0.2s;
         }
         
-        /* Верхний ряд: Чекбокс + Текст */
-        .task-top-row {
-            display: flex; align-items: flex-start; gap: 14px; width: 100%;
-        }
+        .task-top-row { display: flex; align-items: flex-start; gap: 14px; width: 100%; }
         
         .task-check { 
             width: 26px; height: 26px; border: 2px solid rgba(255,255,255,0.2); 
@@ -165,22 +162,17 @@
         
         .task-title { 
             font-size: 17px; font-weight: 600; color: #fff; line-height: 1.5; 
-            word-break: break-word; /* Перенос слов */
-            flex: 1;
+            word-break: break-word; flex: 1;
         }
 
-        /* Нижний ряд: Теги + Кнопки */
         .task-bottom-row {
             display: flex; justify-content: space-between; align-items: center; 
-            width: 100%; gap: 10px;
-            flex-wrap: wrap; /* Чтобы кнопки перенеслись если совсем тесно */
+            width: 100%; gap: 10px; flex-wrap: wrap; 
         }
 
         .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-        
         .actions { display: flex; gap: 8px; opacity: 1; align-items: center; margin-left: auto; }
         
-        /* Кнопки действий */
         .btn-action { 
             background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
             color: #ccc; width: 38px; height: 38px; border-radius: 12px; 
@@ -195,7 +187,6 @@
             background: linear-gradient(90deg, rgba(250, 204, 21, 0.05) 0%, rgba(255,255,255,0.02) 100%);
         }
 
-        /* Теги */
         .tag.quick { background: linear-gradient(90deg, #FACC15, #EAB308); color: #000 !important; font-weight: 800; padding: 4px 10px; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px; display:inline-flex; align-items:center; gap:4px; }
         .tag { padding: 4px 10px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
         .tag.context-tag { color: #60A5FA; background: rgba(96, 165, 250, 0.1); }
@@ -221,13 +212,6 @@
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.2); cursor: pointer;
         }
         
-        /* FIXED: PROJECT STEPS COLOR */
-        .project-progress-bar {
-            background: rgba(255, 255, 255, 0.05); /* Темный полупрозрачный фон */
-            padding: 12px; border-radius: 12px; font-size: 14px; display: flex; 
-            justify-content: space-between; align-items: center; margin-top: 10px;
-        }
-
         .step-row { 
             display: flex; align-items: center; gap: 10px; 
             background: #0f1014; /* Темный фон */
@@ -238,10 +222,8 @@
             font-size: 16px; color: #FFFFFF !important; font-weight: 600; opacity: 1;
         }
 
-        /* WIZARD VISUALS - NEW BUTTONS */
-        .wizard-visual {
-            display: flex; justify-content: center; margin-bottom: 24px;
-        }
+        /* WIZARD VISUALS - STYLED BUTTONS */
+        .wizard-visual { display: flex; justify-content: center; margin-bottom: 24px; }
         .wizard-icon-circle {
             width: 80px; height: 80px; border-radius: 50%;
             background: rgba(62, 123, 255, 0.1); border: 2px solid rgba(62, 123, 255, 0.3);
@@ -249,7 +231,6 @@
             font-size: 40px; color: var(--primary-color);
             box-shadow: 0 0 30px rgba(62, 123, 255, 0.2);
         }
-        
         .wizard-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 10px; }
         .wizard-btn { 
             width: 100%; padding: 18px; border-radius: 18px; border: 1px solid; 
@@ -258,6 +239,14 @@
             justify-content: center; align-items: center;
         }
         .wizard-btn:active { transform: scale(0.98); }
+
+        /* FOCUS MODE MODAL */
+        .focus-item { 
+            background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3);
+            padding: 16px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+        }
+        .focus-num { font-size: 18px; font-weight: 800; color: #FACC15; }
+        .focus-text { font-size: 16px; font-weight: 600; color: #fff; }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
@@ -296,16 +285,14 @@
     <div id="splash-screen">
         <canvas id="splash-canvas"></canvas>
         <div class="splash-content">
-            <div style="font-size: 56px; color: var(--primary-color); margin-bottom: 24px; text-shadow: 0 0 30px rgba(62,123,255,0.5);">
-                <i class="ph-fill ph-brain"></i>
-            </div>
+            <div style="font-size: 56px; color: var(--primary-color); margin-bottom: 24px; text-shadow: 0 0 30px rgba(62,123,255,0.5);"><i class="ph-fill ph-brain"></i></div>
             <div class="quote-text" id="splash-quote"></div>
             <div class="quote-author" id="splash-author"></div>
         </div>
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.3</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.4</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -318,9 +305,7 @@
         <div class="menu-item" onclick="switchView('done')"><span><i class="ph ph-check-circle"></i> Готово</span><span class="badge" id="badge-done">0</span></div>
         <div class="menu-item" onclick="switchView('trash')"><span><i class="ph ph-trash"></i> Корзина</span><span class="badge" id="badge-trash">0</span></div>
         <div class="spacer" style="flex:1;"></div>
-        <div class="menu-item" onclick="openSettings()">
-            <span style="color:var(--text-main)"><i class="ph ph-gear"></i> Настройки</span>
-        </div>
+        <div class="menu-item" onclick="openSettings()"><span style="color:var(--text-main)"><i class="ph ph-gear"></i> Настройки</span></div>
     </div>
 
     <div class="main"><div id="app-view"></div></div>
@@ -344,7 +329,6 @@
         <div class="modal">
             <div class="modal-header">⚙️ Настройки<i class="ph ph-x close-btn" onclick="closeModal('settings-modal')" style="cursor:pointer"></i></div>
             <div id="premium-status-box" class="premium-status">Загрузка...</div>
-            
             <div id="ai-review-btn-container" style="display:none; margin-bottom:20px;">
                 <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">AI ФУНКЦИИ</label>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -352,19 +336,16 @@
                     <button class="btn-primary" style="background: linear-gradient(135deg, #3B82F6, #2563EB); font-size:14px; flex:1;" onclick="retroactiveTagging()"><i class="ph-bold ph-tag"></i> Обновить теги (AI)</button>
                 </div>
             </div>
-
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
             <div style="display:flex; gap:8px; margin-bottom:24px;">
                 <input type="text" id="promo-input" placeholder="Введите код" style="text-transform:uppercase;">
                 <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
-            
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
             <textarea id="feedback-text" placeholder="Ваши идеи..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v3.3 • AI Edition<br>
-                <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
+                FocusSystem v3.4 • AI Edition<br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
     </div>
@@ -410,16 +391,9 @@
     <div id="wizard-modal" class="modal-overlay">
         <div class="modal" style="text-align:center;">
             <div style="font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:20px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
-            
-            <div class="wizard-visual">
-                <div class="wizard-icon-circle">
-                    <i id="wizard-icon" class="ph-fill ph-question"></i>
-                </div>
-            </div>
-
+            <div class="wizard-visual"><div class="wizard-icon-circle"><i id="wizard-icon" class="ph-fill ph-question"></i></div></div>
             <div style="margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 20px; line-height: 1.4; color:#fff;">...</strong></div>
             <div id="wizard-question-text" style="font-size:18px; font-weight:600; margin-bottom:32px; color:var(--primary-color);">...</div>
-            
             <div class="wizard-buttons">
                 <button class="wizard-btn" style="background:rgba(255,77,77,0.1); color:#FF4D4D; border-color:rgba(255,77,77,0.3);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
                 <button class="wizard-btn" style="background:rgba(34,197,94,0.1); color:#22C55E; border-color:rgba(34,197,94,0.3);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
@@ -427,6 +401,16 @@
             <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
+
+    <div id="focus-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">⚡️ AI ULTRA FOCUS<i class="ph ph-x close-btn" onclick="closeModal('focus-modal')" style="cursor:pointer"></i></div>
+            <div style="margin-bottom:20px; color:var(--text-secondary); text-align:center;">Система выбрала 3 задачи для максимальной эффективности прямо сейчас.</div>
+            <div id="focus-list-container"></div>
+            <button class="btn-primary" style="margin-top:24px; background:linear-gradient(135deg, #FACC15, #EAB308); color:black;" onclick="closeModal('focus-modal')">🚀 Принято, работаю!</button>
+        </div>
+    </div>
+
     <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
     <div id="date-modal" class="modal-overlay"><div class="modal"><div class="modal-header">📅 Выберите время</div><label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ДАТА</label><input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px;"><label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ВРЕМЯ</label><input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px;"><button class="btn-primary" onclick="submitDateModal()">Сохранить</button></div></div>
     <div id="move-modal" class="modal-overlay"><div class="modal"><div class="modal-header">Куда переместить?</div><div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('reference')"><span><i class="ph ph-archive-box"></i> Архив</span></button></div><button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button></div></div>
@@ -471,80 +455,47 @@
             { t: "Время — самый ценный ресурс.", a: "Теофраст" }, { t: "Живи так, будто этот день — последний.", a: "Сенека" }
         ];
 
-        /* --- 3D GEOMETRY ENGINE (Metamorphosis) --- */
+        /* --- 3D GEOMETRY ENGINE --- */
         class Geometry3D {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
                 this.ctx = this.canvas.getContext('2d');
-                this.vertices = [];
-                this.edges = [];
-                this.angleX = 0;
-                this.angleY = 0;
-                this.resize();
-                this.initIcosahedron();
+                this.vertices = []; this.edges = [];
+                this.angleX = 0; this.angleY = 0;
+                this.resize(); this.initIcosahedron();
                 window.addEventListener('resize', () => this.resize());
             }
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.cx = this.canvas.width/2; this.cy = this.canvas.height/2; }
             initIcosahedron() {
                 const t = (1.0 + Math.sqrt(5.0)) / 2.0;
-                this.vertices = [
-                    [-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0],
-                    [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
-                    [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]
-                ];
-                // Создаем связи (ближайшие соседи)
-                for(let i=0; i<this.vertices.length; i++) {
-                    for(let j=i+1; j<this.vertices.length; j++) {
-                        const dist = Math.hypot(this.vertices[i][0]-this.vertices[j][0], this.vertices[i][1]-this.vertices[j][1], this.vertices[i][2]-this.vertices[j][2]);
-                        if(dist < 2.5) this.edges.push([i, j]);
-                    }
-                }
+                this.vertices = [[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]];
+                for(let i=0; i<this.vertices.length; i++) for(let j=i+1; j<this.vertices.length; j++) if(Math.hypot(this.vertices[i][0]-this.vertices[j][0], this.vertices[i][1]-this.vertices[j][1], this.vertices[i][2]-this.vertices[j][2]) < 2.5) this.edges.push([i, j]);
             }
             rotate(v, ax, ay) {
-                let y = v[1], z = v[2];
-                v[1] = y*Math.cos(ax) - z*Math.sin(ax);
-                v[2] = z*Math.cos(ax) + y*Math.sin(ax);
-                let x = v[0]; z = v[2];
-                v[0] = x*Math.cos(ay) - z*Math.sin(ay);
-                v[2] = z*Math.cos(ay) + x*Math.sin(ay);
+                let y = v[1], z = v[2]; v[1] = y*Math.cos(ax) - z*Math.sin(ax); v[2] = z*Math.cos(ax) + y*Math.sin(ax);
+                let x = v[0]; z = v[2]; v[0] = x*Math.cos(ay) - z*Math.sin(ay); v[2] = z*Math.cos(ay) + x*Math.sin(ay);
             }
             animate() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 this.angleX += 0.005; this.angleY += 0.008;
                 const scale = Math.min(this.canvas.width, this.canvas.height) * 0.25;
                 const projected = [];
-                
-                // Metamorphosis: Pulse vertices
                 const time = Date.now() * 0.001;
-                
                 this.vertices.forEach((v, i) => {
-                    const pulse = 1 + Math.sin(time + i) * 0.1; // Pulsing effect
+                    const pulse = 1 + Math.sin(time + i) * 0.1;
                     let rotV = [v[0]*pulse, v[1]*pulse, v[2]*pulse];
                     this.rotate(rotV, this.angleX, this.angleY);
-                    const z = 1 / (3 - rotV[2] * 0.5); // Perspective
-                    projected.push({ x: this.cx + rotV[0]*scale*z, y: this.cy + rotV[1]*scale*z, z: rotV[2] });
+                    projected.push({ x: this.cx + rotV[0]*scale, y: this.cy + rotV[1]*scale, z: rotV[2] });
                 });
-
                 this.edges.forEach(e => {
                     const p1 = projected[e[0]], p2 = projected[e[1]];
-                    const depth = (p1.z + p2.z) / 2;
-                    const alpha = (depth + 2) / 4; // Fade distant lines
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1.x, p1.y);
-                    this.ctx.lineTo(p2.x, p2.y);
-                    // Color shift
-                    const hue = (time * 20 + depth * 50) % 360;
-                    this.ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
-                    this.ctx.lineWidth = 1 + alpha;
-                    this.ctx.stroke();
+                    const alpha = ((p1.z + p2.z)/2 + 2) / 4;
+                    this.ctx.beginPath(); this.ctx.moveTo(p1.x, p1.y); this.ctx.lineTo(p2.x, p2.y);
+                    this.ctx.strokeStyle = `hsla(${(time*20)%360}, 70%, 60%, ${alpha})`; this.ctx.stroke();
                 });
-
-                projected.forEach((p, i) => {
-                    const alpha = (p.z + 2) / 3;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, 3 * alpha, 0, Math.PI*2);
-                    this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                    this.ctx.fill();
+                projected.forEach(p => {
+                    this.ctx.beginPath(); this.ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                    this.ctx.fillStyle = `rgba(255,255,255,0.8)`; this.ctx.fill();
                 });
                 requestAnimationFrame(() => this.animate());
             }
@@ -552,20 +503,12 @@
 
         let bgGeo, splashGeo;
         function initSplash() {
-            splashGeo = new Geometry3D('splash-canvas');
-            splashGeo.animate();
-            bgGeo = new Geometry3D('bg-canvas');
-            bgGeo.animate();
-
+            splashGeo = new Geometry3D('splash-canvas'); splashGeo.animate();
+            bgGeo = new Geometry3D('bg-canvas'); bgGeo.animate();
             const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
             document.getElementById('splash-quote').innerText = `"${q.t}"`;
             document.getElementById('splash-author').innerText = `— ${q.a}`;
-            
-            setTimeout(() => {
-                const s = document.getElementById('splash-screen');
-                s.style.opacity = '0';
-                setTimeout(() => s.style.display = 'none', 800);
-            }, 4000);
+            setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; }, 4000);
         }
 
         /* --- AUTH & DB --- */
@@ -574,13 +517,9 @@
             if (user) {
                 currentUserID = String(user.id);
                 document.querySelector('.logo').innerHTML = `<i class="ph-fill ph-brain"></i> ${user.first_name}'s Focus`;
-                if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
                 try {
                     const response = await fetch(`${API_URL}/api/auth`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: tg.initData }) });
-                    if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-                    const data = await response.json();
-                    if (!data.token) throw new Error("No token");
-                    await signInWithCustomToken(auth, data.token);
+                    if (response.ok) { const data = await response.json(); if (data.token) await signInWithCustomToken(auth, data.token); }
                 } catch (e) { console.error(e); }
             } else {
                 let storedId = localStorage.getItem('gtd_guest_id');
@@ -590,10 +529,7 @@
             let userPathId = auth.currentUser?.uid || currentUserID;
             onValue(ref(dbRef, 'users/' + userPathId), (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    db = { ...db, ...data };
-                    ['inbox','today','projects','waiting','done','trash'].forEach(k => { if(!Array.isArray(db[k])) db[k] = Object.values(db[k] || {}); });
-                } 
+                if (data) { db = { ...db, ...data }; ['inbox','today','projects','waiting','done','trash'].forEach(k => { if(!Array.isArray(db[k])) db[k] = Object.values(db[k] || {}); }); } 
                 isLoaded = true; updateBadges(); renderCurrentView();
                 if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + userPathId;
                 
@@ -610,284 +546,58 @@
             updateBadges(); renderCurrentView();
         }
 
-        /* --- PREMIUM LOGIC --- */
+        /* --- LOGIC UTILS --- */
         function checkPremiumLimits() {
             if ((db.premiumUntil && new Date(db.premiumUntil) > new Date()) || (db.isPremium === true && !db.premiumUntil)) return true;
-            const activeProjects = (db.projects || []).filter(p => !p.completedAt).length;
-            if (activeProjects >= 3) { alert("💎 Лимит! Бесплатная версия: 3 проекта и нет AI функций."); return false; }
+            if ((db.projects || []).filter(p => !p.completedAt).length >= 3) { alert("💎 Лимит! Бесплатная версия: 3 проекта и нет AI."); return false; }
             return true;
         }
         function checkAIPremium() {
             if ((db.premiumUntil && new Date(db.premiumUntil) > new Date()) || db.isPremium === true) return true;
-            alert("🔒 Эта AI-функция доступна только в Premium.\nОформите подписку в Настройках.");
-            return false;
+            alert("🔒 Эта AI-функция доступна только в Premium."); return false;
         }
-
-        /* --- AI FEATURES (SIMULATION) --- */
-        
-        // 1. AUTO-TAGGING & CONTEXT
         function applyAITags(text) {
-            const contextMap = {
-                'магазин': '@Магазин', 'купить': '@Магазин', 'хлеб': '@Магазин',
-                'написать': '@Компьютер', 'код': '@Компьютер', 'письмо': '@Компьютер',
-                'позвонить': '@Звонки', 'набрать': '@Звонки',
-                'оплатить': '@Финансы', 'счет': '@Финансы',
-                'врач': '@Город', 'сходить': '@Город'
-            };
-            let detected = [];
-            Object.keys(contextMap).forEach(key => {
-                if (text.toLowerCase().includes(key)) detected.push(contextMap[key]);
-            });
-            return [...new Set(detected)]; 
+            const map = {'магазин':'@Магазин','купить':'@Магазин','написать':'@Компьютер','код':'@Компьютер','позвонить':'@Звонки','оплатить':'@Финансы'};
+            let det = []; Object.keys(map).forEach(k => { if (text.toLowerCase().includes(k)) det.push(map[k]); });
+            return [...new Set(det)];
         }
-
-        // 2. DUPLICATE DETECTOR
         function checkDuplicates(text) {
-            const allTasks = [...db.inbox, ...db.today, ...db.projects];
-            const found = allTasks.find(t => t.text.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(t.text.toLowerCase()));
-            if (found && found.text.length > 4) {
-                return confirm(`🤖 AI: Похожая задача уже есть ("${found.text}"). Всё равно создать?`);
-            }
+            const found = [...db.inbox, ...db.today].find(t => t.text.toLowerCase().includes(text.toLowerCase()));
+            if (found && found.text.length > 4) return confirm(`🤖 AI: Похожая задача уже есть ("${found.text}"). Создать?`);
             return true;
         }
+        function isTwoMinuteTask(text) { return ['позвонить','скинуть','отправить','оплатить'].some(v => text.toLowerCase().startsWith(v)); }
 
-        // 3. 2-MINUTE RULE DETECTOR
-        function isTwoMinuteTask(text) {
-            const quickVerbs = ['позвонить', 'скинуть', 'отправить', 'оплатить', 'перевести', 'написать', 'узнать', 'заказать', 'глянуть'];
-            return quickVerbs.some(v => text.toLowerCase().startsWith(v));
-        }
-        
-        // 4. RETROACTIVE TAGGING
-        window.retroactiveTagging = function() {
-            if (!checkAIPremium()) return;
-            let count = 0;
-            const collections = ['inbox', 'today', 'calendar', 'waiting', 'someday'];
-            
-            collections.forEach(col => {
-                if(db[col]) {
-                    db[col].forEach(task => {
-                        const newTags = applyAITags(task.text);
-                        if(newTags.length > 0) {
-                            if(!task.tags) task.tags = [];
-                            // Add only new tags
-                            newTags.forEach(tag => {
-                                if(!task.tags.includes(tag)) { task.tags.push(tag); count++; }
-                            });
-                        }
-                    });
-                }
-            });
-            
-            if(count > 0) {
-                saveDB();
-                alert(`✨ AI обновил ${count} задач и добавил теги!`);
-            } else {
-                alert("AI просканировал задачи, но не нашел ничего нового для тегов.");
-            }
-            closeModal('settings-modal');
-        }
-
-        /* --- VOICE INPUT --- */
-        window.startVoiceInput = function() {
-            if (!checkAIPremium()) return;
-            
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { 
-                alert("🎙 Apple блокирует доступ к микрофону в Telegram.\n\nПожалуйста, используйте кнопку микрофона на стандартной клавиатуре iPhone."); 
-                return; 
-            }
-            
-            const btn = document.getElementById('btn-mic');
-            btn.classList.add('listening');
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
-            
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                processVoiceCommand(transcript);
-                btn.classList.remove('listening');
-            };
-            recognition.onerror = (e) => { 
-                console.error(e);
-                alert("🎙 Ошибка доступа. На iPhone используйте кнопку микрофона на клавиатуре."); 
-                btn.classList.remove('listening'); 
-            };
-            recognition.start();
-        }
-
-        function processVoiceCommand(text) {
-            const lower = text.toLowerCase();
-            let dateStr = null;
-            let timeStr = null;
-            let cleanText = text;
-
-            if (lower.includes('завтра')) {
-                const d = new Date(); d.setDate(d.getDate() + 1);
-                dateStr = d.toISOString().split('T')[0];
-                cleanText = cleanText.replace(/завтра/gi, '').trim();
-            } else if (lower.includes('сегодня')) {
-                dateStr = new Date().toISOString().split('T')[0];
-                cleanText = cleanText.replace(/сегодня/gi, '').trim();
-            }
-
-            const timeMatch = lower.match(/в (\d{1,2})[:\s](\d{2})/);
-            if (timeMatch) {
-                timeStr = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
-                cleanText = cleanText.replace(timeMatch[0], '').trim();
-            }
-
-            cleanText = cleanText.replace(/напомни/gi, '').trim();
-            cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
-
-            if (dateStr) {
-                if (!db.calendar) db.calendar = [];
-                db.calendar.push({ id: Date.now(), text: cleanText, dateStr, timeStr, tags: applyAITags(cleanText), created: new Date().toISOString() });
-                alert(`🤖 AI: Создано событие в календаре:\n"${cleanText}"\n📅 ${dateStr} ⏰ ${timeStr || 'Весь день'}`);
-                saveDB();
-            } else {
-                addTask(cleanText); 
-            }
-        }
-
-        /* --- WEEKLY REVIEW --- */
-        window.generateWeeklyReview = function() {
-            if (!checkAIPremium()) return;
-            const doneCount = db.done.length;
-            const activeProj = db.projects.filter(p => !p.completedAt).length;
-            const stagnant = db.projects.filter(p => p.steps && p.steps.every(s => !s.completed)).length;
-            
-            let msg = `🤖 AI WEEKLY REPORT:\n\n✅ Завершено задач: ${doneCount}\n🏗 Активных проектов: ${activeProj}\n`;
-            if (doneCount > 5) msg += "🔥 Отличная продуктивность!\n";
-            else msg += "🐢 Неделя была тихой. Наверстаем?\n";
-            
-            if (stagnant > 0) msg += `\n⚠️ Проектов без движения: ${stagnant}. Добавь микро-шаг!`;
-            
-            alert(msg);
-        }
-        
-        /* --- AI FOCUS (NEW) --- */
+        /* --- AI FOCUS --- */
         window.activateFocusMode = function() {
             if (!checkAIPremium()) return;
-            if (db.today.length === 0) return alert("Список 'Сегодня' пуст. Нечего фокусировать.");
+            if (db.today.length === 0) return alert("Список 'Сегодня' пуст.");
             
             // Score tasks
             let scored = db.today.map(t => {
                 let score = 0;
-                if (t.isQuick) score += 20; // Easy wins
-                if (t.tags && t.tags.some(tag => tag.includes('Срочно'))) score += 30;
-                score += Math.random() * 10; // AI magic variation
+                if (t.isQuick) score += 50; 
+                if (t.text.length > 20) score += 10;
+                if (t.tags && t.tags.length > 0) score += 20;
+                score += Math.random() * 15;
                 return { ...t, score };
             });
-            
             scored.sort((a,b) => b.score - a.score);
             const top3 = scored.slice(0, 3);
             
-            let msg = "⚡️ AI FOCUS: Твои 3 главные задачи:\n\n";
-            top3.forEach((t, i) => msg += `${i+1}. ${t.text}\n`);
-            msg += "\nЗабудь об остальном. Действуй!";
-            alert(msg);
-        }
-        
-        /* --- SEARCH --- */
-        window.openSearch = function() {
-             document.getElementById('search-modal').style.display = 'flex';
-             document.getElementById('search-input').focus();
-             performSearch();
-        }
-        
-        window.performSearch = function() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const resultsContainer = document.getElementById('search-results');
-            resultsContainer.innerHTML = '';
-            
-            if(query.length < 1) {
-                resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Начните вводить...</div>';
-                return;
-            }
-
-            const allTasks = [];
-            // Collect all tasks with source info
-            ['inbox','today','projects','waiting','someday','done'].forEach(view => {
-                 if(db[view]) db[view].forEach(t => allTasks.push({...t, source: view}));
+            const cont = document.getElementById('focus-list-container');
+            cont.innerHTML = '';
+            top3.forEach((t, i) => {
+                cont.innerHTML += `<div class="focus-item"><div class="focus-num">${i+1}</div><div class="focus-text">${t.text}</div></div>`;
             });
-
-            const found = allTasks.filter(t => t.text.toLowerCase().includes(query));
-            
-            if(found.length === 0) {
-                 resultsContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">Ничего не найдено</div>';
-            } else {
-                 found.forEach(t => {
-                     const iconMap = {'inbox':'ph-tray','today':'ph-fire','projects':'ph-kanban','waiting':'ph-clock-user','someday':'ph-lightbulb','done':'ph-check-circle'};
-                     resultsContainer.innerHTML += `
-                     <div onclick="jumpToTask('${t.source}')" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; cursor:pointer;">
-                        <div style="font-weight:600; color:#fff; margin-bottom:4px;">${t.text}</div>
-                        <div style="font-size:12px; color:var(--primary-color); display:flex; align-items:center; gap:4px;">
-                            <i class="ph ${iconMap[t.source]||'ph-circle'}"></i> ${t.source.toUpperCase()}
-                        </div>
-                     </div>`;
-                 });
-            }
-        }
-        
-        window.jumpToTask = function(view) {
-            closeModal('search-modal');
-            switchView(view);
+            document.getElementById('focus-modal').style.display = 'flex';
         }
 
-        /* --- UI LOGIC --- */
-        window.addTask = function(overrideText = null) { 
-            window.haptic('light'); 
-            const input = document.getElementById('main-input');
-            const val = overrideText || input.value.trim(); 
-            if(!val) return; 
-
-            // AI CHECKS
-            if (checkAIPremium()) {
-                if (!checkDuplicates(val)) return;
-            }
-
-            if(!db.inbox) db.inbox = []; 
-            
-            let newTask = { 
-                id: Date.now(), 
-                text: val, 
-                created: new Date().toISOString(), 
-                isProject: false,
-                isQuick: isTwoMinuteTask(val) // Проверяем 2-минутку сразу
-            };
-            
-            if (checkAIPremium()) {
-                 const tags = applyAITags(val);
-                 if (tags.length) newTask.tags = tags;
-            }
-            
-            db.inbox.unshift(newTask); 
-            if (!overrideText) input.value = ''; 
-            renderCurrentView(); saveDB(); 
-        }
-        
-        // EDIT TASK LOGIC
-        window.editTask = function(id) {
-            const task = db[currentView].find(t => t.id === id);
-            if(!task) return;
-            openInput('Редактировать', (newText) => {
-                task.text = newText;
-                task.tags = applyAITags(newText); // Re-evaluate tags
-                saveDB();
-            });
-            // Pre-fill input
-            setTimeout(() => {
-                document.getElementById('input-modal-field').value = task.text;
-            }, 100);
-        }
-
+        /* --- UI RENDER --- */
         window.renderCurrentView = function() {
             const container = document.getElementById('app-view');
             const bgCanvas = document.getElementById('bg-canvas');
-            
-            // Background Animation logic
-            if (currentView === 'inbox') bgCanvas.style.opacity = '0.15';
-            else bgCanvas.style.opacity = '0';
+            if (currentView === 'inbox') bgCanvas.style.opacity = '0.15'; else bgCanvas.style.opacity = '0';
 
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
@@ -905,52 +615,32 @@
                 if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
             }
             
-            // AI FOCUS BUTTON FOR TODAY
             if (currentView === 'today' && db.today.length > 0) {
                 html += `<button class="btn-wizard" style="background:rgba(250, 204, 21, 0.1); color:#FACC15; border-color:rgba(250, 204, 21, 0.3); margin-bottom:16px;" onclick="activateFocusMode()"><i class="ph-fill ph-lightning"></i> AI Focus: Что делать?</button>`;
             }
             
             html += `<div class="task-list">`;
-            let list = [...db[currentView]]; // copy
-
-            // AI SORTING FOR 'TODAY' (2-minute rule)
-            if (currentView === 'today') {
-                list.sort((a, b) => (b.isQuick === true) - (a.isQuick === true));
-            }
+            let list = [...db[currentView]];
+            if (currentView === 'today') list.sort((a, b) => (b.isQuick === true) - (a.isQuick === true));
 
             if(list.length === 0) { 
                 if (currentView === 'inbox') {
-                    html += `
-                    <div class="empty-state-container">
-                        <div style="text-align:center; color:var(--text-secondary); margin-bottom:12px; font-size:15px;">Входящих нет. Отличная работа! 🎉</div>
-                        <div class="empty-card" onclick="document.getElementById('main-input').focus()">
-                             <div class="empty-icon-box" style="background: rgba(62, 123, 255, 0.1); color: #3E7BFF;"><i class="ph-fill ph-plus-circle"></i></div>
-                             <div class="empty-text"><strong>Добавить задачу</strong><span>Быстрый сброс мыслей</span></div>
-                        </div>
-                        <div class="empty-card" onclick="switchView('projects')">
-                             <div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div>
-                             <div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div>
-                        </div>
-                         <div class="empty-card" onclick="openSearch()">
-                             <div class="empty-icon-box" style="background: rgba(255, 255, 255, 0.1); color: #fff;"><i class="ph-fill ph-magnifying-glass"></i></div>
-                             <div class="empty-text"><strong>Найти задачу</strong><span>Поиск по всем папкам</span></div>
-                        </div>
+                    html += `<div class="empty-state-container">
+                        <div style="text-align:center; color:var(--text-secondary); margin-bottom:12px;">Входящих нет. Отличная работа! 🎉</div>
+                        <div class="empty-card" onclick="document.getElementById('main-input').focus()"><div class="empty-icon-box" style="background: rgba(62, 123, 255, 0.1); color: #3E7BFF;"><i class="ph-fill ph-plus-circle"></i></div><div class="empty-text"><strong>Добавить задачу</strong><span>Быстрый сброс</span></div></div>
+                        <div class="empty-card" onclick="switchView('projects')"><div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div><div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div></div>
+                        <div class="empty-card" onclick="openSearch()"><div class="empty-icon-box" style="background: rgba(255, 255, 255, 0.1); color: #fff;"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-text"><strong>Найти задачу</strong><span>Поиск везде</span></div></div>
                     </div>`;
-                } else {
-                    html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:16px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:48px; margin-bottom:12px; display:block;"></i>Задач нет</div>`; 
-                }
+                } else html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px;"><i class="ph ph-coffee" style="font-size:48px;"></i><br>Задач нет</div>`; 
             } else {
                 if (currentView === 'projects') {
                       list.forEach(item => {
-                        if(!item.steps) item.steps = [];
-                        const activeStep = item.steps.find(s => !s.completed);
-                        const progress = item.steps.filter(s=>s.completed).length + '/' + item.steps.length;
-                        html += `<div class="task-card" style="display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><div style="font-weight:700; font-size:18px; color:var(--text-main);"><i class="ph ph-folder-notch"></i> ${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:15px; color:var(--text-secondary); margin-bottom:12px;">🎯 ${item.goal}</div><div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; font-size:14px; display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; gap:8px; align-items:center;"><i class="ph ph-footprints" style="color:var(--primary-color)"></i> ${activeStep ? activeStep.text : 'Готово!'}</span><span style="font-size:13px; font-weight:700; color:var(--text-secondary);">${progress}</span></div></div>`;
+                        const progress = (item.steps||[]).filter(s=>s.completed).length + '/' + (item.steps||[]).length;
+                        html += `<div class="task-card"><div class="task-top-row"><div style="font-weight:700; font-size:18px; flex:1;">${item.title}</div><div class="actions"><button class="btn-action" onclick="editProject(${item.id})"><i class="ph ph-pencil-simple"></i></button><button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button></div></div><div style="font-size:15px; color:var(--text-secondary);">🎯 ${item.goal}</div><div class="project-progress-bar"><span style="display:flex; gap:8px;"><i class="ph ph-footprints"></i> Прогресс</span><span>${progress}</span></div></div>`;
                       });
                 } else { 
                     list.forEach((item, index) => { 
-                        let prefix = '';
-                        if(currentView === 'inbox') prefix = `<span class="task-num">${index+1}.</span>`;
+                        let prefix = currentView === 'inbox' ? `<span style="opacity:0.5; margin-right:6px;">${index+1}.</span>` : '';
                         html += createCard(item, false, false, prefix); 
                     }); 
                 }
@@ -960,42 +650,21 @@
 
         window.createCard = function(item, isDoneView, isProjectCard, prefixHtml = '') {
             let metaHtml = '';
-            // 2-MIN RULE ICON - ТЕПЕРЬ ОТОБРАЖАЕТСЯ ЕСЛИ ЕСТЬ
             if(item.isQuick) metaHtml += `<span class="tag quick"><i class="ph-fill ph-lightning"></i> 2 мин</span>`;
             if(item.tags) item.tags.forEach(t => metaHtml += `<span class="tag context-tag">${t}</span>`);
-            if(item.dateStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-calendar"></i> ${formatDateRUS(item.dateStr)}</span>`;
-            if(item.timeStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-clock"></i> ${item.timeStr}</span>`;
-            if(item.assignee) metaHtml += `<span class="tag project"><i class="ph-fill ph-user"></i> ${item.assignee}</span>`;
-            if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
+            if(item.dateStr) metaHtml += `<span class="tag">${formatDateRUS(item.dateStr)}</span>`;
             
-            // SMART WAITING NUDGE
-            let nudgeBtn = '';
-            if (currentView === 'waiting') {
-                const daysWaiting = (Date.now() - (item.id)) / (1000 * 60 * 60 * 24);
-                if (daysWaiting > 3) nudgeBtn = `<button class="btn-action" onclick="alert('🤖 AI: Напоминание:\nПривет! Как там дела с задачей: ${item.text}?')" style="color:#FACC15"><i class="ph-fill ph-hand-waving"></i></button>`;
-            }
-
             let buttons = '';
-            // EDIT BUTTON (NEW)
-            if(['inbox', 'today', 'calendar', 'waiting', 'someday'].includes(currentView)) {
-                buttons += `<button class="btn-action" onclick="editTask(${item.id})"><i class="ph ph-pencil-simple"></i></button>`;
-            }
-
+            if(['inbox', 'today', 'calendar', 'waiting', 'someday'].includes(currentView)) buttons += `<button class="btn-action" onclick="editTask(${item.id})"><i class="ph ph-pencil-simple"></i></button>`;
+            
             if(!['trash','done'].includes(currentView)) { 
-                buttons += nudgeBtn;
                 buttons += `<button class="btn-action ai-magic" onclick="magicDecompose(${item.id})"><i class="ph-bold ph-magic-wand"></i></button>`;
                 buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; 
-            }
-            if(currentView === 'trash') { 
+                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`;
+            } else if (currentView === 'trash') { 
                 buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
-            } 
-            else if (isDoneView) { 
-                // RESTORE FROM DONE (NEW)
-                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph-bold ph-arrow-u-up-left"></i></button>`; 
-                buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; 
-            } 
-            else { 
-                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; 
+            } else if (isDoneView) { 
+                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph-bold ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; 
             }
 
             const displayTitle = item.title || item.text;
@@ -1004,40 +673,24 @@
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
             
             const cardClass = item.isQuick ? 'task-card quick-task' : 'task-card';
-            
-            /* --- НОВАЯ ВЕРСТКА КАРТОЧКИ --- */
-            return `
-            <div class="${cardClass}">
-                <div class="task-top-row">
-                    ${checkboxHtml}
-                    <div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${prefixHtml} ${displayTitle}</div>
-                </div>
-                <div class="task-bottom-row">
-                     <div class="task-meta">${metaHtml}</div>
-                     <div class="actions">${buttons}</div>
-                </div>
-            </div>`;
+            return `<div class="${cardClass}"><div class="task-top-row">${checkboxHtml}<div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${prefixHtml} ${displayTitle}</div></div><div class="task-bottom-row"><div class="task-meta">${metaHtml}</div><div class="actions">${buttons}</div></div></div>`;
         }
 
-        /* --- STANDARD FUNCTIONS --- */
+        /* --- ACTIONS --- */
+        window.addTask = function(overrideText = null) { 
+            window.haptic('light'); 
+            const input = document.getElementById('main-input');
+            const val = overrideText || input.value.trim(); 
+            if(!val) return; 
+            if (checkAIPremium() && !checkDuplicates(val)) return;
+            if(!db.inbox) db.inbox = []; 
+            let task = { id: Date.now(), text: val, created: new Date().toISOString(), isQuick: isTwoMinuteTask(val) };
+            if (checkAIPremium()) { const tags = applyAITags(val); if (tags.length) task.tags = tags; }
+            db.inbox.unshift(task); if (!overrideText) input.value = ''; renderCurrentView(); saveDB(); 
+        }
+        window.editTask = function(id) { const t = db[currentView].find(x=>x.id===id); if(t) openInput('Редактировать', (v)=>{ t.text=v; t.tags=applyAITags(v); saveDB(); }); setTimeout(()=>document.getElementById('input-modal-field').value=t.text,100); }
         window.switchView = function(view) { window.haptic('light'); currentView = view; document.querySelectorAll('.nav-item, .menu-item').forEach(el => el.classList.remove('active')); document.querySelectorAll(`[onclick="switchView('${view}')"]`).forEach(el => el.classList.add('active')); renderCurrentView(); }
         window.magicDecompose = async function(id) { if (!checkAIPremium()) return; const task = db[currentView].find(t => t.id === id); if(!task) return; if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return; window.haptic('medium'); openProjectModal(null, task); setTimeout(() => askAIForSteps(), 500); }
-        window.openSettings = function() {
-            document.getElementById('settings-modal').style.display = 'flex';
-            const statusBox = document.getElementById('premium-status-box');
-            const aiBtn = document.getElementById('ai-review-btn-container');
-            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
-                const date = new Date(db.premiumUntil).toLocaleDateString();
-                statusBox.className = 'premium-status active';
-                statusBox.innerHTML = `💎 <b>Premium активен</b><br>До: ${date}`;
-                aiBtn.style.display = 'block';
-            } else {
-                statusBox.className = 'premium-status expired';
-                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
-                aiBtn.style.display = 'none';
-            }
-            if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + (auth.currentUser?.uid || currentUserID);
-        }
         window.activatePromo = async function() { const code = document.getElementById('promo-input').value.trim(); if (!code) return; try { const res = await fetch(`${API_URL}/api/promo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, code: code }) }); const data = await res.json(); if (data.success) { alert('🎉 ' + data.message); if (data.newPremiumUntil) { db.premiumUntil = data.newPremiumUntil; db.isPremium = true; openSettings(); } closeModal('settings-modal'); } else { alert('❌ ' + data.message); } } catch (e) { alert('Ошибка сети'); } }
         window.sendFeedback = async function() { const text = document.getElementById('feedback-text').value.trim(); if(!text) return; try { await fetch(`${API_URL}/api/feedback`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' }) }); alert("Отправлено!"); closeModal('settings-modal'); } catch(e) { alert("Ошибка отправки"); } }
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
@@ -1053,16 +706,7 @@
         
         /* WIZARD VISUALS */
         let wizardTask=null, wizardStep=0, questions = [ { text: "Нужно делать?", icon: "ph-person-simple-run", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", icon: "ph-calendar-plus", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", icon: "ph-users-three", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", icon: "ph-steps", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", icon: "ph-lightning", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", icon: "ph-calendar-check", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
-        
-        window.renderWizard = function() { 
-            const q = questions[wizardStep]; 
-            document.getElementById('wizard-task-text').innerText = wizardTask.text; 
-            document.getElementById('wizard-question-text').innerText = q.text; 
-            document.getElementById('wizard-icon').className = `ph-fill ${q.icon}`;
-            document.getElementById('btn-no').innerText = q.noTxt; 
-            document.getElementById('btn-yes').innerText = q.yesTxt; 
-        }
-        
+        window.renderWizard = function() { const q = questions[wizardStep]; document.getElementById('wizard-task-text').innerText = wizardTask.text; document.getElementById('wizard-question-text').innerText = q.text; document.getElementById('wizard-icon').className = `ph-fill ${q.icon}`; document.getElementById('btn-no').innerText = q.noTxt; document.getElementById('btn-yes').innerText = q.yesTxt; }
         window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
         window.moveTo = function(f, e={}) { db.inbox = db.inbox.filter(t => t.id !== wizardTask.id); if(!db[f]) db[f]=[]; db[f].unshift({...wizardTask, ...e, id:Date.now()}); renderCurrentView(); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
         window.closeModal = function(id) { document.getElementById(id).style.display='none'; }
@@ -1072,29 +716,39 @@
         window.submitDateModal = function() { const d=document.getElementById('calendar-date').value; const t=document.getElementById('calendar-time').value; if(d&&window.dateCallback) window.dateCallback(d,t); closeModal('date-modal'); }
         window.openMoveModal = function(id) { window.moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
         window.submitMove = function(f) { if(!window.moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===window.moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); renderCurrentView(); saveDB(); } closeModal('move-modal'); }
+        
+        /* SEARCH & PROJECT */
+        window.openSearch = function() { document.getElementById('search-modal').style.display = 'flex'; document.getElementById('search-input').focus(); performSearch(); }
+        window.performSearch = function() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const res = document.getElementById('search-results'); res.innerHTML = '';
+            if(q.length<1) return res.innerHTML = '<div style="text-align:center;color:#94A3B8">Начните вводить...</div>';
+            const all=[]; ['inbox','today','projects','waiting','someday','done'].forEach(v=>{ if(db[v]) db[v].forEach(t=>all.push({...t,s:v})) });
+            const found = all.filter(t=>t.text.toLowerCase().includes(q));
+            if(found.length===0) res.innerHTML='<div style="text-align:center;color:#94A3B8">Ничего нет</div>';
+            else found.forEach(t=>{ res.innerHTML+=`<div onclick="closeModal('search-modal');switchView('${t.s}')" style="background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;cursor:pointer;"><div style="font-weight:600;color:#fff">${t.text}</div><div style="font-size:12px;color:#3E7BFF">${t.s.toUpperCase()}</div></div>` });
+        }
+        
         let tempSteps=[];
         window.openProjectModal = function(eid=null, src=null) { closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[]; const aiBtn = document.getElementById('btn-ai-magic'); if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none'; if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); } else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; } renderSteps(); }
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
-        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
-        window.updateStep = function(i,v) { tempSteps[i].text=v };
+        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="tempSteps[${i}].text=this.value"><i class="ph ph-x" style="color:red;padding:5px;" onclick="removeStep(${i})"></i></div>`; }); }
         window.askAIForSteps = async function() {
             if (!checkAIPremium()) return;
             const title = document.getElementById('proj-name').value;
-            if(!title) return alert("Сначала напишите название проекта!");
-            const btn = document.getElementById('btn-ai-magic'); const oldText = btn.innerHTML;
+            if(!title) return alert("Напишите название!");
+            const btn = document.getElementById('btn-ai-magic'); const old = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
             try {
-                const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".`, initData: tg.initData }) });
-                if (response.status === 402) { alert("⛔️ Подписка не активна."); return; }
-                const data = await response.json();
-                if(data.reply) { const lines = data.reply.split('\n').filter(line => line.trim().length > 0); lines.forEach(line => { const cleanText = line.replace(/^[\d\.\-\s]+/, ''); tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false}); }); renderSteps(); window.haptic('success'); }
-            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
+                const res = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Проект: "${title}"`, initData: tg.initData }) });
+                const data = await res.json();
+                if(data.reply) { const lines = data.reply.split('\n').filter(l => l.trim().length > 0); lines.forEach(l => { tempSteps.push({id: Date.now()+Math.random(), text: l.replace(/^[\d\.\-\s]+/, ''), completed: false}); }); renderSteps(); }
+            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = old; btn.disabled = false; }
         }
-        window.saveProject = function() { window.haptic('success'); const eid=document.getElementById('proj-edit-id').value; if (!eid) { if (!checkPremiumLimits()) return; } const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } renderCurrentView(); saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
-        window.editProject = function(id) { openProjectModal(id); }
-        window.updateBadges = function() { const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash']; views.forEach(view => { const el = document.getElementById('badge-' + view); if(el) el.innerText = db[view] ? db[view].length : 0; const mobEl = document.getElementById('mob-badge-' + view); if(mobEl) { const count = db[view] ? db[view].length : 0; mobEl.innerText = count; mobEl.style.display = count > 0 ? 'flex' : 'none'; } }); }
-        
+        window.saveProject = function() { const eid=document.getElementById('proj-edit-id').value; if (!eid && !checkPremiumLimits()) return; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните всё!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } renderCurrentView(); saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
+        window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; const sb = document.getElementById('premium-status-box'); if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) { sb.innerHTML = `💎 <b>Premium</b><br>До: ${new Date(db.premiumUntil).toLocaleDateString()}`; document.getElementById('ai-review-btn-container').style.display='block'; } else { sb.innerHTML = `🌑 <b>Free</b><div onclick="closeApp()" style="color:#991B1B;cursor:pointer;margin-top:5px">👉 КУПИТЬ</div>`; document.getElementById('ai-review-btn-container').style.display='none'; } }
+
         initSplash(); initUserInfo(); switchView('inbox');
     </script>
 </body>
