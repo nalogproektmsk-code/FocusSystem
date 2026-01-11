@@ -451,21 +451,40 @@
         }
 
         // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ССЫЛКА НА closeApp()
+       // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ДЛЯ ОТЛАДКИ ID
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
+            
+            // Логика статуса
             if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
                 const date = new Date(db.premiumUntil).toLocaleDateString();
                 statusBox.className = 'premium-status active';
                 statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
             } else {
                 statusBox.className = 'premium-status expired';
-                // Сделали кнопку более явной и рабочей
                 statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
             }
-            // ID для отладки
+
+            // 👇 ГЛАВНАЯ ЧАСТЬ: ВЫВОДИМ ОБА ID НА ЭКРАН
             const debugEl = document.getElementById('debug-id');
-            if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
+            const authUser = auth.currentUser; // Получаем текущего юзера Firebase
+            
+            let debugText = `TG ID: ${currentUserID}`; // ID из Телеграма (название папки)
+            
+            if (authUser) {
+                debugText += `<br>Auth UID: ${authUser.uid}`; // ID из Токена (пропуск)
+                // Сравниваем их
+                if (String(currentUserID) === String(authUser.uid)) {
+                    debugText += `<br>✅ <span style="color:green">СОВПАДАЮТ</span>`;
+                } else {
+                    debugText += `<br>❌ <span style="color:red">НЕ СОВПАДАЮТ</span>`;
+                }
+            } else {
+                debugText += `<br>Auth UID: ⚠️ НЕТ АВТОРИЗАЦИИ`;
+            }
+            
+            if(debugEl) debugEl.innerHTML = debugText;
         }
 
         // 👇 ИСПРАВЛЕНИЕ: МГНОВЕННОЕ ОБНОВЛЕНИЕ СТАТУСА ПРИ АКТИВАЦИИ
@@ -661,3 +680,4 @@
     </script>
 </body>
 </html>
+
