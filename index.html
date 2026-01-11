@@ -228,7 +228,8 @@
             <textarea id="feedback-text" placeholder="Нашли ошибку или есть идея? Напишите нам!" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v1.5 • Maximum Efficiency
+                FocusSystem v1.5 • Maximum Efficiency<br>
+                <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
     </div>
@@ -329,6 +330,11 @@
         let currentView = 'inbox';
         let currentUserID = 'guest_user';
 
+        // ИСПРАВЛЕНИЕ: Выносим функцию закрытия в глобальную область, чтобы onclick="closeApp()" работал
+        window.closeApp = function() {
+            tg.close();
+        }
+
         // QUOTES FOR SPLASH
         const QUOTES = [
             { t: "Секрет успеха — начать.", a: "Марк Твен" },
@@ -365,7 +371,7 @@
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData })
+                        body: JSON.stringify({ initData: tg.initData }) // Теперь backend тут сохранит имя
                     });
                     
                     if (!response.ok) throw new Error("Auth Failed");
@@ -393,11 +399,10 @@
                 if (data) db = data; else saveDB();
                 updateBadges();
                 renderCurrentView();
-            }, (error) => {
-                // Если сработали правила защиты и нас не пустили
-                if (error.code === 'PERMISSION_DENIED') {
-                    console.error("Доступ к базе запрещен.");
-                }
+                
+                // Обновляем ID в настройках для отладки
+                const debugEl = document.getElementById('debug-id');
+                if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
             });
         }
 
@@ -420,7 +425,7 @@
             return true;
         }
 
-        // 👇 ОБНОВЛЕНО: ССЫЛКА НА БОТА ЗАКРЫВАЕТ ПРИЛОЖЕНИЕ (ЧТОБЫ ВЕРНУТЬСЯ В ЧАТ)
+        // 👇 ИСПРАВЛЕНИЕ: КНОПКА "КУПИТЬ В БОТЕ" ЗАКРЫВАЕТ APP ЧЕРЕЗ closeApp()
         window.openSettings = function() {
             document.getElementById('settings-modal').style.display = 'flex';
             const statusBox = document.getElementById('premium-status-box');
@@ -430,12 +435,15 @@
                 statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
             } else {
                 statusBox.className = 'premium-status expired';
-                // Сделали кнопку более явной и рабочей
-                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><a href="#" onclick="tg.close();" style="color:#991B1B; font-weight:bold; text-decoration:underline; cursor:pointer;">👉 Купить в боте</a>`;
+                // Вызываем глобальную функцию closeApp()
+                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:bold; text-decoration:underline; cursor:pointer; margin-top:5px;">👉 Купить в боте</div>`;
             }
+            // Показываем ID юзера внизу для отладки
+            const debugEl = document.getElementById('debug-id');
+            if(debugEl) debugEl.innerText = 'ID: ' + currentUserID;
         }
 
-        // 👇 ОБНОВЛЕНО: МГНОВЕННОЕ ОБНОВЛЕНИЕ СТАТУСА ПРИ АКТИВАЦИИ
+        // 👇 ИСПРАВЛЕНИЕ: МГНОВЕННОЕ ОБНОВЛЕНИЕ СТАТУСА ПРИ АКТИВАЦИИ
         window.activatePromo = async function() {
             const code = document.getElementById('promo-input').value.trim();
             if (!code) return;
@@ -450,14 +458,16 @@
                 const data = await res.json();
                 if (data.success) { 
                     alert('🎉 ' + data.message); 
-                    // Если сервер вернул новую дату, обновляем локально сразу же
+                    // МГНОВЕННО ОБНОВЛЯЕМ ЛОКАЛЬНЫЕ ДАННЫЕ
                     if (data.newPremiumUntil) {
                         db.premiumUntil = data.newPremiumUntil;
                         db.isPremium = true;
-                        saveDB(); // Сохраняем в базу
-                        openSettings(); // Перерисовываем окно настроек
+                        saveDB(); // Сохраняем, чтобы не потерялось
+                        openSettings(); // Перерисовываем окно настроек, чтобы увидеть новый статус
+                    } else {
+                        // Если сервер не вернул дату, просто закроем (но лучше обновить)
+                        closeModal('settings-modal'); 
                     }
-                    closeModal('settings-modal'); 
                 } 
                 else { alert('❌ ' + data.message); }
             } catch (e) { alert('Ошибка сети'); } 
@@ -483,8 +493,13 @@
                         username: username // Отправляем на сервер
                     })
                 });
-                alert("Сообщение отправлено!"); document.getElementById('feedback-text').value = ''; closeModal('settings-modal');
-            } catch(e) { alert("Ошибка отправки"); }
+                alert("Сообщение отправлено!"); 
+                document.getElementById('feedback-text').value = ''; 
+                closeModal('settings-modal');
+            } catch(e) { 
+                console.error(e);
+                alert("Ошибка отправки"); 
+            }
         }
 
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
