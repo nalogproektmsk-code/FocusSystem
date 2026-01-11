@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem Cloud</title>
+    <title>FocusSystem AI 3.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,13 +19,7 @@
        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-       ym(106183159, "init", { 
-            clickmap:true, 
-            trackLinks:true, 
-            accurateTrackBounce:true, 
-            webvisor:true, 
-            triggerEvent:true 
-       });
+       ym(106183159, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true, triggerEvent:true });
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/106183159" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 
@@ -57,11 +51,10 @@
             color: var(--text-main); 
             margin: 0; display: flex; height: 100vh; overflow: hidden; 
             -webkit-tap-highlight-color: transparent;
-            font-size: 16px; /* УВЕЛИЧЕН ШРИФТ */
-            line-height: 1.5;
+            font-size: 16px; line-height: 1.5;
         }
 
-        /* SPLASH SCREEN */
+        /* 3D CANVAS & SPLASH */
         #splash-screen {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg-dark);
@@ -69,21 +62,24 @@
             align-items: center; justify-content: center; padding: 40px; text-align: center;
             transition: opacity 0.8s ease;
         }
-        #brain-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; opacity: 0.6;
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1s ease;
         }
-        .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
-        .quote-text { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 16px; font-style: italic; opacity: 0.9; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-        .quote-author { font-size: 15px; font-weight: 500; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
+        /* Анимация видна ярко на сплэше */
+        #splash-screen canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+        }
+        .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+        .quote-text { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 16px; font-style: italic; opacity: 0.9; text-shadow: 0 4px 20px rgba(0,0,0,1); }
+        .quote-author { font-size: 15px; font-weight: 500; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,1); }
 
         /* INPUTS */
         input, textarea, select { 
             flex: 1; padding: 14px 16px; 
             border: 1px solid var(--input-border); 
             border-radius: var(--radius-md);
-            font-size: 17px; /* Увеличен */
-            font-family: 'Inter', sans-serif; 
+            font-size: 17px; font-family: 'Inter', sans-serif; 
             outline: none; background: var(--input-bg); 
             color: #fff; transition: all 0.2s;
             backdrop-filter: var(--glass-blur);
@@ -91,23 +87,18 @@
         input:focus { border-color: var(--primary-color); background: rgba(255,255,255,0.07); }
         input::placeholder { color: #64748B; }
         
-        .input-wrapper { background: transparent; border: none; margin-bottom: 24px; }
+        .input-wrapper { background: transparent; border: none; margin-bottom: 24px; position: relative; z-index: 2; }
         .input-group { 
-            display: flex; gap: 10px; padding: 6px; align-items: center; 
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
-            border-radius: 20px; box-sizing: border-box; 
+            display: flex; gap: 8px; padding: 6px; align-items: center; 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+            border-radius: 20px; box-sizing: border-box; backdrop-filter: blur(10px);
         }
-        .input-group input { border: none; background: transparent !important; backdrop-filter: none; }
+        .input-group input { border: none; background: transparent !important; backdrop-filter: none; padding-left: 12px; }
         
-        /* SIDEBAR (Desktop) */
+        /* SIDEBAR */
         .sidebar { 
-            width: 280px; /* Чуть шире */
-            background: var(--sidebar-bg); 
-            border-right: 1px solid var(--border-color); 
-            display: flex; flex-direction: column; 
-            padding: 32px 20px; 
-            flex-shrink: 0; 
-            overflow-y: auto; 
+            width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); 
+            display: flex; flex-direction: column; padding: 32px 20px; flex-shrink: 0; overflow-y: auto; z-index: 10;
         }
         .logo { font-size: 22px; font-weight: 800; margin-bottom: 40px; color: #fff; display: flex; align-items: center; gap: 10px; }
         .logo i { color: var(--primary-color); font-size: 26px; }
@@ -117,137 +108,105 @@
         .badge { background: rgba(255,255,255,0.1); color: #fff; padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
 
         /* MAIN AREA */
-        .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; box-sizing: border-box; }
-        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
-        .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+        .main { flex: 1; padding: 48px; overflow-y: auto; max-width: 900px; margin: 0 auto; box-sizing: border-box; position: relative; z-index: 5; }
+        .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+        .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        /* КНОПКА ДОБАВЛЕНИЯ (ИСПРАВЛЕНА ДЛЯ iOS) */
+        /* КНОПКИ */
         .btn-add { 
             background: var(--primary-color); color: white; width: 48px; height: 48px; 
             border-radius: 16px; border: none; font-size: 28px; cursor: pointer; 
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.3); transition: 0.3s;
-            /* Flexbox для идеального центра */
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            padding: 0; 
-            margin: 0;
-            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0;
         }
-        .btn-add:active { transform: translateY(2px); box-shadow: none; }
+        .btn-mic {
+            background: rgba(255,255,255,0.1); color: white; width: 48px; height: 48px;
+            border-radius: 16px; border: none; font-size: 24px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; transition: 0.2s; flex-shrink: 0;
+        }
+        .btn-mic.listening { background: #EF4444; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        /* КНОПКА WIZARD (РАЗОБРАТЬ ИНБОКС) */
         .btn-wizard {
-            width: 100%;
-            background: rgba(62, 123, 255, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(62, 123, 255, 0.3);
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            margin-bottom: 24px;
-            transition: 0.2s;
+            width: 100%; background: rgba(62, 123, 255, 0.1); color: var(--primary-color);
+            border: 1px solid rgba(62, 123, 255, 0.3); border-radius: 16px; padding: 16px;
+            font-size: 16px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 10px;
+            cursor: pointer; margin-bottom: 24px; transition: 0.2s; backdrop-filter: blur(5px);
         }
-        .btn-wizard:active { background: rgba(62, 123, 255, 0.2); transform: scale(0.98); }
 
         /* TASK CARDS */
-        .task-list { display: flex; flex-direction: column; gap: 14px; }
+        .task-list { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 2; }
         .task-card { 
             background: var(--card-bg); padding: 20px; border-radius: var(--radius-xl); 
             border: 1px solid var(--border-color); backdrop-filter: var(--glass-blur);
-            display: flex; justify-content: space-between; transition: 0.2s;
-            align-items: flex-start;
+            display: flex; justify-content: space-between; transition: 0.2s; align-items: flex-start;
         }
-        .task-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
         
+        /* 2-MIN RULE HIGHLIGHT */
+        .task-card.quick-task {
+            border: 1px solid rgba(250, 204, 21, 0.3);
+            background: linear-gradient(90deg, rgba(250, 204, 21, 0.05) 0%, rgba(255,255,255,0.02) 100%);
+        }
+
         .task-left { display: flex; align-items: flex-start; gap: 16px; flex: 1; }
         .task-check { width: 26px; height: 26px; border: 2px solid rgba(255,255,255,0.2); border-radius: 9px; transition: 0.2s; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
         .task-check.checked { background: var(--success); border-color: var(--success); color: white; }
         .task-content { flex: 1; }
         .task-title { font-size: 17px; font-weight: 600; color: #fff; line-height: 1.4; margin-bottom: 8px; }
         .task-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-        .task-num { color: var(--text-secondary); font-size: 14px; font-weight: 800; margin-right: 6px; opacity: 0.5; }
-
-        .actions { display: flex; gap: 10px; opacity: 0.8; transition: 0.2s; align-items: center; }
+        
+        .actions { display: flex; gap: 10px; opacity: 0.9; align-items: center; }
         .btn-action { 
-            background: rgba(255,255,255,0.08); 
-            border: 1px solid rgba(255,255,255,0.05);
-            color: #ccc; 
-            width: 38px; height: 38px; /* Кнопки крупнее */
-            border-radius: 10px; 
-            cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; transition: 0.2s; 
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
+            color: #ccc; width: 40px; height: 40px; border-radius: 12px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; 
         }
-        .btn-action i { font-size: 20px; } /* Иконки крупнее */
-        .btn-action:hover { background: rgba(255,255,255,0.2); color: #fff; }
-        .btn-action.delete:hover { background: rgba(255, 77, 77, 0.2); color: var(--danger); border-color: var(--danger); }
+        .btn-action i { font-size: 22px; }
         .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); border: none; color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
 
-        .tag.quick { 
-            background: linear-gradient(90deg, #FACC15, #EAB308); 
-            color: #000 !important; font-weight: 800; padding: 4px 12px;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px;
-        }
-        .tag { padding: 5px 12px; background: rgba(255,255,255,0.08); color: var(--text-secondary); border-radius: 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+        .tag.quick { background: linear-gradient(90deg, #FACC15, #EAB308); color: #000 !important; font-weight: 800; padding: 4px 12px; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px; display:inline-flex; align-items:center; gap:4px; }
+        .tag { padding: 5px 12px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border-radius: 8px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .tag.context-tag { color: #60A5FA; background: rgba(96, 165, 250, 0.1); }
 
-        /* EMPTY STATE CARDS */
-        .empty-state-container {
-            display: flex; flex-direction: column; gap: 12px; margin-top: 20px;
-        }
+        /* EMPTY STATE */
+        .empty-state-container { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; position: relative; z-index: 2; }
         .empty-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: 0.2s;
+            background: rgba(30, 30, 35, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: 0.2s; backdrop-filter: blur(10px);
         }
-        .empty-card:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.06); }
-        .empty-icon-box {
-            width: 48px; height: 48px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-        }
+        .empty-card:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.1); }
+        .empty-icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .empty-text strong { display: block; font-size: 16px; color: #fff; margin-bottom: 2px; }
         .empty-text span { font-size: 13px; color: var(--text-secondary); }
 
         /* MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: #1C1E26; width: 450px; max-width: 90%; padding: 32px; border-radius: 32px; border: 1px solid var(--border-color); display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: #1C1E26; width: 450px; max-width: 90%; padding: 32px; border-radius: 32px; border: 1px solid var(--border-color); display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: 800; margin-bottom: 24px; color: #fff; }
         .btn-primary { 
             background: var(--primary-color); color: white; height: 56px; 
             border-radius: 18px; border: none; font-weight: 700; font-size: 16px; width: 100%;
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.2); cursor: pointer;
         }
-        .wizard-buttons { display: flex; gap: 12px; margin-top: 20px; }
-        .wizard-btn { flex: 1; padding: 18px; border-radius: 18px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: white; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         
-        .step-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 14px; margin-bottom: 8px; }
+        .step-row { 
+            display: flex; align-items: center; gap: 10px; 
+            background: #2D3038; /* ТЕМНЫЙ ФОН ДЛЯ ЧИТАЕМОСТИ */
+            padding: 14px; border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .step-row input { background: transparent !important; border: none !important; font-size: 16px; color: #fff !important; font-weight: 500; }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
         .premium-status.expired { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
 
-        /* BOTTOM NAV */
         .bottom-nav { display: none; }
 
-        /* MEDIA QUERIES */
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main { padding: 20px; padding-bottom: 120px; }
             .title { font-size: 28px; }
             .header { margin-bottom: 24px; }
-
             .bottom-nav { 
                 position: fixed; bottom: 20px; left: 16px; right: 16px; 
                 background: rgba(30, 32, 40, 0.9); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -256,7 +215,6 @@
                 scrollbar-width: none; -ms-overflow-style: none; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             }
             .bottom-nav::-webkit-scrollbar { display: none; }
-
             .nav-item { 
                 display: inline-flex; flex-direction: column; align-items: center; justify-content: center; 
                 min-width: 70px; padding: 6px 4px; color: #94A3B8; font-size: 11px; font-weight: 600; 
@@ -264,18 +222,16 @@
             }
             .nav-item.active { color: #FFFFFF; background: rgba(255, 255, 255, 0.12); }
             .nav-icon { font-size: 24px; margin-bottom: 3px; position: relative; display: flex; align-items: center; justify-content: center; }
-            .nav-badge { 
-                position: absolute; top: -4px; right: -6px; background: var(--primary-color); color: white; 
-                font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 10px; 
-                display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #1e2028; 
-            }
+            .nav-badge { position: absolute; top: -4px; right: -6px; background: var(--primary-color); color: white; font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #1e2028; }
         }
     </style>
 </head>
 <body>
 
+    <canvas id="bg-canvas"></canvas>
+
     <div id="splash-screen">
-        <canvas id="brain-canvas"></canvas>
+        <canvas id="splash-canvas"></canvas>
         <div class="splash-content">
             <div style="font-size: 56px; color: var(--primary-color); margin-bottom: 24px; text-shadow: 0 0 30px rgba(62,123,255,0.5);">
                 <i class="ph-fill ph-brain"></i>
@@ -286,8 +242,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI</div>
-        
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.0</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -326,32 +281,25 @@
         <div class="modal">
             <div class="modal-header">⚙️ Настройки<i class="ph ph-x close-btn" onclick="closeModal('settings-modal')" style="cursor:pointer"></i></div>
             <div id="premium-status-box" class="premium-status">Загрузка...</div>
+            
+            <div id="ai-review-btn-container" style="display:none; margin-bottom:20px;">
+                <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">AI WEEKLY REVIEW</label>
+                <button class="btn-primary" style="background: linear-gradient(135deg, #10B981, #059669);" onclick="generateWeeklyReview()"><i class="ph-bold ph-chart-line-up"></i> Сгенерировать отчет</button>
+            </div>
+
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
             <div style="display:flex; gap:8px; margin-bottom:24px;">
                 <input type="text" id="promo-input" placeholder="Введите код" style="text-transform:uppercase;">
                 <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
-            <div class="spacer"></div>
+            
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Ваши идеи или баги..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <textarea id="feedback-text" placeholder="Ваши идеи..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v2.0 • AI Edition<br>
+                FocusSystem v3.0 • AI Edition<br>
                 <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
-        </div>
-    </div>
-
-    <div id="wizard-modal" class="modal-overlay">
-        <div class="modal">
-            <div style="text-align:center; font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
-            <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 22px; line-height: 1.4;">...</strong></div>
-            <div id="wizard-question-text" style="text-align:center; font-size:22px; font-weight:600; margin:32px 0;">...</div>
-            <div class="wizard-buttons">
-                <button class="wizard-btn" style="color:var(--danger);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
-                <button class="wizard-btn" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
-            </div>
-            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
     
@@ -380,33 +328,21 @@
         </div>
     </div>
     
-    <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
-    
-    <div id="date-modal" class="modal-overlay">
+    <div id="wizard-modal" class="modal-overlay">
         <div class="modal">
-            <div class="modal-header">📅 Выберите время</div>
-            <label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ДАТА</label>
-            <input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ВРЕМЯ</label>
-            <input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px;">
-            <button class="btn-primary" onclick="submitDateModal()">Сохранить</button>
-        </div>
-    </div>
-
-    <div id="move-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">Куда переместить?</div>
-            <div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"> 
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button>
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button>
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button>
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button>
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span></button>
-                <button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('reference')"><span><i class="ph ph-archive-box"></i> Архив</span></button>
+            <div style="text-align:center; font-size:12px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px; font-weight: 800; letter-spacing:1px;">Сортировка Inbox</div>
+            <div style="text-align: center; margin-bottom: 24px;"><strong id="wizard-task-text" style="font-size: 22px; line-height: 1.4;">...</strong></div>
+            <div id="wizard-question-text" style="text-align:center; font-size:22px; font-weight:600; margin:32px 0;">...</div>
+            <div class="wizard-buttons">
+                <button class="wizard-btn" style="color:var(--danger);" onclick="handleWizardAnswer(false)" id="btn-no">Нет</button>
+                <button class="wizard-btn" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);" onclick="handleWizardAnswer(true)" id="btn-yes">Да</button>
             </div>
-            <button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
+            <button onclick="closeModal('wizard-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button>
         </div>
     </div>
+    <div id="input-modal" class="modal-overlay"><div class="modal"><div class="modal-header" id="input-modal-title">Ввод</div><input type="text" id="input-modal-field" style="width: 100%; box-sizing:border-box; margin-bottom: 24px;"><button class="btn-primary" onclick="submitInputModal()">ОК</button></div></div>
+    <div id="date-modal" class="modal-overlay"><div class="modal"><div class="modal-header">📅 Выберите время</div><label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ДАТА</label><input type="date" id="calendar-date" style="width:100%; box-sizing:border-box; margin-bottom:16px;"><label style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; display:block;">ВРЕМЯ</label><input type="time" id="calendar-time" style="width:100%; box-sizing:border-box; margin-bottom:24px;"><button class="btn-primary" onclick="submitDateModal()">Сохранить</button></div></div>
+    <div id="move-modal" class="modal-overlay"><div class="modal"><div class="modal-header">Куда переместить?</div><div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height: 400px;"><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('inbox')"><span><i class="ph ph-tray"></i> Inbox</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('today')"><span><i class="ph ph-fire"></i> Сегодня</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('calendar')"><span><i class="ph ph-calendar-blank"></i> Календарь</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('waiting')"><span><i class="ph ph-clock-user"></i> Поручения</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('someday')"><span><i class="ph ph-lightbulb"></i> Потом</span></button><button class="menu-item" style="border:none; width:100%; background:#F8FAFC;" onclick="submitMove('reference')"><span><i class="ph ph-archive-box"></i> Архив</span></button></div><button onclick="closeModal('move-modal')" style="width:100%; margin-top:20px; border:none; background:none; color:var(--text-secondary); font-size:15px; padding: 10px; cursor:pointer;">Отмена</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -414,17 +350,7 @@
         import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const API_URL = 'https://636a13eb-9e28-4f04-a3b6-37318d504198-00-1eel6lm7asdp7.janeway.replit.dev'; 
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyALuLfaVgYjc3rHXJz9g8TMJpO9Lzryfj4",
-            authDomain: "gtd-focus-app.firebaseapp.com",
-            databaseURL: "https://gtd-focus-app-default-rtdb.firebaseio.com",
-            projectId: "gtd-focus-app",
-            storageBucket: "gtd-focus-app.firebasestorage.app",
-            messagingSenderId: "54533448500",
-            appId: "1:54533448500:web:0c59c28d63ce03af1abb61",
-            measurementId: "G-D0PNMT824K"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyALuLfaVgYjc3rHXJz9g8TMJpO9Lzryfj4", authDomain: "gtd-focus-app.firebaseapp.com", databaseURL: "https://gtd-focus-app-default-rtdb.firebaseio.com", projectId: "gtd-focus-app", storageBucket: "gtd-focus-app.firebasestorage.app", messagingSenderId: "54533448500", appId: "1:54533448500:web:0c59c28d63ce03af1abb61", measurementId: "G-D0PNMT824K" };
 
         const app = initializeApp(firebaseConfig);
         const dbRef = getDatabase(app);
@@ -439,99 +365,115 @@
 
         window.closeApp = function() { if(tg) tg.close(); }
 
-        /* --- РАСШИРЕННЫЕ ЦИТАТЫ --- */
+        /* --- 30 QUOTES --- */
         const QUOTES = [
-            { t: "Секрет успеха — начать.", a: "Марк Твен" },
-            { t: "Делай то, что можешь, с тем, что имеешь.", a: "Теодор Рузвельт" },
-            { t: "Занятость не означает продуктивность.", a: "Тим Феррис" },
-            { t: "Твой мозг — для идей, а не для хранения.", a: "Дэвид Аллен" },
-            { t: "Фокус — это сказать 'нет'.", a: "Стив Джобс" },
-            { t: "Дисциплина — это решение делать то, чего очень не хочется.", a: "Майк Тайсон" },
-            { t: "Будущее зависит от того, что вы делаете сегодня.", a: "Махатма Ганди" },
-            { t: "Планы ничто, планирование — всё.", a: "Дуайт Эйзенхауэр" },
-            { t: "Простота — высшая ступень утонченности.", a: "Леонардо да Винчи" },
-            { t: "Не ждите. Время никогда не будет подходящим.", a: "Наполеон Хилл" },
-            { t: "Успех — это сумма небольших усилий, повторяющихся изо дня в день.", a: "Роберт Кольер" },
-            { t: "Любитель сидит и ждет вдохновения, остальные просто встают и идут работать.", a: "Стивен Кинг" },
-            { t: "Ваше время ограничено, не тратьте его, живя чужой жизнью.", a: "Стив Джобс" },
-            { t: "Действие — основной ключ к успеху.", a: "Пабло Пикассо" },
-            { t: "Каждая минута, потраченная на организацию, экономит час.", a: "Бенджамин Франклин" }
+            { t: "Секрет успеха — начать.", a: "Марк Твен" }, { t: "Делай то, что можешь, с тем, что имеешь.", a: "Т. Рузвельт" },
+            { t: "Занятость не означает продуктивность.", a: "Тим Феррис" }, { t: "Твой мозг — для идей, а не для хранения.", a: "Дэвид Аллен" },
+            { t: "Фокус — это сказать 'нет'.", a: "Стив Джобс" }, { t: "Дисциплина — это решение делать то, чего не хочется.", a: "Майк Тайсон" },
+            { t: "Будущее зависит от того, что вы делаете сегодня.", a: "Махатма Ганди" }, { t: "Планы ничто, планирование — всё.", a: "Д. Эйзенхауэр" },
+            { t: "Простота — высшая ступень утонченности.", a: "Леонардо да Винчи" }, { t: "Не ждите. Время никогда не будет подходящим.", a: "Наполеон Хилл" },
+            { t: "Успех — это сумма небольших усилий, повторяющихся изо дня в день.", a: "Роберт Кольер" }, { t: "Любитель ждет вдохновения, профи встает и работает.", a: "Стивен Кинг" },
+            { t: "Ваше время ограничено, не живите чужой жизнью.", a: "Стив Джобс" }, { t: "Действие — основной ключ к успеху.", a: "Пабло Пикассо" },
+            { t: "Каждая минута организации экономит час.", a: "Б. Франклин" }, { t: "Кто хочет — ищет возможности, кто не хочет — причины.", a: "Сократ" },
+            { t: "Не бойтесь расти медленно, бойтесь стоять на месте.", a: "Китайская мудрость" }, { t: "Самый трудный шаг — это шаг за пределы привычного.", a: "Неизвестный" },
+            { t: "Если вы проходите через ад, идите не останавливаясь.", a: "У. Черчилль" }, { t: "Вчера — история, завтра — тайна, сегодня — подарок.", a: "Кунг-фу Панда" },
+            { t: "Чтобы дойти до цели, надо прежде всего идти.", a: "Оноре де Бальзак" }, { t: "Неудача — это просто возможность начать снова, но мудрее.", a: "Генри Форд" },
+            { t: "Начинай там, где ты есть.", a: "Артур Эш" }, { t: "Лучший способ предсказать будущее — создать его.", a: "Питер Друкер" },
+            { t: "Порядок в вещах — порядок в мыслях.", a: "Народная мудрость" }, { t: "Маленькие шаги ведут к большим переменам.", a: "Кайдзен" },
+            { t: "Умный человек решает проблемы, мудрый их избегает.", a: "Эйнштейн" }, { t: "Сделанное лучше идеального.", a: "Facebook Motto" },
+            { t: "Время — самый ценный ресурс.", a: "Теофраст" }, { t: "Живи так, будто этот день — последний.", a: "Сенека" }
         ];
 
-        /* --- АНИМАЦИЯ МОЗГА (CANVAS) --- */
-        function initBrainAnimation() {
-            const canvas = document.getElementById('brain-canvas');
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let points = [];
-            const maxDist = 120; // Дистанция соединения линий
-
-            function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-                initPoints();
+        /* --- 3D GEOMETRY ENGINE (Metamorphosis) --- */
+        class Geometry3D {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.vertices = [];
+                this.edges = [];
+                this.angleX = 0;
+                this.angleY = 0;
+                this.resize();
+                this.initIcosahedron();
+                window.addEventListener('resize', () => this.resize());
             }
-
-            function initPoints() {
-                points = [];
-                const numPoints = Math.floor((width * height) / 10000); // Плотность точек
-                for (let i = 0; i < numPoints; i++) {
-                    points.push({
-                        x: Math.random() * width,
-                        y: Math.random() * height,
-                        vx: (Math.random() - 0.5) * 0.8, // Скорость
-                        vy: (Math.random() - 0.5) * 0.8
-                    });
-                }
-            }
-
-            function draw() {
-                ctx.clearRect(0, 0, width, height);
-                ctx.fillStyle = '#3E7BFF';
-                ctx.strokeStyle = 'rgba(62, 123, 255, 0.2)';
-
-                for (let i = 0; i < points.length; i++) {
-                    let p = points[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-
-                    if (p.x < 0 || p.x > width) p.vx *= -1;
-                    if (p.y < 0 || p.y > height) p.vy *= -1;
-
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    for (let j = i + 1; j < points.length; j++) {
-                        let p2 = points[j];
-                        let dx = p.x - p2.x;
-                        let dy = p.y - p2.y;
-                        let dist = Math.sqrt(dx*dx + dy*dy);
-
-                        if (dist < maxDist) {
-                            ctx.beginPath();
-                            ctx.lineWidth = 1 - (dist / maxDist);
-                            ctx.moveTo(p.x, p.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.stroke();
-                        }
+            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.cx = this.canvas.width/2; this.cy = this.canvas.height/2; }
+            initIcosahedron() {
+                const t = (1.0 + Math.sqrt(5.0)) / 2.0;
+                this.vertices = [
+                    [-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0],
+                    [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
+                    [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]
+                ];
+                // Создаем связи (ближайшие соседи)
+                for(let i=0; i<this.vertices.length; i++) {
+                    for(let j=i+1; j<this.vertices.length; j++) {
+                        const dist = Math.hypot(this.vertices[i][0]-this.vertices[j][0], this.vertices[i][1]-this.vertices[j][1], this.vertices[i][2]-this.vertices[j][2]);
+                        if(dist < 2.5) this.edges.push([i, j]);
                     }
                 }
-                requestAnimationFrame(draw);
             }
+            rotate(v, ax, ay) {
+                let y = v[1], z = v[2];
+                v[1] = y*Math.cos(ax) - z*Math.sin(ax);
+                v[2] = z*Math.cos(ax) + y*Math.sin(ax);
+                let x = v[0]; z = v[2];
+                v[0] = x*Math.cos(ay) - z*Math.sin(ay);
+                v[2] = z*Math.cos(ay) + x*Math.sin(ay);
+            }
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.angleX += 0.005; this.angleY += 0.008;
+                const scale = Math.min(this.canvas.width, this.canvas.height) * 0.25;
+                const projected = [];
+                
+                // Metamorphosis: Pulse vertices
+                const time = Date.now() * 0.001;
+                
+                this.vertices.forEach((v, i) => {
+                    const pulse = 1 + Math.sin(time + i) * 0.1; // Pulsing effect
+                    let rotV = [v[0]*pulse, v[1]*pulse, v[2]*pulse];
+                    this.rotate(rotV, this.angleX, this.angleY);
+                    const z = 1 / (3 - rotV[2] * 0.5); // Perspective
+                    projected.push({ x: this.cx + rotV[0]*scale*z, y: this.cy + rotV[1]*scale*z, z: rotV[2] });
+                });
 
-            window.addEventListener('resize', resize);
-            resize();
-            draw();
+                this.edges.forEach(e => {
+                    const p1 = projected[e[0]], p2 = projected[e[1]];
+                    const depth = (p1.z + p2.z) / 2;
+                    const alpha = (depth + 2) / 4; // Fade distant lines
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1.x, p1.y);
+                    this.ctx.lineTo(p2.x, p2.y);
+                    // Color shift
+                    const hue = (time * 20 + depth * 50) % 360;
+                    this.ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+                    this.ctx.lineWidth = 1 + alpha;
+                    this.ctx.stroke();
+                });
+
+                projected.forEach((p, i) => {
+                    const alpha = (p.z + 2) / 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, 3 * alpha, 0, Math.PI*2);
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                    this.ctx.fill();
+                });
+                requestAnimationFrame(() => this.animate());
+            }
         }
 
+        let bgGeo, splashGeo;
         function initSplash() {
-            initBrainAnimation();
+            splashGeo = new Geometry3D('splash-canvas');
+            splashGeo.animate();
+            bgGeo = new Geometry3D('bg-canvas');
+            bgGeo.animate();
+
             const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
             document.getElementById('splash-quote').innerText = `"${q.t}"`;
             document.getElementById('splash-author').innerText = `— ${q.a}`;
             
-            // Увеличено время показа до 4000мс (4 сек)
             setTimeout(() => {
                 const s = document.getElementById('splash-screen');
                 s.style.opacity = '0';
@@ -539,198 +481,226 @@
             }, 4000);
         }
 
+        /* --- AUTH & DB --- */
         async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
-            
             if (user) {
                 currentUserID = String(user.id);
-                const name = user.first_name;
-                const logoEl = document.querySelector('.logo');
-                if (logoEl) logoEl.innerHTML = `<i class="ph-fill ph-brain"></i> ${name}'s Focus`;
+                document.querySelector('.logo').innerHTML = `<i class="ph-fill ph-brain"></i> ${user.first_name}'s Focus`;
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
-
                 try {
-                    const response = await fetch(`${API_URL}/api/auth`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ initData: tg.initData }) 
-                    });
-                    
+                    const response = await fetch(`${API_URL}/api/auth`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: tg.initData }) });
                     if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-                    
                     const data = await response.json();
-                    if (!data.token) throw new Error("No token received");
-
+                    if (!data.token) throw new Error("No token");
                     await signInWithCustomToken(auth, data.token);
-                    console.log("✅ Auth Success");
-
-                } catch (e) {
-                    console.error(e);
-                    // alert(`🚨 Ошибка Входа:\n${e.message}`); // Скрыл алерт, чтобы не пугать, если оффлайн
-                }
+                } catch (e) { console.error(e); }
             } else {
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
-            
-            let userPathId = currentUserID;
-            if (auth.currentUser) userPathId = auth.currentUser.uid;
-            
-            const userRef = ref(dbRef, 'users/' + userPathId);
-            onValue(userRef, (snapshot) => {
+            let userPathId = auth.currentUser?.uid || currentUserID;
+            onValue(ref(dbRef, 'users/' + userPathId), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     db = { ...db, ...data };
-                    if(!Array.isArray(db.inbox)) db.inbox = Object.values(db.inbox || {});
-                    if(!Array.isArray(db.today)) db.today = Object.values(db.today || {});
-                    if(!Array.isArray(db.projects)) db.projects = Object.values(db.projects || {});
+                    ['inbox','today','projects','waiting','done','trash'].forEach(k => { if(!Array.isArray(db[k])) db[k] = Object.values(db[k] || {}); });
                 } 
-                isLoaded = true; 
-                updateBadges();
-                renderCurrentView();
-                const debugEl = document.getElementById('debug-id');
-                if(debugEl) debugEl.innerText = 'ID: ' + userPathId;
+                isLoaded = true; updateBadges(); renderCurrentView();
+                if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + userPathId;
             });
         }
-
         function saveDB() {
             if (!isLoaded) return;
-            const dataToSave = { 
-                inbox: db.inbox || [],
-                today: db.today || [],
-                calendar: db.calendar || [],
-                projects: db.projects || [],
-                waiting: db.waiting || [],
-                someday: db.someday || [],
-                reference: db.reference || [],
-                done: db.done || [],
-                trash: db.trash || []
-            };
-            const userPathId = auth.currentUser?.uid || currentUserID;
-            update(ref(dbRef, 'users/' + userPathId), dataToSave).catch(e => console.error("Save Error:", e));
-            updateBadges();
-            renderCurrentView();
+            const dataToSave = { inbox: db.inbox||[], today: db.today||[], calendar: db.calendar||[], projects: db.projects||[], waiting: db.waiting||[], someday: db.someday||[], reference: db.reference||[], done: db.done||[], trash: db.trash||[] };
+            update(ref(dbRef, 'users/' + (auth.currentUser?.uid || currentUserID)), dataToSave);
+            updateBadges(); renderCurrentView();
         }
 
+        /* --- PREMIUM LOGIC --- */
         function checkPremiumLimits() {
-            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) return true;
-            if (db.isPremium === true && !db.premiumUntil) return true;
+            if ((db.premiumUntil && new Date(db.premiumUntil) > new Date()) || (db.isPremium === true && !db.premiumUntil)) return true;
             const activeProjects = (db.projects || []).filter(p => !p.completedAt).length;
-            if (activeProjects >= 3) {
-                alert("💎 Лимит бесплатной версии!\n\nТолько 3 проекта. Оформите подписку в Настройках.");
-                return false; 
+            if (activeProjects >= 3) { alert("💎 Лимит! Бесплатная версия: 3 проекта и нет AI функций."); return false; }
+            return true;
+        }
+        function checkAIPremium() {
+            if ((db.premiumUntil && new Date(db.premiumUntil) > new Date()) || db.isPremium === true) return true;
+            alert("🔒 Эта AI-функция доступна только в Premium.\nОформите подписку в Настройках.");
+            return false;
+        }
+
+        /* --- AI FEATURES (SIMULATION) --- */
+        
+        // 1. AUTO-TAGGING & CONTEXT
+        function applyAITags(text) {
+            const contextMap = {
+                'магазин': '@Магазин', 'купить': '@Магазин', 'хлеб': '@Магазин',
+                'написать': '@Компьютер', 'код': '@Компьютер', 'письмо': '@Компьютер',
+                'позвонить': '@Звонки', 'набрать': '@Звонки',
+                'оплатить': '@Финансы', 'счет': '@Финансы',
+                'врач': '@Город', 'сходить': '@Город'
+            };
+            let detected = [];
+            Object.keys(contextMap).forEach(key => {
+                if (text.toLowerCase().includes(key)) detected.push(contextMap[key]);
+            });
+            return [...new Set(detected)]; // unique tags
+        }
+
+        // 2. DUPLICATE DETECTOR
+        function checkDuplicates(text) {
+            const allTasks = [...db.inbox, ...db.today, ...db.projects];
+            const found = allTasks.find(t => t.text.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(t.text.toLowerCase()));
+            if (found && found.text.length > 4) {
+                return confirm(`🤖 AI: Похожая задача уже есть ("${found.text}"). Всё равно создать?`);
             }
             return true;
         }
 
-        window.openSettings = function() {
-            document.getElementById('settings-modal').style.display = 'flex';
-            const statusBox = document.getElementById('premium-status-box');
-            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
-                const date = new Date(db.premiumUntil).toLocaleDateString();
-                statusBox.className = 'premium-status active';
-                statusBox.innerHTML = `💎 <b>Premium активен</b><br>Действует до: ${date}`;
-            } else {
-                statusBox.className = 'premium-status expired';
-                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
-            }
-            const debugEl = document.getElementById('debug-id');
-            const uid = auth.currentUser?.uid || currentUserID;
-            if(debugEl) debugEl.innerText = 'Support ID: ' + uid;
+        // 3. 2-MINUTE RULE DETECTOR
+        function isTwoMinuteTask(text) {
+            const quickVerbs = ['позвонить', 'скинуть', 'отправить', 'оплатить', 'перевести', 'написать', 'узнать'];
+            return quickVerbs.some(v => text.toLowerCase().startsWith(v));
         }
 
-        window.activatePromo = async function() {
-            const code = document.getElementById('promo-input').value.trim();
-            if (!code) return;
-            const btn = document.querySelector('#settings-modal .btn-primary');
-            btn.innerHTML = 'Проверка...';
-            try {
-                const res = await fetch(`${API_URL}/api/promo`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: currentUserID, code: code })
-                });
-                const data = await res.json();
-                if (data.success) { 
-                    alert('🎉 ' + data.message); 
-                    if (data.newPremiumUntil) {
-                        db.premiumUntil = data.newPremiumUntil;
-                        db.isPremium = true;
-                        openSettings(); 
-                    }
-                    closeModal('settings-modal'); 
-                } 
-                else { alert('❌ ' + data.message); }
-            } catch (e) { alert('Ошибка сети'); } 
-            btn.innerHTML = 'OK';
-        }
-
-        window.sendFeedback = async function() {
-            const text = document.getElementById('feedback-text').value.trim();
-            if(!text) return;
-            const username = tg.initDataUnsafe?.user?.username || 'hidden';
-            try {
-                await fetch(`${API_URL}/api/feedback`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        userId: currentUserID, 
-                        text: text, 
-                        name: tg.initDataUnsafe?.user?.first_name || 'Guest',
-                        username: username 
-                    })
-                });
-                alert("Сообщение отправлено!"); 
-                document.getElementById('feedback-text').value = ''; 
-                closeModal('settings-modal');
-            } catch(e) { console.error(e); alert("Ошибка отправки"); }
-        }
-
-        window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
-        window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
-        
-        window.switchView = function(view) {
-            window.haptic('light'); 
-            currentView = view;
+        /* --- VOICE INPUT (WHISPER STYLE MOCK) --- */
+        window.startVoiceInput = function() {
+            if (!checkAIPremium()) return;
             
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Ваш браузер не поддерживает голосовой ввод :("); return; }
+            
+            const btn = document.getElementById('btn-mic');
+            btn.classList.add('listening');
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                processVoiceCommand(transcript);
+                btn.classList.remove('listening');
+            };
+            recognition.onerror = () => { alert("Ошибка распознавания"); btn.classList.remove('listening'); };
+            recognition.start();
+        }
 
-            const activeNavs = document.querySelectorAll(`[onclick="switchView('${view}')"]`);
-            activeNavs.forEach(el => el.classList.add('active'));
+        function processVoiceCommand(text) {
+            // "Напомни позвонить маме завтра в 18:00"
+            const lower = text.toLowerCase();
+            let dateStr = null;
+            let timeStr = null;
+            let cleanText = text;
 
-            const targetNav = document.querySelector(`.nav-item.active`);
-            if (targetNav) { targetNav.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }
+            // Simple heuristics
+            if (lower.includes('завтра')) {
+                const d = new Date(); d.setDate(d.getDate() + 1);
+                dateStr = d.toISOString().split('T')[0];
+                cleanText = cleanText.replace(/завтра/gi, '').trim();
+            } else if (lower.includes('сегодня')) {
+                dateStr = new Date().toISOString().split('T')[0];
+                cleanText = cleanText.replace(/сегодня/gi, '').trim();
+            }
 
-            renderCurrentView();
+            const timeMatch = lower.match(/в (\d{1,2})[:\s](\d{2})/);
+            if (timeMatch) {
+                timeStr = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
+                cleanText = cleanText.replace(timeMatch[0], '').trim();
+            }
+
+            cleanText = cleanText.replace(/напомни/gi, '').trim();
+            cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
+
+            if (dateStr) {
+                // To Calendar
+                if (!db.calendar) db.calendar = [];
+                db.calendar.push({ id: Date.now(), text: cleanText, dateStr, timeStr, tags: applyAITags(cleanText), created: new Date().toISOString() });
+                alert(`🤖 AI: Создано событие в календаре:\n"${cleanText}"\n📅 ${dateStr} ⏰ ${timeStr || 'Весь день'}`);
+                saveDB();
+            } else {
+                // To Inbox
+                addTask(cleanText); // Reuses existing logic with AI checks inside
+            }
+        }
+
+        /* --- WEEKLY REVIEW --- */
+        window.generateWeeklyReview = function() {
+            if (!checkAIPremium()) return;
+            const doneCount = db.done.length;
+            const activeProj = db.projects.filter(p => !p.completedAt).length;
+            const stagnant = db.projects.filter(p => p.steps && p.steps.every(s => !s.completed)).length;
+            
+            let msg = `🤖 AI WEEKLY REPORT:\n\n✅ Завершено задач: ${doneCount}\n🏗 Активных проектов: ${activeProj}\n`;
+            if (doneCount > 5) msg += "🔥 Отличная продуктивность!\n";
+            else msg += "🐢 Неделя была тихой. Наверстаем?\n";
+            
+            if (stagnant > 0) msg += `\n⚠️ Проектов без движения: ${stagnant}. Добавь микро-шаг!`;
+            
+            alert(msg);
+        }
+
+        /* --- UI LOGIC --- */
+        window.addTask = function(overrideText = null) { 
+            window.haptic('light'); 
+            const input = document.getElementById('main-input');
+            const val = overrideText || input.value.trim(); 
+            if(!val) return; 
+
+            // AI CHECKS
+            if (checkAIPremium()) {
+                if (!checkDuplicates(val)) return;
+            }
+
+            if(!db.inbox) db.inbox = []; 
+            
+            let newTask = { id: Date.now(), text: val, created: new Date().toISOString(), isProject: false };
+            
+            if (checkAIPremium()) {
+                 const tags = applyAITags(val);
+                 if (tags.length) newTask.tags = tags;
+            }
+            
+            db.inbox.unshift(newTask); 
+            if (!overrideText) input.value = ''; 
+            renderCurrentView(); saveDB(); 
         }
 
         window.renderCurrentView = function() {
             const container = document.getElementById('app-view');
+            const bgCanvas = document.getElementById('bg-canvas');
+            
+            // Background Animation logic
+            if (currentView === 'inbox') bgCanvas.style.opacity = '0.15';
+            else bgCanvas.style.opacity = '0';
+
             const headers = { 'inbox': '📥 Входящие', 'today': '🔥 Сегодня', 'calendar': '📅 Календарь', 'projects': '🏗 Проекты', 'waiting': '👀 Жду ответа', 'someday': '💡 Однажды', 'reference': '📚 Архив', 'done': '✅ Завершено', 'trash': '🗑 Корзина' };
             let html = `<div class="header"><div class="title">${headers[currentView]}</div>`;
-            if (currentView === 'done' && (db.done && db.done.length > 0)) html += `<button class="btn-action delete" onclick="emptyDone()" style="width:auto; padding:0 10px; font-size:14px; font-weight:600;">Очистить всё</button>`;
-            if(currentView === 'trash' && db.trash && db.trash.length > 0) html += `<button class="btn-action delete" onclick="emptyTrash()" style="width:auto; padding:0 10px; font-size:14px; font-weight:600;">Очистить</button>`;
+            if(currentView === 'done' || currentView === 'trash') html += `<button class="btn-action delete" onclick="empty${currentView === 'done'?'Done':'Trash'}()">Очистить</button>`;
             html += `</div>`;
             
             if(!db[currentView]) db[currentView] = [];
             
-            // ВВОД ЗАДАЧ И WIZARD ТОЛЬКО В INBOX
             if (currentView === 'inbox') {
-                html += `<div class="input-wrapper"><div class="input-group"><input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()"><button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button></div></div>`;
-                if(db.inbox.length > 0) {
-                    html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
-                }
+                html += `<div class="input-wrapper"><div class="input-group">
+                    <input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()">
+                    <button class="btn-mic" id="btn-mic" onclick="startVoiceInput()"><i class="ph-fill ph-microphone"></i></button>
+                    <button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button>
+                </div></div>`;
+                if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
             }
             
             html += `<div class="task-list">`;
-            const list = db[currentView] || [];
-            
-            // ПУСТОЕ СОСТОЯНИЕ (КАРТОЧКИ В ИНБОКСЕ, ИНАЧЕ ПРОСТО ТЕКСТ)
+            let list = [...db[currentView]]; // copy
+
+            // AI SORTING FOR 'TODAY' (2-minute rule)
+            if (currentView === 'today') {
+                list.forEach(t => t.isQuick = isTwoMinuteTask(t.text));
+                list.sort((a, b) => (b.isQuick === true) - (a.isQuick === true));
+            }
+
             if(list.length === 0) { 
                 if (currentView === 'inbox') {
-                    // КРАСИВЫЕ КАРТОЧКИ ДЛЯ ПУСТОГО ИНБОКСА
                     html += `
                     <div class="empty-state-container">
                         <div style="text-align:center; color:var(--text-secondary); margin-bottom:12px; font-size:15px;">Входящих нет. Отличная работа! 🎉</div>
@@ -742,21 +712,12 @@
                              <div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div>
                              <div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div>
                         </div>
-                        <div class="empty-card" onclick="switchView('today')">
-                             <div class="empty-icon-box" style="background: rgba(250, 204, 21, 0.1); color: #FACC15;"><i class="ph-fill ph-sun"></i></div>
-                             <div class="empty-text"><strong>План на сегодня</strong><span>Фокус на главном</span></div>
-                        </div>
                     </div>`;
                 } else {
                     html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px; font-size:16px; opacity:0.6;"><i class="ph ph-coffee" style="font-size:48px; margin-bottom:12px; display:block;"></i>Задач нет</div>`; 
                 }
             } else {
-                if (currentView === 'done') {
-                    const doneProjects = list.filter(i => i.isProject);
-                    const doneTasks = list.filter(i => !i.isProject);
-                    if (doneProjects.length > 0) { html += `<div class="section-title" style="margin-top:10px; font-weight:700; color:var(--text-secondary);">Проекты</div>`; doneProjects.forEach(item => { html += createCard(item, true, true); }); }
-                    if (doneTasks.length > 0) { html += `<div class="section-title" style="margin-top:20px; font-weight:700; color:var(--text-secondary);">Задачи</div>`; doneTasks.forEach(item => { html += createCard(item, true, false); }); }
-                } else if (currentView === 'projects') {
+                if (currentView === 'projects') {
                       list.forEach(item => {
                         if(!item.steps) item.steps = [];
                         const activeStep = item.steps.find(s => !s.completed);
@@ -776,100 +737,106 @@
 
         window.createCard = function(item, isDoneView, isProjectCard, prefixHtml = '') {
             let metaHtml = '';
+            // 2-MIN RULE ICON
             if(item.isQuick) metaHtml += `<span class="tag quick"><i class="ph-fill ph-lightning"></i> 2 мин</span>`;
+            if(item.tags) item.tags.forEach(t => metaHtml += `<span class="tag context-tag">${t}</span>`);
             if(item.dateStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-calendar"></i> ${formatDateRUS(item.dateStr)}</span>`;
             if(item.timeStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-clock"></i> ${item.timeStr}</span>`;
             if(item.assignee) metaHtml += `<span class="tag project"><i class="ph-fill ph-user"></i> ${item.assignee}</span>`;
             if(item.projectTitle) metaHtml += `<span class="tag project"><i class="ph-fill ph-folder"></i> ${item.projectTitle}</span>`;
             
+            // SMART WAITING NUDGE
+            let nudgeBtn = '';
+            if (currentView === 'waiting') {
+                const daysWaiting = (Date.now() - (item.id)) / (1000 * 60 * 60 * 24);
+                if (daysWaiting > 3) nudgeBtn = `<button class="btn-action" onclick="alert('🤖 AI: Напоминание:\nПривет! Как там дела с задачей: ${item.text}?')" style="color:#FACC15"><i class="ph-fill ph-hand-waving"></i></button>`;
+            }
+
             let buttons = '';
-            // КНОПКИ ДЕЙСТВИЙ
             if(!['trash','done'].includes(currentView)) { 
+                buttons += nudgeBtn;
                 buttons += `<button class="btn-action ai-magic" onclick="magicDecompose(${item.id})"><i class="ph-bold ph-magic-wand"></i></button>`;
                 buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; 
             }
-
-            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; } else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
+            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } 
+            else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; } 
+            else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
 
             const displayTitle = item.title || item.text;
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
             let checkboxHtml = '';
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
-            return `<div class="task-card"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
+            
+            const cardClass = item.isQuick ? 'task-card quick-task' : 'task-card';
+            return `<div class="${cardClass}"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
 
-        window.magicDecompose = async function(id) {
-            // ВАЖНО: ПРОВЕРКА ЛИМИТОВ ПЕРЕД AI
-            if (!checkPremiumLimits()) return;
-            
-            const task = db[currentView].find(t => t.id === id);
-            if(!task) return;
-
-            if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return;
-            window.haptic('medium');
-            
-            openProjectModal(null, task);
-            setTimeout(() => {
-                askAIForSteps();
-            }, 500);
+        /* --- STANDARD FUNCTIONS --- */
+        window.switchView = function(view) { window.haptic('light'); currentView = view; document.querySelectorAll('.nav-item, .menu-item').forEach(el => el.classList.remove('active')); document.querySelectorAll(`[onclick="switchView('${view}')"]`).forEach(el => el.classList.add('active')); renderCurrentView(); }
+        window.magicDecompose = async function(id) { if (!checkAIPremium()) return; const task = db[currentView].find(t => t.id === id); if(!task) return; if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return; window.haptic('medium'); openProjectModal(null, task); setTimeout(() => askAIForSteps(), 500); }
+        window.openSettings = function() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            const statusBox = document.getElementById('premium-status-box');
+            const aiBtn = document.getElementById('ai-review-btn-container');
+            if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) {
+                const date = new Date(db.premiumUntil).toLocaleDateString();
+                statusBox.className = 'premium-status active';
+                statusBox.innerHTML = `💎 <b>Premium активен</b><br>До: ${date}`;
+                aiBtn.style.display = 'block';
+            } else {
+                statusBox.className = 'premium-status expired';
+                statusBox.innerHTML = `🌑 <b>Бесплатная версия</b><br>Лимит: 3 проекта. Нет AI.<br><div onclick="closeApp()" style="color:#991B1B; font-weight:800; text-decoration:underline; cursor:pointer; margin-top:8px;">👉 КУПИТЬ В БОТЕ</div>`;
+                aiBtn.style.display = 'none';
+            }
+            if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + (auth.currentUser?.uid || currentUserID);
         }
-
-        window.addTask = function() { window.haptic('light'); const val = document.getElementById('main-input').value.trim(); if(!val) return; if(!db.inbox) db.inbox = []; db.inbox.unshift({ id: Date.now(), text: val, created: new Date().toISOString(), isProject: false }); document.getElementById('main-input').value = ''; renderCurrentView(); saveDB(); }
+        window.activatePromo = async function() { const code = document.getElementById('promo-input').value.trim(); if (!code) return; try { const res = await fetch(`${API_URL}/api/promo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, code: code }) }); const data = await res.json(); if (data.success) { alert('🎉 ' + data.message); if (data.newPremiumUntil) { db.premiumUntil = data.newPremiumUntil; db.isPremium = true; openSettings(); } closeModal('settings-modal'); } else { alert('❌ ' + data.message); } } catch (e) { alert('Ошибка сети'); } }
+        window.sendFeedback = async function() { const text = document.getElementById('feedback-text').value.trim(); if(!text) return; try { await fetch(`${API_URL}/api/feedback`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' }) }); alert("Отправлено!"); closeModal('settings-modal'); } catch(e) { alert("Ошибка отправки"); } }
+        window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
+        window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         window.moveToTrash = function(from, id) { window.haptic('medium'); const idx = db[from].findIndex(t => t.id === id); if(idx > -1) { const item = db[from].splice(idx, 1)[0]; item.originalFolder = from; if(!db.trash) db.trash = []; db.trash.unshift(item); renderCurrentView(); saveDB(); } }
         window.restoreFromTrash = function(id) { window.haptic('light'); const idx = db.trash.findIndex(t => t.id === id); if(idx > -1) { const item = db.trash.splice(idx, 1)[0]; db[item.originalFolder || 'inbox'].push(item); renderCurrentView(); saveDB(); } }
         window.permanentDelete = function(id) { window.haptic('heavy'); if(confirm("Удалить навсегда?")) { db.trash = db.trash.filter(t => t.id !== id); renderCurrentView(); saveDB(); } }
-        window.emptyDone = function() { if(confirm("Переместить все выполненные в корзину?")) { if(!db.trash) db.trash = []; db.trash.push(...db.done.map(i => ({...i, originalFolder: 'done'}))); db.done = []; renderCurrentView(); saveDB(); } }
-        window.emptyTrash = function() { window.haptic('heavy'); if(confirm("Очистить корзину?")) { db.trash = []; renderCurrentView(); saveDB(); } }
+        window.emptyDone = function() { if(confirm("Очистить выполненные?")) { if(!db.trash) db.trash = []; db.trash.push(...db.done.map(i => ({...i, originalFolder: 'done'}))); db.done = []; renderCurrentView(); saveDB(); } }
+        window.emptyTrash = function() { if(confirm("Очистить корзину?")) { db.trash = []; renderCurrentView(); saveDB(); } }
         window.undoComplete = function(id) { window.haptic('light'); const idx = db.done.findIndex(t => t.id === id); if(idx > -1) { const item = db.done.splice(idx, 1)[0]; delete item.completedAt; if(item.isProject) db.projects.unshift(item); else db.today.unshift(item); renderCurrentView(); saveDB(); } }
         window.completeTask = function(from, id) { window.haptic('success'); id = Number(id); const idx = db[from].findIndex(t => t.id === id); if(idx === -1) return; const task = db[from][idx]; if (task.projectId) { const project = db.projects.find(p => p.id === task.projectId); if (project) { const step = project.steps.find(s => s.id === task.stepId); if(step) step.completed = true; const nextStep = project.steps.find(s => !s.completed); if(nextStep) { alert(`Отлично! Следующий шаг: "${nextStep.text}"`); db.today.push({ id: Date.now(), text: nextStep.text, projectId: project.id, projectTitle: project.title, stepId: nextStep.id, isProject: false }); } else { alert("🎉 Проект завершен!"); db.projects = db.projects.filter(p => p.id !== project.id); project.isProject = true; project.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(project); } } db[from].splice(idx, 1); } else { const item = db[from].splice(idx, 1)[0]; item.completedAt = new Date().toLocaleString(); if(!db.done) db.done = []; db.done.unshift(item); } renderCurrentView(); saveDB(); }
-
-        let wizardTask=null, wizardStep=0, inputCallback=null, dateCallback=null, moveTaskId=null;
-        const questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
-        
         window.startWizard = function() { if(db.inbox.length===0) return; window.haptic('light'); wizardTask=db.inbox[db.inbox.length - 1]; wizardStep=0; document.getElementById('wizard-modal').style.display='flex'; renderWizard(); }
+        let wizardTask=null, wizardStep=0, questions = [ { text: "Нужно делать?", no: "reference", noTxt: "Нет (Архив)", yesTxt: "Да" }, { text: "На этой неделе?", no: "someday", noTxt: "Нет (Потом)", yesTxt: "Да" }, { text: "Делать МНЕ?", no: "DELEGATE", noTxt: "Нет (Поручить)", yesTxt: "Да" }, { text: "Это 1 шаг?", no: "PROJECT", noTxt: "Нет (Проект)", yesTxt: "Да" }, { text: "< 2 минут?", yes: "DO_NOW", yesTxt: "Да (Сейчас)", noTxt: "> 2 мин" }, { text: "Жесткая дата?", yes: "CALENDAR", yesTxt: "Да (Календарь)", noTxt: "Нет (В Сегодня)" } ];
         window.renderWizard = function() { const q = questions[wizardStep]; document.getElementById('wizard-task-text').innerText = wizardTask.text; document.getElementById('wizard-question-text').innerText = q.text; document.getElementById('btn-no').innerText = q.noTxt; document.getElementById('btn-yes').innerText = q.yesTxt; }
         window.handleWizardAnswer = function(yes) { window.haptic('light'); const q = questions[wizardStep]; if(!yes) { if(q.no==='reference') return moveTo('reference'); if(q.no==='someday') return moveTo('someday'); if(q.no==='DELEGATE') { openInput('Кому?', (n)=>{ setTimeout(()=>openDateModal((d)=>moveTo('waiting',{assignee:n, dateStr:d})),200); }); return; } if(q.no==='PROJECT') { openProjectModal(null, wizardTask); return; } } else { if(q.yes==='DO_NOW') { moveTo('today', { isQuick: true }); alert("⚡️ Добавлено в 'Сегодня' (2 МИН). Сделайте это сейчас!"); return; } if(q.yes==='CALENDAR') { openDateModal((d,t)=>moveTo('calendar',{dateStr:d, timeStr:t})); return; } } wizardStep++; if(wizardStep>=questions.length) moveTo('today'); else renderWizard(); }
         window.moveTo = function(f, e={}) { db.inbox = db.inbox.filter(t => t.id !== wizardTask.id); if(!db[f]) db[f]=[]; db[f].unshift({...wizardTask, ...e, id:Date.now()}); renderCurrentView(); saveDB(); closeModal('wizard-modal'); closeModal('input-modal'); closeModal('date-modal'); if(db.inbox.length>0) setTimeout(startWizard,300); }
         window.closeModal = function(id) { document.getElementById(id).style.display='none'; }
-        window.openInput = function(t, cb) { document.getElementById('input-modal').style.display='flex'; document.getElementById('input-modal-title').innerText=t; inputCallback=cb; }
-        window.submitInputModal = function() { const v=document.getElementById('input-modal-field').value; if(v&&inputCallback) inputCallback(v); closeModal('input-modal'); }
-        window.openDateModal = function(cb) { document.getElementById('date-modal').style.display='flex'; dateCallback=cb; }
-        window.submitDateModal = function() { const d=document.getElementById('calendar-date').value; const t=document.getElementById('calendar-time').value; if(d&&dateCallback) dateCallback(d,t); closeModal('date-modal'); }
-        window.openMoveModal = function(id) { moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
-        window.submitMove = function(f) { if(!moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); renderCurrentView(); saveDB(); } closeModal('move-modal'); }
-
+        window.openInput = function(t, cb) { document.getElementById('input-modal').style.display='flex'; document.getElementById('input-modal-title').innerText=t; window.inputCallback=cb; }
+        window.submitInputModal = function() { const v=document.getElementById('input-modal-field').value; if(v&&window.inputCallback) window.inputCallback(v); closeModal('input-modal'); }
+        window.openDateModal = function(cb) { document.getElementById('date-modal').style.display='flex'; window.dateCallback=cb; }
+        window.submitDateModal = function() { const d=document.getElementById('calendar-date').value; const t=document.getElementById('calendar-time').value; if(d&&window.dateCallback) window.dateCallback(d,t); closeModal('date-modal'); }
+        window.openMoveModal = function(id) { window.moveTaskId=id; document.getElementById('move-modal').style.display='flex'; }
+        window.submitMove = function(f) { if(!window.moveTaskId)return; const idx=db[currentView].findIndex(t=>t.id===window.moveTaskId); if(idx>-1) { const i=db[currentView].splice(idx,1)[0]; if(!db[f]) db[f]=[]; db[f].unshift(i); renderCurrentView(); saveDB(); } closeModal('move-modal'); }
         let tempSteps=[];
         window.openProjectModal = function(eid=null, src=null) { closeModal('wizard-modal'); document.getElementById('project-modal').style.display='flex'; tempSteps=[]; const aiBtn = document.getElementById('btn-ai-magic'); if(aiBtn) aiBtn.style.display = checkPremiumLimits() ? 'block' : 'none'; if(eid) { const p=db.projects.find(x=>x.id===eid); document.getElementById('proj-edit-id').value=eid; document.getElementById('proj-name').value=p.title; document.getElementById('proj-goal').value=p.goal; tempSteps=JSON.parse(JSON.stringify(p.steps)); } else { document.getElementById('proj-edit-id').value=""; document.getElementById('proj-name').value=src ? src.text : ''; document.getElementById('proj-goal').value=""; } renderSteps(); }
         window.addStepToUI = function() { const v=document.getElementById('proj-new-step').value; if(v) { tempSteps.push({id:Date.now(), text:v, completed:false}); document.getElementById('proj-new-step').value=''; renderSteps(); } }
         window.removeStep = function(i) { tempSteps.splice(i,1); renderSteps(); }
-        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)" style="border:none; background:transparent; font-size:16px; width:100%; outline:none;"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
+        window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="updateStep(${i},this.value)"><i class="ph ph-x" style="color:red; font-size:18px; padding:5px; cursor:pointer;" onclick="removeStep(${i})"></i></div>`; }); }
         window.updateStep = function(i,v) { tempSteps[i].text=v };
-
         window.askAIForSteps = async function() {
-            // ВАЖНО: ПРОВЕРКА ЛИМИТОВ ПЕРЕД ЗАПРОСОМ
-            if (!checkPremiumLimits()) return;
-            
+            if (!checkAIPremium()) return;
             const title = document.getElementById('proj-name').value;
             if(!title) return alert("Сначала напишите название проекта!");
-            const btn = document.getElementById('btn-ai-magic');
-            const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...';
-            btn.disabled = true;
+            const btn = document.getElementById('btn-ai-magic'); const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
             try {
                 const response = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Я создаю проект: "${title}".`, initData: tg.initData }) });
-                if (response.status === 402) { alert("⛔️ Подписка не активна. Проверьте Настройки."); return; }
-                if (response.status === 403) { alert("⛔️ Ошибка доступа. Запрос отклонен."); return; }
+                if (response.status === 402) { alert("⛔️ Подписка не активна."); return; }
                 const data = await response.json();
                 if(data.reply) { const lines = data.reply.split('\n').filter(line => line.trim().length > 0); lines.forEach(line => { const cleanText = line.replace(/^[\d\.\-\s]+/, ''); tempSteps.push({id: Date.now() + Math.random(), text: cleanText, completed: false}); }); renderSteps(); window.haptic('success'); }
-            } catch (e) { console.error(e); alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
+            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
         }
-        
         window.saveProject = function() { window.haptic('success'); const eid=document.getElementById('proj-edit-id').value; if (!eid) { if (!checkPremiumLimits()) return; } const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните название, цель и шаги!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { if(!db.inbox) db.inbox = []; db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } if(!db.today) db.today = []; db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } renderCurrentView(); saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
         window.editProject = function(id) { openProjectModal(id); }
         window.updateBadges = function() { const views = ['inbox', 'today', 'calendar', 'projects', 'waiting', 'someday', 'reference', 'done', 'trash']; views.forEach(view => { const el = document.getElementById('badge-' + view); if(el) el.innerText = db[view] ? db[view].length : 0; const mobEl = document.getElementById('mob-badge-' + view); if(mobEl) { const count = db[view] ? db[view].length : 0; mobEl.innerText = count; mobEl.style.display = count > 0 ? 'flex' : 'none'; } }); }
         
-        initSplash();
-        initUserInfo(); switchView('inbox');
+        initSplash(); initUserInfo(); switchView('inbox');
     </script>
 </body>
 </html>
