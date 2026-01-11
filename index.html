@@ -355,7 +355,7 @@
             }, 2000);
         }
 
-        // 🔥 ПРАВИЛЬНАЯ АВТОРИЗАЦИЯ + БЕЗОПАСНАЯ ПОДГРУЗКА
+        // 👇 ВСТАВЬ ЭТО ВМЕСТО СТАРОЙ initUserInfo
         async function initUserInfo() {
             const user = tg.initDataUnsafe?.user;
             
@@ -367,7 +367,10 @@
                 if (typeof ym !== 'undefined') ym(106183159, 'userParams', { UserID: user.id });
 
                 try {
-                    // 1. Получаем токен от сервера
+                    // 1. Попытка получить токен
+                    // Добавили alert для отладки старта
+                    // alert("1. Запрос токена..."); 
+                    
                     const response = await fetch(`${API_URL}/api/auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -375,39 +378,47 @@
                     });
                     
                     if (!response.ok) {
-                        console.error('Auth response NOT OK', response.status);
-                        // Не бросаем ошибку, чтобы продолжить работу с открытыми правилами
-                    } else {
-                        const { token } = await response.json();
-                        // 2. Входим в Firebase
-                        await signInWithCustomToken(auth, token);
-                        console.log("✅ Успешная авторизация в Firebase", auth.currentUser?.uid);
+                        // Если сервер ответил ошибкой (403, 500 и т.д.)
+                        const errText = await response.text();
+                        alert(`❌ Ошибка Сервера Replit:\nStatus: ${response.status}\nText: ${errText}`);
+                        throw new Error(`Server Error: ${response.status}`);
                     }
+                    
+                    const data = await response.json();
+                    if (!data.token) {
+                         alert("❌ Сервер не прислал токен (Token is empty)");
+                         throw new Error("No token received");
+                    }
+
+                    // 2. Входим в Firebase
+                    await signInWithCustomToken(auth, data.token);
+                    
+                    // ЕСЛИ МЫ ЗДЕСЬ - ЗНАЧИТ ВСЁ РАБОТАЕТ
+                    // alert("✅ АВТОРИЗАЦИЯ УСПЕШНА!"); 
+                    console.log("✅ Auth Success");
+
                 } catch (e) {
-                    console.error("Auth Error:", e);
+                    // 👇 ВОТ ЭТО САМОЕ ВАЖНОЕ: ПОКАЖИ МНЕ ЭТОТ ALERT
+                    console.error(e);
+                    alert(`🚨 Ошибка Входа:\n${e.message}\n\nПроверь консоль Replit!`);
                 }
             } else {
-                // Гостевой режим
                 let storedId = localStorage.getItem('gtd_guest_id');
                 if(!storedId) { storedId = 'web_' + Date.now(); localStorage.setItem('gtd_guest_id', storedId); }
                 currentUserID = storedId;
             }
             
-            // 3. Подключаемся к базе. Используем UID из авторизации, если он есть. Если нет - Fallback на ID из Телеграма.
-            // Это обеспечивает работу и со строгими правилами (в будущем), и с открытыми (сейчас).
+            // 3. Подключение к базе (оставляем как было)
             let userPathId = currentUserID;
             if (auth.currentUser) {
                 userPathId = auth.currentUser.uid;
             }
             
-            console.log('DB path users/', userPathId);
             const userRef = ref(dbRef, 'users/' + userPathId);
-            
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     db = { ...db, ...data };
-                    // Приведение типов для надежности
                     if(!Array.isArray(db.inbox)) db.inbox = Object.values(db.inbox || {});
                     if(!Array.isArray(db.today)) db.today = Object.values(db.today || {});
                     if(!Array.isArray(db.projects)) db.projects = Object.values(db.projects || {});
@@ -415,10 +426,8 @@
                 isLoaded = true; 
                 updateBadges();
                 renderCurrentView();
-                
-                // Support ID (без красного текста)
                 const debugEl = document.getElementById('debug-id');
-                if(debugEl) debugEl.innerText = 'Support ID: ' + userPathId;
+                if(debugEl) debugEl.innerText = 'ID: ' + userPathId;
             });
         }
 
@@ -674,3 +683,4 @@
     </script>
 </body>
 </html>
+
