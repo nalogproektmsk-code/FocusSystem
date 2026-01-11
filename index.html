@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FocusSystem AI 3.0</title>
+    <title>FocusSystem AI 3.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +66,6 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1s ease;
         }
-        /* Анимация видна ярко на сплэше */
         #splash-screen canvas {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
@@ -164,6 +163,7 @@
         .btn-action i { font-size: 22px; }
         .btn-action.ai-magic { background: linear-gradient(135deg, #a855f7, #ec4899); border: none; color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
 
+        /* ЯРЛЫЧОК МОЛНИИ ДЛЯ БЫСТРЫХ ЗАДАЧ */
         .tag.quick { background: linear-gradient(90deg, #FACC15, #EAB308); color: #000 !important; font-weight: 800; padding: 4px 12px; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-radius: 8px; display:inline-flex; align-items:center; gap:4px; }
         .tag { padding: 5px 12px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border-radius: 8px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
         .tag.context-tag { color: #60A5FA; background: rgba(96, 165, 250, 0.1); }
@@ -189,12 +189,20 @@
             box-shadow: 0 8px 16px rgba(62, 123, 255, 0.2); cursor: pointer;
         }
         
+        /* ИСПРАВЛЕННЫЙ ЦВЕТ ТЕКСТА В ШАГАХ ПРОЕКТА */
         .step-row { 
             display: flex; align-items: center; gap: 10px; 
-            background: #2D3038; /* ТЕМНЫЙ ФОН ДЛЯ ЧИТАЕМОСТИ */
-            padding: 14px; border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);
+            background: #0f1014; /* Темный фон */
+            padding: 14px; border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .step-row input { background: transparent !important; border: none !important; font-size: 16px; color: #fff !important; font-weight: 500; }
+        .step-row input { 
+            background: transparent !important; 
+            border: none !important; 
+            font-size: 16px; 
+            color: #FFFFFF !important; /* Белый текст */
+            font-weight: 600; 
+            opacity: 1;
+        }
 
         .premium-status { padding: 20px; border-radius: 20px; margin-bottom: 24px; font-size: 15px; line-height: 1.5; border: 1px solid transparent; }
         .premium-status.active { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; }
@@ -242,7 +250,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.0</div>
+        <div class="logo"><i class="ph-fill ph-brain"></i> Focus AI 3.1</div>
         <div class="menu-item active" onclick="switchView('inbox')"><span><i class="ph ph-tray"></i> Inbox</span><span class="badge" id="badge-inbox">0</span></div>
         <div class="menu-item" onclick="switchView('today')"><span><i class="ph ph-fire"></i> Сегодня</span><span class="badge" id="badge-today">0</span></div>
         <div class="menu-item" onclick="switchView('projects')"><span><i class="ph ph-kanban"></i> Проекты</span><span class="badge" id="badge-projects">0</span></div>
@@ -283,8 +291,11 @@
             <div id="premium-status-box" class="premium-status">Загрузка...</div>
             
             <div id="ai-review-btn-container" style="display:none; margin-bottom:20px;">
-                <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">AI WEEKLY REVIEW</label>
-                <button class="btn-primary" style="background: linear-gradient(135deg, #10B981, #059669);" onclick="generateWeeklyReview()"><i class="ph-bold ph-chart-line-up"></i> Сгенерировать отчет</button>
+                <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">AI ФУНКЦИИ</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-primary" style="background: linear-gradient(135deg, #10B981, #059669); font-size:14px; flex:1;" onclick="generateWeeklyReview()"><i class="ph-bold ph-chart-line-up"></i> Weekly Review</button>
+                    <button class="btn-primary" style="background: linear-gradient(135deg, #3B82F6, #2563EB); font-size:14px; flex:1;" onclick="retroactiveTagging()"><i class="ph-bold ph-tag"></i> Обновить теги (AI)</button>
+                </div>
             </div>
 
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ПРОМОКОД</label>
@@ -297,7 +308,7 @@
             <textarea id="feedback-text" placeholder="Ваши идеи..." style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
             <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
-                FocusSystem v3.0 • AI Edition<br>
+                FocusSystem v3.1 • AI Edition<br>
                 <span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
@@ -546,7 +557,7 @@
             Object.keys(contextMap).forEach(key => {
                 if (text.toLowerCase().includes(key)) detected.push(contextMap[key]);
             });
-            return [...new Set(detected)]; // unique tags
+            return [...new Set(detected)]; 
         }
 
         // 2. DUPLICATE DETECTOR
@@ -561,16 +572,49 @@
 
         // 3. 2-MINUTE RULE DETECTOR
         function isTwoMinuteTask(text) {
-            const quickVerbs = ['позвонить', 'скинуть', 'отправить', 'оплатить', 'перевести', 'написать', 'узнать'];
+            const quickVerbs = ['позвонить', 'скинуть', 'отправить', 'оплатить', 'перевести', 'написать', 'узнать', 'заказать', 'глянуть'];
             return quickVerbs.some(v => text.toLowerCase().startsWith(v));
         }
+        
+        // 4. RETROACTIVE TAGGING
+        window.retroactiveTagging = function() {
+            if (!checkAIPremium()) return;
+            let count = 0;
+            const collections = ['inbox', 'today', 'calendar', 'waiting', 'someday'];
+            
+            collections.forEach(col => {
+                if(db[col]) {
+                    db[col].forEach(task => {
+                        const newTags = applyAITags(task.text);
+                        if(newTags.length > 0) {
+                            if(!task.tags) task.tags = [];
+                            // Add only new tags
+                            newTags.forEach(tag => {
+                                if(!task.tags.includes(tag)) { task.tags.push(tag); count++; }
+                            });
+                        }
+                    });
+                }
+            });
+            
+            if(count > 0) {
+                saveDB();
+                alert(`✨ AI обновил ${count} задач и добавил теги!`);
+            } else {
+                alert("AI просканировал задачи, но не нашел ничего нового для тегов.");
+            }
+            closeModal('settings-modal');
+        }
 
-        /* --- VOICE INPUT (WHISPER STYLE MOCK) --- */
+        /* --- VOICE INPUT --- */
         window.startVoiceInput = function() {
             if (!checkAIPremium()) return;
             
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("Ваш браузер не поддерживает голосовой ввод :("); return; }
+            if (!SpeechRecognition) { 
+                alert("🎙 Ваш браузер (или Telegram на iPhone) блокирует микрофон из соображений приватности Apple. Попробуйте открыть веб-версию в Safari/Chrome или используйте текстовый ввод."); 
+                return; 
+            }
             
             const btn = document.getElementById('btn-mic');
             btn.classList.add('listening');
@@ -582,18 +626,20 @@
                 processVoiceCommand(transcript);
                 btn.classList.remove('listening');
             };
-            recognition.onerror = () => { alert("Ошибка распознавания"); btn.classList.remove('listening'); };
+            recognition.onerror = (e) => { 
+                console.error(e);
+                alert("Ошибка распознавания или доступ запрещен. На iPhone микрофон в Telegram часто заблокирован системой."); 
+                btn.classList.remove('listening'); 
+            };
             recognition.start();
         }
 
         function processVoiceCommand(text) {
-            // "Напомни позвонить маме завтра в 18:00"
             const lower = text.toLowerCase();
             let dateStr = null;
             let timeStr = null;
             let cleanText = text;
 
-            // Simple heuristics
             if (lower.includes('завтра')) {
                 const d = new Date(); d.setDate(d.getDate() + 1);
                 dateStr = d.toISOString().split('T')[0];
@@ -613,14 +659,12 @@
             cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
 
             if (dateStr) {
-                // To Calendar
                 if (!db.calendar) db.calendar = [];
                 db.calendar.push({ id: Date.now(), text: cleanText, dateStr, timeStr, tags: applyAITags(cleanText), created: new Date().toISOString() });
                 alert(`🤖 AI: Создано событие в календаре:\n"${cleanText}"\n📅 ${dateStr} ⏰ ${timeStr || 'Весь день'}`);
                 saveDB();
             } else {
-                // To Inbox
-                addTask(cleanText); // Reuses existing logic with AI checks inside
+                addTask(cleanText); 
             }
         }
 
@@ -654,7 +698,13 @@
 
             if(!db.inbox) db.inbox = []; 
             
-            let newTask = { id: Date.now(), text: val, created: new Date().toISOString(), isProject: false };
+            let newTask = { 
+                id: Date.now(), 
+                text: val, 
+                created: new Date().toISOString(), 
+                isProject: false,
+                isQuick: isTwoMinuteTask(val) // Проверяем 2-минутку сразу
+            };
             
             if (checkAIPremium()) {
                  const tags = applyAITags(val);
@@ -664,6 +714,21 @@
             db.inbox.unshift(newTask); 
             if (!overrideText) input.value = ''; 
             renderCurrentView(); saveDB(); 
+        }
+        
+        // EDIT TASK LOGIC
+        window.editTask = function(id) {
+            const task = db[currentView].find(t => t.id === id);
+            if(!task) return;
+            openInput('Редактировать', (newText) => {
+                task.text = newText;
+                task.tags = applyAITags(newText); // Re-evaluate tags
+                saveDB();
+            });
+            // Pre-fill input
+            setTimeout(() => {
+                document.getElementById('input-modal-field').value = task.text;
+            }, 100);
         }
 
         window.renderCurrentView = function() {
@@ -695,7 +760,6 @@
 
             // AI SORTING FOR 'TODAY' (2-minute rule)
             if (currentView === 'today') {
-                list.forEach(t => t.isQuick = isTwoMinuteTask(t.text));
                 list.sort((a, b) => (b.isQuick === true) - (a.isQuick === true));
             }
 
@@ -737,7 +801,7 @@
 
         window.createCard = function(item, isDoneView, isProjectCard, prefixHtml = '') {
             let metaHtml = '';
-            // 2-MIN RULE ICON
+            // 2-MIN RULE ICON - ТЕПЕРЬ ОТОБРАЖАЕТСЯ ЕСЛИ ЕСТЬ
             if(item.isQuick) metaHtml += `<span class="tag quick"><i class="ph-fill ph-lightning"></i> 2 мин</span>`;
             if(item.tags) item.tags.forEach(t => metaHtml += `<span class="tag context-tag">${t}</span>`);
             if(item.dateStr) metaHtml += `<span class="tag date"><i class="ph-fill ph-calendar"></i> ${formatDateRUS(item.dateStr)}</span>`;
@@ -753,20 +817,34 @@
             }
 
             let buttons = '';
+            // EDIT BUTTON (NEW)
+            if(['inbox', 'today', 'calendar', 'waiting', 'someday'].includes(currentView)) {
+                buttons += `<button class="btn-action" onclick="editTask(${item.id})"><i class="ph ph-pencil-simple"></i></button>`;
+            }
+
             if(!['trash','done'].includes(currentView)) { 
                 buttons += nudgeBtn;
                 buttons += `<button class="btn-action ai-magic" onclick="magicDecompose(${item.id})"><i class="ph-bold ph-magic-wand"></i></button>`;
                 buttons += `<button class="btn-action" onclick="openMoveModal(${item.id})"><i class="ph ph-folder-notch-open"></i></button>`; 
             }
-            if(currentView === 'trash') { buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; } 
-            else if (isDoneView) { buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; } 
-            else { buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; }
+            if(currentView === 'trash') { 
+                buttons += `<button class="btn-action" onclick="restoreFromTrash(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button><button class="btn-action delete" onclick="permanentDelete(${item.id})"><i class="ph ph-x"></i></button>`; 
+            } 
+            else if (isDoneView) { 
+                // RESTORE FROM DONE (NEW)
+                buttons += `<button class="btn-action" onclick="undoComplete(${item.id})"><i class="ph ph-arrow-u-up-left"></i></button>`; 
+                buttons += `<button class="btn-action delete" onclick="moveToTrash('done', ${item.id})"><i class="ph ph-trash"></i></button>`; 
+            } 
+            else { 
+                buttons += `<button class="btn-action delete" onclick="moveToTrash('${currentView}', ${item.id})"><i class="ph ph-trash"></i></button>`; 
+            }
 
             const displayTitle = item.title || item.text;
             const checkAction = `completeTask('${currentView}', ${Number(item.id)})`;
             let checkboxHtml = '';
             if(['today','calendar','inbox','waiting','someday'].includes(currentView)) { checkboxHtml = `<div class="task-check" onclick="${checkAction}"><i class="ph-bold ph-check"></i></div>`; } else if (isDoneView) { checkboxHtml = `<div class="task-check checked"><i class="ph-bold ph-check"></i></div>`; }
             
+            // Highlight quick tasks
             const cardClass = item.isQuick ? 'task-card quick-task' : 'task-card';
             return `<div class="${cardClass}"><div class="task-left">${checkboxHtml}<div class="task-content"><div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}"> ${prefixHtml} ${displayTitle} </div><div class="task-meta">${metaHtml}</div></div></div><div class="actions">${buttons}</div></div>`;
         }
