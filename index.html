@@ -19,7 +19,7 @@
        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-       // 👇 ИСПРАВЛЕНИЕ: Добавлен triggerEvent:true для лучшей работы в SPA
+       // 👇 ИСПРАВЛЕНИЕ: Добавлен triggerEvent:true для SPA приложений
        ym(106183159, "init", { 
             clickmap:true, 
             trackLinks:true, 
@@ -450,30 +450,43 @@
             btn.innerHTML = 'OK';
         }
 
+        // 👇 ИСПРАВЛЕННАЯ ФУНКЦИЯ ОБРАТНОЙ СВЯЗИ (Добавляет Username)
         window.sendFeedback = async function() {
             const text = document.getElementById('feedback-text').value.trim();
             if(!text) return;
+            
+            const username = tg.initDataUnsafe?.user?.username || 'hidden';
+
             try {
                 await fetch(`${API_URL}/api/feedback`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' })
+                    body: JSON.stringify({ 
+                        userId: currentUserID, 
+                        text: text, 
+                        name: tg.initDataUnsafe?.user?.first_name || 'Guest',
+                        username: username 
+                    })
                 });
-                alert("Сообщение отправлено!"); document.getElementById('feedback-text').value = ''; closeModal('settings-modal');
-            } catch(e) { alert("Ошибка отправки"); }
+                alert("Сообщение отправлено!"); 
+                document.getElementById('feedback-text').value = ''; 
+                closeModal('settings-modal');
+            } catch(e) { 
+                console.error(e);
+                alert("Ошибка отправки"); 
+            }
         }
 
         window.haptic = function(style = 'light') { try { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch(e){} }
         window.formatDateRUS = function(isoDate) { if(!isoDate) return ''; const parts = isoDate.split('-'); if(parts.length !== 3) return isoDate; return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         
-        // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
+        // 👇 ОБНОВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ (С Метрикой)
         window.switchView = function(view) {
             window.haptic('light'); 
             currentView = view;
 
             // --- НАЧАЛО: КОД ДЛЯ ЯНДЕКС МЕТРИКИ (ИСПРАВЛЕННЫЙ) ---
             if (typeof ym !== 'undefined') {
-                // Создаем полный виртуальный адрес, чтобы Яндекс понял, что это "страница"
                 var virtualUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname + '#' + view;
                 
                 ym(106183159, 'hit', virtualUrl, { 
@@ -481,7 +494,6 @@
                     referer: window.location.href 
                 });
                 
-                // Вывод в консоль для проверки (виден если подключить отладку к телефону)
                 console.log('[Metrica] Hit sent:', virtualUrl);
             } else {
                 console.log('[Metrica] Not loaded yet');
