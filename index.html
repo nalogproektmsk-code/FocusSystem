@@ -352,9 +352,9 @@
                 <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'center'})},300)" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
-            <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
+            <div style="height: 50px;"></div> <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
                 FocusSystem v2.0 • beta "AI Edition" <br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
@@ -559,11 +559,6 @@
                 if (data) { db = { ...db, ...data }; ['inbox','today','projects','waiting','done','trash'].forEach(k => { if(!Array.isArray(db[k])) db[k] = Object.values(db[k] || {}); }); } 
                 isLoaded = true; updateBadges(); renderCurrentView();
                 if(document.getElementById('debug-id')) document.getElementById('debug-id').innerText = 'ID: ' + userPathId;
-                
-                // Hide mic on iPhone
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                const micBtn = document.getElementById('btn-mic');
-                if(isIOS && micBtn) micBtn.style.display = 'none';
             });
         }
         function saveDB() {
@@ -652,9 +647,10 @@
             if(!db[currentView]) db[currentView] = [];
             
             if (currentView === 'inbox') {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                 html += `<div class="input-wrapper"><div class="input-group">
                     <input type="text" id="main-input" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTask()">
-                    <button class="btn-mic" id="btn-mic" onclick="startVoiceInput()"><i class="ph-fill ph-microphone"></i></button>
+                    <button class="btn-mic" id="btn-mic" style="${isIOS ? 'display:none' : ''}" onclick="startVoiceInput()"><i class="ph-fill ph-microphone"></i></button>
                     <button class="btn-add" onclick="addTask()"><i class="ph ph-plus"></i></button>
                 </div></div>`;
                 if(db.inbox.length > 0) html += `<button class="btn-wizard" onclick="startWizard()"><i class="ph-bold ph-lightning" style="font-size:20px;"></i> РАЗОБРАТЬ ИНБОКС (${db.inbox.length})</button>`;
@@ -673,7 +669,7 @@
                     html += `<div class="empty-state-container">
                         <div style="text-align:center; color:var(--text-secondary); margin-bottom:12px;">Входящих нет. Отличная работа! 🎉</div>
                         <div class="empty-card" onclick="document.getElementById('main-input').focus()"><div class="empty-icon-box" style="background: rgba(62, 123, 255, 0.1); color: #3E7BFF;"><i class="ph-fill ph-plus-circle"></i></div><div class="empty-text"><strong>Добавить задачу</strong><span>Быстрый сброс</span></div></div>
-                        <div class="empty-card" onclick="switchView('projects')"><div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div><div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div></div>
+                        <div class="empty-card" onclick="openProjectModal()"><div class="empty-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #A855F7;"><i class="ph-fill ph-rocket-launch"></i></div><div class="empty-text"><strong>Новый проект</strong><span>Создать план через AI</span></div></div>
                         <div class="empty-card" onclick="openSearch()"><div class="empty-icon-box" style="background: rgba(255, 255, 255, 0.1); color: #fff;"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-text"><strong>Найти задачу</strong><span>Поиск везде</span></div></div>
                     </div>`;
                 } else html += `<div style="text-align:center; color:var(--text-secondary); margin-top:60px;"><i class="ph ph-coffee" style="font-size:48px;"></i><br>Задач нет</div>`; 
@@ -738,6 +734,7 @@
             db.inbox.unshift(task); if (!overrideText) input.value = ''; renderCurrentView(); saveDB(); 
         }
         window.editTask = function(id) { const t = db[currentView].find(x=>x.id===id); if(t) openInput('Редактировать', (v)=>{ t.text=v; t.tags=applyAITags(v); saveDB(); }); setTimeout(()=>document.getElementById('input-modal-field').value=t.text,100); }
+        window.editProject = function(id) { openProjectModal(id); }
         window.switchView = function(view) { window.haptic('light'); currentView = view; document.querySelectorAll('.nav-item, .menu-item').forEach(el => el.classList.remove('active')); document.querySelectorAll(`[onclick="switchView('${view}')"]`).forEach(el => el.classList.add('active')); renderCurrentView(); }
         window.magicDecompose = async function(id) { if (!checkAIPremium()) return; const task = db[currentView].find(t => t.id === id); if(!task) return; if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return; window.haptic('medium'); openProjectModal(null, task); setTimeout(() => askAIForSteps(), 500); }
         window.activatePromo = async function() { const code = document.getElementById('promo-input').value.trim(); if (!code) return; try { const res = await fetch(`${API_URL}/api/promo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, code: code }) }); const data = await res.json(); if (data.success) { alert('🎉 ' + data.message); if (data.newPremiumUntil) { db.premiumUntil = data.newPremiumUntil; db.isPremium = true; openSettings(); } closeModal('settings-modal'); } else { alert('❌ ' + data.message); } } catch (e) { alert('Ошибка сети'); } }
@@ -954,4 +951,3 @@
     </script>
 </body>
 </html>
-
