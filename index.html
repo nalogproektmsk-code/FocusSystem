@@ -352,9 +352,9 @@
                 <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'center'})},300)" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'center'})},500)" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
             <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
-            <div style="height: 50px;"></div> <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
+            <div style="height: 200px;"></div> <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
                 FocusSystem v2.0 • beta "AI Edition" <br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
@@ -744,7 +744,16 @@
             const text = textField.value.trim(); 
             if(!text) return; 
             try { 
-                await fetch(`${API_URL}/api/feedback`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, text: text, name: tg.initDataUnsafe?.user?.first_name || 'Guest' }) }); 
+                await fetch(`${API_URL}/api/feedback`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ 
+                        userId: currentUserID, 
+                        text: text, 
+                        name: tg.initDataUnsafe?.user?.first_name || 'Guest',
+                        username: tg.initDataUnsafe?.user?.username || 'hidden' // Исправление: Добавлено поле username
+                    }) 
+                }); 
                 alert("Отправлено!"); 
                 textField.value = ''; 
                 closeModal('settings-modal'); 
