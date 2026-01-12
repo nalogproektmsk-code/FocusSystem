@@ -285,6 +285,17 @@
                 display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #1e2028; 
                 display: none; 
             }
+            
+            /* --- FIX: MOBILE MODAL FOR KEYBOARD --- */
+            .modal-overlay { align-items: flex-end; }
+            .modal {
+                width: 100%; max-width: 100%;
+                border-radius: 24px 24px 0 0;
+                margin: 0;
+                max-height: 90vh;
+            }
+            /* Prevent button from shrinking on keyboard open */
+            #settings-modal .btn-primary { flex-shrink: 0; }
         }
     </style>
 </head>
@@ -352,9 +363,10 @@
                 <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="activatePromo()">OK</button>
             </div>
             <label style="display:block; font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ</label>
-            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'center'})},500)" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
-            <button class="btn-primary" style="background:#334155;" onclick="sendFeedback()">Отправить</button>
-            <div style="height: 200px;"></div> <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
+            <textarea id="feedback-text" placeholder="Ваши идеи..." onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'nearest'})},500)" style="width:100%; box-sizing:border-box; height:80px; margin-bottom:12px; resize:none;"></textarea>
+            <button class="btn-primary" style="background:#334155; flex-shrink:0;" onclick="sendFeedback()">Отправить</button>
+            <div style="height: 20px;"></div> 
+            <div style="text-align:center; margin-top:20px; font-size:11px; color:var(--text-secondary);">
                 FocusSystem v2.0 • beta "AI Edition" <br><span id="debug-id" style="font-size: 9px; opacity: 0.5;"></span>
             </div>
         </div>
