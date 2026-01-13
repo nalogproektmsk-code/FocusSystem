@@ -955,15 +955,74 @@
         window.renderSteps = function() { const c=document.getElementById('proj-steps-container'); c.innerHTML=''; tempSteps.forEach((s,i)=>{ c.innerHTML+=`<div class="step-row"><span>${i+1}.</span><input value="${s.text}" oninput="tempSteps[${i}].text=this.value"><i class="ph ph-x" style="color:red;padding:5px;" onclick="removeStep(${i})"></i></div>`; }); }
         window.askAIForSteps = async function() {
             if (!checkAIPremium()) return;
+            
             const title = document.getElementById('proj-name').value;
-            if(!title) return alert("Напишите название!");
-            const btn = document.getElementById('btn-ai-magic'); const old = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; btn.disabled = true;
+            const goalInput = document.getElementById('proj-goal').value;
+            
+            if(!title) return alert("Напишите название проекта!");
+            
+            // ЛОГИКА: Если цель не указана, просим ИИ додумать её самому исходя из названия
+            const goalContext = goalInput && goalInput.trim() !== "" 
+                ? `Желаемый результат (Цель): "${goalInput}".` 
+                : `Желаемый результат: Логическое и успешное завершение задачи "${title}".`;
+
+            const btn = document.getElementById('btn-ai-magic'); 
+            const old = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Думаю...'; 
+            btn.disabled = true;
+
+            const prompt = `
+            Я веду список задач по методу GTD.
+            У меня есть проект: "${title}".
+            ${goalContext}
+
+            Твоя задача: Составь конкретный план действий (чек-лист).
+
+            СТРОГИЕ ПРАВИЛА (ИНАЧЕ Я НЕ ПРИМУ ОТВЕТ):
+            1. Напиши ТОЛЬКО список действий. Никаких вступлений ("Вот ваш план") и заключений.
+            2. Количество шагов: от 5 до 10. (Если проект простой — хватит и 3-5). Не пиши больше 12 шагов!
+            3. ЗАПРЕЩЕНО использовать заголовки этапов (например: "Подготовка:", "Этап 1:"). Только действия.
+            4. Не используй вложенные списки.
+            5. Каждый шаг должен начинаться с глагола (Позвонить, Купить, Найти, Согласовать).
+            6. Каждый шаг строго с новой строки. Без нумерации (цифры я проставлю сам).
+            `;
+
             try {
-                const res = await fetch(`${API_URL}/api/ask-ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Проект: "${title}"`, initData: tg.initData }) });
+                const res = await fetch(`${API_URL}/api/ask-ai`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ message: prompt, initData: tg.initData }) 
+                });
+                
                 const data = await res.json();
-                if(data.reply) { const lines = data.reply.split('\n').filter(l => l.trim().length > 0); lines.forEach(l => { tempSteps.push({id: Date.now()+Math.random(), text: l.replace(/^[\d\.\-\s]+/, ''), completed: false}); }); renderSteps(); }
-            } catch (e) { alert("Ошибка ИИ"); } finally { btn.innerHTML = old; btn.disabled = false; }
+                
+                if(data.reply) { 
+                    const lines = data.reply.split('\n').filter(l => {
+                        const t = l.trim();
+                        // Фильтруем пустые строки и строки-заголовки
+                        return t.length > 0 && !t.endsWith(':') && !t.toLowerCase().includes('этап');
+                    });
+                    
+                    lines.forEach(l => { 
+                        // Чистим от мусора
+                        const cleanText = l.replace(/^[\d\.\-\*\•\s]+/, '').trim();
+                        if(cleanText && cleanText.length > 2) { 
+                            tempSteps.push({
+                                id: Date.now() + Math.random(), 
+                                text: cleanText, 
+                                completed: false
+                            }); 
+                        }
+                    }); 
+                    renderSteps(); 
+                }
+            } catch (e) { 
+                console.error(e);
+                alert("Ошибка ИИ. Проверьте интернет или ключ API."); 
+            } finally { 
+                btn.innerHTML = old; 
+                btn.disabled = false; 
+            }
         }
         window.saveProject = function() { const eid=document.getElementById('proj-edit-id').value; if (!eid && !checkPremiumLimits()) return; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните всё!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } renderCurrentView(); saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
         window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; const sb = document.getElementById('premium-status-box'); if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) { sb.innerHTML = `💎 <b>Premium</b><br>До: ${new Date(db.premiumUntil).toLocaleDateString()}`; document.getElementById('ai-review-btn-container').style.display='block'; } else { sb.innerHTML = `🌑 <b>Free</b><div onclick="closeApp()" style="color:#991B1B;cursor:pointer;margin-top:5px">👉 КУПИТЬ</div>`; document.getElementById('ai-review-btn-container').style.display='none'; } }
@@ -972,4 +1031,5 @@
     </script>
 </body>
 </html>
+
 
