@@ -608,11 +608,26 @@
             if ((db.premiumUntil && new Date(db.premiumUntil) > new Date()) || db.isPremium === true) return true;
             alert("🔒 Эта AI-функция доступна только в Premium."); return false;
         }
-        function applyAITags(text) {
-            const map = {'магазин':'@Магазин','купить':'@Магазин','написать':'@Компьютер','код':'@Компьютер','позвонить':'@Звонки','оплатить':'@Финансы'};
-            let det = []; Object.keys(map).forEach(k => { if (text.toLowerCase().includes(k)) det.push(map[k]); });
-            return [...new Set(det)];
+
+        // --- REAL AI FUNCTIONS ---
+
+        async function applyAITags(text) {
+            if (!checkAIPremium()) return []; // Если нет премиума - нет тегов
+            
+            try {
+                const res = await fetch(`${API_URL}/api/tags`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text, initData: tg.initData })
+                });
+                const data = await res.json();
+                return data.tags || [];
+            } catch(e) {
+                console.error("Tags error", e);
+                return [];
+            }
         }
+
         function checkDuplicates(text) {
             const found = [...db.inbox, ...db.today].find(t => t.text.toLowerCase().includes(text.toLowerCase()));
             if (found && found.text.length > 4) return confirm(`🤖 AI: Похожая задача уже есть ("${found.text}"). Создать?`);
@@ -620,30 +635,123 @@
         }
         function isTwoMinuteTask(text) { return ['позвонить','скинуть','отправить','оплатить'].some(v => text.toLowerCase().startsWith(v)); }
 
-        /* --- AI FOCUS --- */
-        window.activateFocusMode = function() {
+        /* --- AI FOCUS (REAL) --- */
+        window.activateFocusMode = async function() {
             if (!checkAIPremium()) return;
             if (db.today.length === 0) return alert("Список 'Сегодня' пуст.");
             
-            // Score tasks
-            let scored = db.today.map(t => {
-                let score = 0;
-                if (t.isQuick) score += 50; 
-                if (t.text.length > 20) score += 10;
-                if (t.tags && t.tags.length > 0) score += 20;
-                score += Math.random() * 15;
-                return { ...t, score };
-            });
-            scored.sort((a,b) => b.score - a.score);
-            const top3 = scored.slice(0, 3);
-            
-            const cont = document.getElementById('focus-list-container');
-            cont.innerHTML = '';
-            top3.forEach((t, i) => {
-                cont.innerHTML += `<div class="focus-item"><div class="focus-num">${i+1}</div><div class="focus-text">${t.text}</div></div>`;
-            });
-            document.getElementById('focus-modal').style.display = 'flex';
+            const btn = document.querySelector('.btn-wizard[onclick="activateFocusMode()"]');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ИИ Думает...';
+
+            try {
+                // Отправляем задачи на сервер
+                const res = await fetch(`${API_URL}/api/focus`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        tasks: db.today.map(t => ({ text: t.text, isQuick: t.isQuick })),
+                        initData: tg.initData 
+                    })
+                });
+                
+                const data = await res.json();
+                // Сервер возвращает { indices: [0, 4, 2] }
+                let indices = data.indices || [0,1,2]; 
+                
+                const cont = document.getElementById('focus-list-container');
+                cont.innerHTML = '';
+                
+                indices.forEach((idx, i) => {
+                    if(db.today[idx]) {
+                        const t = db.today[idx];
+                        cont.innerHTML += `<div class="focus-item"><div class="focus-num">${i+1}</div><div class="focus-text">${t.text}</div></div>`;
+                    }
+                });
+                
+                document.getElementById('focus-modal').style.display = 'flex';
+
+            } catch(e) {
+                alert("Ошибка ИИ: " + e.message);
+            } finally {
+                btn.innerHTML = oldText;
+            }
         }
+
+        /* --- REAL VOICE INPUT (WHISPER) --- */
+        window.startVoiceInput = async function() {
+            if (!checkAIPremium()) return;
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return alert("Микрофон недоступен");
+            }
+
+            const btn = document.getElementById('btn-mic');
+            btn.classList.add('listening');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                const audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
+                    const formData = new FormData();
+                    formData.append('voice', audioBlob);
+                    formData.append('initData', tg.initData);
+
+                    btn.classList.remove('listening');
+                    
+                    // Показываем, что идет загрузка
+                    const inputField = document.getElementById('main-input');
+                    const originalPlaceholder = inputField.placeholder;
+                    inputField.value = "🎧 Слушаю...";
+                    inputField.disabled = true;
+
+                    try {
+                        const res = await fetch(`${API_URL}/api/voice`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await res.json();
+                        
+                        if (data.text) {
+                            inputField.value = data.text;
+                        } else {
+                             inputField.value = "";
+                             alert("Не удалось распознать");
+                        }
+                    } catch (e) {
+                        alert("Ошибка сети: " + e.message);
+                        inputField.value = "";
+                    } finally {
+                        inputField.disabled = false;
+                        inputField.placeholder = originalPlaceholder;
+                        if(inputField.value === "🎧 Слушаю...") inputField.value = "";
+                        inputField.focus();
+                    }
+                };
+
+                mediaRecorder.start();
+                
+                // Записываем 5 секунд (авто-стоп)
+                setTimeout(() => {
+                    if (mediaRecorder.state === "recording") {
+                        mediaRecorder.stop();
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                }, 5000);
+
+            } catch (e) {
+                btn.classList.remove('listening');
+                alert("Ошибка доступа к микрофону");
+            }
+        }
+
 
         /* --- UI RENDER --- */
         window.renderCurrentView = function() {
@@ -733,19 +841,41 @@
             return `<div class="${cardClass}"><div class="task-top-row">${checkboxHtml}<div class="task-title" style="${isDoneView?'text-decoration:line-through; opacity:0.5':''}">${prefixHtml} ${displayTitle}</div></div><div class="task-bottom-row"><div class="task-meta">${metaHtml}</div><div class="actions">${buttons}</div></div></div>`;
         }
 
-        /* --- ACTIONS --- */
-        window.addTask = function(overrideText = null) { 
+        /* --- ACTIONS (UPDATED ASYNC ADD TASK) --- */
+        window.addTask = async function(overrideText = null) { 
             window.haptic('light'); 
             const input = document.getElementById('main-input');
             const val = overrideText || input.value.trim(); 
             if(!val) return; 
+            
             if (checkAIPremium() && !checkDuplicates(val)) return;
+            
             if(!db.inbox) db.inbox = []; 
             let task = { id: Date.now(), text: val, created: new Date().toISOString(), isQuick: isTwoMinuteTask(val) };
-            if (checkAIPremium()) { const tags = applyAITags(val); if (tags.length) task.tags = tags; }
-            db.inbox.unshift(task); if (!overrideText) input.value = ''; renderCurrentView(); saveDB(); 
+            
+            if (checkAIPremium()) { 
+                // Показываем пользователю, что мы думаем, если это не быстрый ввод
+                if(!overrideText) {
+                    input.placeholder = "🤖 Ставлю теги...";
+                    input.disabled = true;
+                }
+                const tags = await applyAITags(val); 
+                if (tags.length) task.tags = tags; 
+                
+                if(!overrideText) {
+                    input.disabled = false;
+                    input.placeholder = "Что нужно сделать?";
+                    input.focus();
+                }
+            }
+            
+            db.inbox.unshift(task); 
+            if (!overrideText) input.value = ''; 
+            renderCurrentView(); 
+            saveDB(); 
         }
-        window.editTask = function(id) { const t = db[currentView].find(x=>x.id===id); if(t) openInput('Редактировать', (v)=>{ t.text=v; t.tags=applyAITags(v); saveDB(); }); setTimeout(()=>document.getElementById('input-modal-field').value=t.text,100); }
+        
+        window.editTask = function(id) { const t = db[currentView].find(x=>x.id===id); if(t) openInput('Редактировать', (v)=>{ t.text=v; saveDB(); }); setTimeout(()=>document.getElementById('input-modal-field').value=t.text,100); }
         window.editProject = function(id) { openProjectModal(id); }
         window.switchView = function(view) { window.haptic('light'); currentView = view; document.querySelectorAll('.nav-item, .menu-item').forEach(el => el.classList.remove('active')); document.querySelectorAll(`[onclick="switchView('${view}')"]`).forEach(el => el.classList.add('active')); renderCurrentView(); }
         window.magicDecompose = async function(id) { if (!checkAIPremium()) return; const task = db[currentView].find(t => t.id === id); if(!task) return; if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return; window.haptic('medium'); openProjectModal(null, task); setTimeout(() => askAIForSteps(), 500); }
@@ -815,12 +945,14 @@
             let updatedCount = 0;
             const folders = ['inbox', 'today', 'waiting', 'someday'];
             
-            folders.forEach(folder => {
+            // Note: This iterates and waits. Might be slow for many tasks.
+            // Better approach for production: Send bulk to backend.
+            // Keeping simple loop for now as per "minimal change" strategy.
+            for (const folder of folders) {
                 if(db[folder]) {
-                    db[folder].forEach(task => {
-                        const newTags = applyAITags(task.text || "");
-                        if (newTags.length > 0) {
-                            // Merge existing tags with new ones uniquely
+                    for (const task of db[folder]) {
+                         const newTags = await applyAITags(task.text || "");
+                         if (newTags.length > 0) {
                             const existing = task.tags || [];
                             const merged = [...new Set([...existing, ...newTags])];
                             if (merged.length > existing.length) {
@@ -828,9 +960,9 @@
                                 updatedCount++;
                             }
                         }
-                    });
+                    }
                 }
-            });
+            }
 
             if (updatedCount > 0) {
                 saveDB();
@@ -1031,4 +1163,3 @@
     </script>
 </body>
 </html>
-
