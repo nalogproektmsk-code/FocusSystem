@@ -878,7 +878,17 @@
         window.editTask = function(id) { const t = db[currentView].find(x=>x.id===id); if(t) openInput('Редактировать', (v)=>{ t.text=v; saveDB(); }); setTimeout(()=>document.getElementById('input-modal-field').value=t.text,100); }
         window.editProject = function(id) { openProjectModal(id); }
         window.switchView = function(view) { window.haptic('light'); currentView = view; document.querySelectorAll('.nav-item, .menu-item').forEach(el => el.classList.remove('active')); document.querySelectorAll(`[onclick="switchView('${view}')"]`).forEach(el => el.classList.add('active')); renderCurrentView(); }
-        window.magicDecompose = async function(id) { if (!checkAIPremium()) return; const task = db[currentView].find(t => t.id === id); if(!task) return; if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return; window.haptic('medium'); openProjectModal(null, task); setTimeout(() => askAIForSteps(), 500); }
+        window.magicDecompose = async function(id) {
+            if (!checkAIPremium()) return;
+            const task = db[currentView].find(t => t.id === id);
+            if(!task) return;
+            if(!confirm(`🪄 Превратить задачу "${task.text}" в подробный проект?`)) return;
+            window.haptic('medium');
+            // FIX: Mark this task as the active wizard task so saveProject deletes it later
+            if(currentView === 'inbox') wizardTask = task;
+            openProjectModal(null, task);
+            setTimeout(() => askAIForSteps(), 500);
+        }
         window.activatePromo = async function() { const code = document.getElementById('promo-input').value.trim(); if (!code) return; try { const res = await fetch(`${API_URL}/api/promo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: currentUserID, code: code }) }); const data = await res.json(); if (data.success) { alert('🎉 ' + data.message); if (data.newPremiumUntil) { db.premiumUntil = data.newPremiumUntil; db.isPremium = true; openSettings(); } closeModal('settings-modal'); } else { alert('❌ ' + data.message); } } catch (e) { alert('Ошибка сети'); } }
         
         window.sendFeedback = async function() { 
@@ -1156,7 +1166,36 @@
                 btn.disabled = false; 
             }
         }
-        window.saveProject = function() { const eid=document.getElementById('proj-edit-id').value; if (!eid && !checkPremiumLimits()) return; const t=document.getElementById('proj-name').value; const g=document.getElementById('proj-goal').value; if(!t||!g||tempSteps.length===0) return alert("Заполните всё!"); if(eid) { const i=db.projects.findIndex(p=>p.id==eid); if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; } } else { const nid=Date.now(); if(!db.projects) db.projects = []; db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true}); if(wizardTask) { db.inbox=db.inbox.filter(x=>x.id!==wizardTask.id); } db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false}); } renderCurrentView(); saveDB(); closeModal('project-modal'); if(!eid&&db.inbox.length>0) setTimeout(startWizard,300); }
+        window.saveProject = function() {
+            const eid=document.getElementById('proj-edit-id').value;
+            if (!eid && !checkPremiumLimits()) return;
+            const t=document.getElementById('proj-name').value;
+            const g=document.getElementById('proj-goal').value;
+            if(!t||!g||tempSteps.length===0) return alert("Заполните всё!");
+
+            if(eid) {
+                const i=db.projects.findIndex(p=>p.id==eid);
+                if(i>-1) { db.projects[i].title=t; db.projects[i].goal=g; db.projects[i].steps=tempSteps; }
+            } else {
+                const nid=Date.now();
+                if(!db.projects) db.projects = [];
+                db.projects.push({id:nid, title:t, goal:g, steps:tempSteps, isProject:true});
+
+                // Add first step to today
+                db.today.push({id:Date.now()+1, text:tempSteps[0].text, projectId:nid, projectTitle:t, stepId:tempSteps[0].id, isProject:false});
+
+                // FIX: Remove from inbox if it was a wizard task or decomposed task
+                if(wizardTask && wizardTask.id) {
+                    db.inbox = db.inbox.filter(x=>x.id!==wizardTask.id);
+                    wizardTask = null; // Clear it
+                }
+            }
+            renderCurrentView();
+            saveDB();
+            closeModal('project-modal');
+            // Only restart wizard if there are items left
+            if(!eid && db.inbox.length>0) setTimeout(startWizard,300);
+        }
         window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; const sb = document.getElementById('premium-status-box'); if (db.premiumUntil && new Date(db.premiumUntil) > new Date()) { sb.innerHTML = `💎 <b>Premium</b><br>До: ${new Date(db.premiumUntil).toLocaleDateString()}`; document.getElementById('ai-review-btn-container').style.display='block'; } else { sb.innerHTML = `🌑 <b>Free</b><div onclick="closeApp()" style="color:#991B1B;cursor:pointer;margin-top:5px">👉 КУПИТЬ</div>`; document.getElementById('ai-review-btn-container').style.display='none'; } }
 
         initSplash(); initUserInfo(); switchView('inbox');
